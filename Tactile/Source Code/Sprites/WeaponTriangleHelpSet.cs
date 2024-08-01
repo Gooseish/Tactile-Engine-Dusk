@@ -19,11 +19,46 @@ namespace Tactile
                 var weapon = item as Data_Weapon;
 
                 int x = 0;
-
-                add_wta(weapon.Reaver(), weapon.main_type(), ref x);
-                if (weapon.Scnd_Type != 0)
-                    add_wta(weapon.Reaver(), weapon.scnd_type(), ref x);
+                var types = GetWeaponTypes(weapon);
+                // Try to add a weapon triangle graphic for each type found
+                foreach (var type in types)
+                {
+                    add_wta(weapon.Reaver(), type, ref x);
+                }
             }
+        }
+
+        private List<WeaponType> GetWeaponTypes(Data_Weapon weapon)
+        {
+            // Get a list of all the weapon types that will be checked
+            WeaponType type;
+            var types = new List<WeaponType>();
+
+            // Get the primary type
+            type = weapon.main_type();
+            types.Add(type);
+            // If the primary type has parent weapon types, get those
+            while (type.ParentKey > 0)
+            {
+                type = Global.weapon_types[type.ParentKey];
+                types.Add(type);
+            }
+
+            // Get the secondary type, if there is one
+            if (weapon.Scnd_Type != 0)
+            {
+                type = weapon.scnd_type();
+                types.Add(type);
+                // If the secondary type has parent weapon types, get those
+                while (type.ParentKey > 0)
+                {
+                    type = Global.weapon_types[type.ParentKey];
+                    types.Add(type);
+                }
+            }
+
+            // Remove duplicates
+            return types.Distinct().ToList();
         }
 
         private void add_wta(bool reaver, WeaponType type, ref int x)
@@ -31,6 +66,8 @@ namespace Tactile
             if (type.WtaTypes.Count > 0 || type.WtaReaverTypes.Count > 0 ||
                 type.WtaRanges.Count > 0 || type.WtdRanges.Count > 0)
             {
+                //@Yeti: weapons that have wta at certain ranges need a graphical representation of that
+
                 var wta_types = reaver ? type.WtaReaverTypes : type.WtaTypes;
                 foreach (int other_type in wta_types)
                 {
@@ -47,12 +84,6 @@ namespace Tactile
 
                     x -= 48;
                 }
-            }
-
-            if (type.ParentKey > 0)
-            {
-                type = Global.weapon_types[type.ParentKey];
-                add_wta(reaver, type, ref x);
             }
         }
 
