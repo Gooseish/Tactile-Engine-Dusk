@@ -1956,19 +1956,22 @@ namespace Tactile
         #endregion
 
         #region Status Effects
-        public IEnumerable<int> SkillStatusInflict()
+        public IEnumerable<int> SkillStatusInflict(Data_Weapon weapon)
         {
             // Skills: Toxic
             if (actor.has_skill("TOXIC"))
             {
-                // Poison
-                var state = Global.data_statuses.FirstOrDefault(x => x.Value.Name == "Poison");
-                if (state.Value != null)
-                    yield return state.Value.Id;
+                if (weapon != null && !weapon.is_staff())
+                {
+                    // Poison
+                    var state = Global.data_statuses.FirstOrDefault(x => x.Value.Name == "Poison");
+                    if (state.Value != null)
+                        yield return state.Value.Id;
 
-                //@Debug: don't need to search for the status id if you can
-                // be certain which one it is, just yield return the id
-                //@Debug: yield return 1;
+                    //@Debug: don't need to search for the status id if you can
+                    // be certain which one it is, just yield return the id
+                    //@Debug: yield return 1;
+                }
             }
         }
 

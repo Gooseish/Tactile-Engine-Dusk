@@ -759,7 +759,7 @@ namespace Tactile
             }
             // Statuses the weapon inflicts, and statuses from attacker's skills
             foreach (int i in weapon.Status_Inflict
-                .Concat(battler_1.SkillStatusInflict())
+                .Concat(battler_1.SkillStatusInflict(weapon))
                 .Distinct())
             {
                 if (battler_2.is_unit())
