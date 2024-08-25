@@ -755,13 +755,17 @@ namespace Tactile.State
                                     if (Battler_1.has_attack_canto() && Battler_1.can_canto_move() && !Battler_1.full_move() && Map_Combat_Data.Kill != 1) // !Battler_1.is_dead) //Debug
                                     {
                                         Battler_1.cantoing = true;
-                                        if (Battler_1.is_active_player_team && !Battler_1.berserk) //Multi
+                                        if (!Battler_1.berserk)
                                         {
-                                            Global.player.loc = Battler_1.loc;
-                                            Global.player.instant_move = true;
-                                            Global.game_system.Selected_Unit_Id = Battler_1_Id;
+                                            // Move range needs updated regardless of team
                                             Battler_1.update_move_range();
-                                            Battler_1.open_move_range();
+                                            if (Battler_1.is_active_player_team) //Multi
+                                            {
+                                                Global.player.loc = Battler_1.loc;
+                                                Global.player.instant_move = true;
+                                                Global.game_system.Selected_Unit_Id = Battler_1_Id;
+                                                Battler_1.open_move_range();
+                                            }
                                         }
                                     }
                                     else
