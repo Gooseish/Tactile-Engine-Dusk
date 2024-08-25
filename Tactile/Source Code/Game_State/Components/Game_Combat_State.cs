@@ -1293,7 +1293,7 @@ namespace Tactile.State
                                 Combat_Timer = 0;
                                 // Status effect animation
                                 if (battler_2 != null &&
-                                        Map_Combat_Data.Data[Attack_Id].Key.Result.state_change.Count > 0 &&
+                                        Map_Combat_Data.Data[Attack_Id].Key.Result.status_inflicted() &&
                                         !is_battler_dead(ids[1]) &&
                                         !skip_skill_update() &&
                                         Map_Combat_Data.Data[Attack_Id].Key.Result.status_inflict_map_id() > 0)

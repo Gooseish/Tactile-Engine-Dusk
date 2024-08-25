@@ -553,7 +553,7 @@ namespace Tactile
                         actual_dmg = hp;
                     dmg = Math.Max(Math.Min(actual_dmg, hp), hp - battler_1.actor.maxhp);
                     result.kill = dmg >= hp;
-                    state_change(weapon, ref result);
+                    state_change(battler_1, battler_1, weapon, ref result);
                     // Can't delayed heal after killing yourself
                     if (weapon.Drains_HP() && !result.kill)
                         result.delayed_life_steal = dmg > 0;
@@ -566,7 +566,7 @@ namespace Tactile
                     battler_1.skill_effects(ref actual_dmg, battler_2, ref result);
                     dmg = Math.Max(Math.Min(actual_dmg, hp), hp - battler_2.actor.maxhp);
                     result.kill = dmg >= hp;
-                    state_change(weapon, ref result);
+                    state_change(battler_1, battler_2, weapon, ref result);
                     result.delayed_life_steal = weapon.Drains_HP() && dmg > 0;
                 }
                 result.dmg = dmg;
@@ -613,7 +613,7 @@ namespace Tactile
                         actual_dmg = hp;
                     dmg = Math.Max(Math.Min(actual_dmg, hp), hp - battler_1.actor.maxhp);
                     result.kill = dmg >= hp;
-                    state_change(weapon, ref result);
+                    state_change(battler_1, battler_1, weapon, ref result);
                     if (weapon.Drains_HP() && !result.kill)
                         result.delayed_life_steal = dmg > 0;
                 }
@@ -625,7 +625,7 @@ namespace Tactile
                     battler_1.skill_effects(ref actual_dmg, battler_2, ref result);
                     dmg = Math.Max(Math.Min(actual_dmg, hp), hp - battler_2.actor.maxhp);
                     result.kill = dmg >= hp;
-                    state_change(weapon, ref result);
+                    state_change(battler_1, battler_2, weapon, ref result);
                     result.delayed_life_steal = weapon.Drains_HP() && dmg > 0;
                 }
                 result.dmg = dmg;
@@ -667,7 +667,7 @@ namespace Tactile
                 int hp = battler_2.hp;
                 int dmg = Math.Min(actual_dmg, hp);
                 result.kill = dmg >= hp;
-                state_change(weapon, ref result);
+                state_change(battler_1, battler_2, weapon, ref result);
                 result.dmg = dmg;
                 result.actual_dmg = actual_dmg;
             }
@@ -702,7 +702,7 @@ namespace Tactile
             //battler_1.actor.backfire = false; //Debug
             int wexp = staff_wexp(battler_1.actor, weapon);
 
-            state_change(weapon, ref result);
+            state_change(battler_1, battler_2, weapon, ref result);
             result.dmg = dmg;
             result.actual_dmg = actual_dmg;
 
@@ -720,7 +720,7 @@ namespace Tactile
             int wexp = staff_wexp(battler_1.actor, weapon);
 
             if (hit)
-                state_change(weapon, ref result);
+                state_change(battler_1, battler_2, weapon, ref result);
             result.dmg = 0;
             result.actual_dmg = 0;
 
@@ -748,14 +748,27 @@ namespace Tactile
             return actor.wexp_from_weapon(staff);
         }
 
-        public static void state_change(TactileLibrary.Data_Weapon weapon, ref Attack_Result result)
+        public static void state_change(
+            Game_Unit battler_1, Combat_Map_Object battler_2,
+            Data_Weapon weapon, ref Attack_Result result)
         {
+            // Statuses the weapon removes
             foreach (int i in weapon.Status_Remove)
             {
                 result.state_change.Add(new KeyValuePair<int, bool>(i, false));
             }
-            foreach (int i in weapon.Status_Inflict)
+            // Statuses the weapon inflicts, and statuses from attacker's skills
+            foreach (int i in weapon.Status_Inflict
+                .Concat(battler_1.SkillStatusInflict())
+                .Distinct())
             {
+                if (battler_2.is_unit())
+                {
+                    // If the target is immune to this status
+                    if ((battler_2 as Game_Unit).SkillIgnoresState(i))
+                        continue;
+                }
+
                 result.state_change.Add(new KeyValuePair<int, bool>(i, true));
             }
         }

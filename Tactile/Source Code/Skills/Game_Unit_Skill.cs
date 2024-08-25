@@ -1955,6 +1955,35 @@ namespace Tactile
         }
         #endregion
 
+        #region Status Effects
+        public IEnumerable<int> SkillStatusInflict()
+        {
+            // Skills: Toxic
+            if (actor.has_skill("TOXIC"))
+            {
+                // Poison
+                var state = Global.data_statuses.FirstOrDefault(x => x.Value.Name == "Poison");
+                if (state.Value != null)
+                    yield return state.Value.Id;
+
+                //@Debug: don't need to search for the status id if you can
+                // be certain which one it is, just yield return the id
+                //@Debug: yield return 1;
+            }
+        }
+
+        public bool SkillIgnoresState(int id)
+        {
+            // Poison
+            if (Global.data_statuses.ContainsKey(id) && Global.data_statuses[id].Name == "Poison")
+                // Skills: Antivenom
+                if (actor.has_skill("ANTIV"))
+                    return true;
+
+            return false;
+        }
+        #endregion
+
         #region Movement/Range Affecting
         private bool canto_skill()
         {
