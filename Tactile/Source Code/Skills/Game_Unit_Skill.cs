@@ -2021,7 +2021,16 @@ namespace Tactile
             Mogall = 212,
             Revenant = 214,
             Wolf = 216,
-            Bonewalker_Bow = 218
+            Bonewalker_Bow = 218,
+            Elder_Bael = 203,
+            Wight = 205,
+            Deathgoyle = 208,
+            Maelduin = 211,
+            Arch_Mogall = 213,
+            Entombed = 215,
+            Gwyllgi = 217,
+            Wight_Bow = 219,
+            Gorgon = 209
         }
 
         private int[] SummonWeapons(SummonId id)
@@ -2057,6 +2066,35 @@ namespace Tactile
                 case SummonId.Wolf:
                     result[0] = 202;
                     break;
+                case SummonId.Elder_Bael:
+                    result[0] = 202;
+                    break;
+                case SummonId.Wight:
+                    result[0] = 3;
+                    result[1] = 33;
+                    break;
+                case SummonId.Wight_Bow:
+                    result[0] = 83;
+                    break;
+                case SummonId.Deathgoyle:
+                    result[0] = 33;
+                    break;
+                case SummonId.Maelduin:
+                    result[0] = 59;
+                    break;
+                case SummonId.Arch_Mogall:
+                    result[0] = 141;
+                    break;
+                case SummonId.Entombed:
+                    result[0] = 202;
+                    break;
+                case SummonId.Gwyllgi:
+                    result[0] = 202;
+                    break;
+                case SummonId.Gorgon:
+                    break;
+
+
 
             }
             return result;

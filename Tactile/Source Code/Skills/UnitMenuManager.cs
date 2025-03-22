@@ -194,9 +194,19 @@ namespace Tactile.Menus.Map.Unit
             Game_Unit unit = Global.game_map.units[summonMenu.unitId];
             var unitMenu = (Menus.ElementAt(1) as UnitCommandMenu);
             Global.game_system.play_se(System_Sounds.Confirm);
-            SummonMenuIds command = summonMenu.SelectedCommand;
+            if(unit.actor.has_skill("BETTER_SUMMON"))
+            {
+                BetterSummonMenuIds command = summonMenu.BetterSelectedCommand;
 
-            TargetSummonLocation(unit, command);
+                TargetBetterSummonLocation(unit, command);
+            }
+            else
+            {
+                SummonMenuIds command = summonMenu.SelectedCommand;
+
+                TargetSummonLocation(unit, command);
+            }
+            
 
 
 
@@ -205,6 +215,32 @@ namespace Tactile.Menus.Map.Unit
         private void TargetSummonLocation(Game_Unit unit, SummonMenuIds command)
         {
             Game_Unit.SummonId id = summonId(command);
+            List<Vector2> summon_locs = unit.summon_locs(id);
+
+            if (unit.summon_locs(id).Count < 1)
+                Global.game_system.play_se(System_Sounds.Buzzer);
+            else
+            {
+                Global.game_system.play_se(System_Sounds.Confirm);
+
+                unit.attemptedSummon = id;
+
+                var targetWindow = new Window_Target_Summon(unit.id, id, new Vector2(4, 0));
+                var targetMenu = new UnitTargetMenu(targetWindow);
+                targetMenu.Selected += summonTargetMenu_Selected;
+                targetMenu.Canceled += unitTargetMenu_Canceled;
+                AddMenu(targetMenu);
+                Global.player.facing = 4;
+                Global.player.update_cursor_frame();
+            }
+
+            return;
+        }
+
+        public void TargetBetterSummonLocation(Game_Unit unit, BetterSummonMenuIds command)
+        {
+            Game_Unit.SummonId id = betterSummonId(command);
+
             List<Vector2> summon_locs = unit.summon_locs(id);
 
             if (unit.summon_locs(id).Count < 1)
@@ -254,9 +290,6 @@ namespace Tactile.Menus.Map.Unit
                 case SummonMenuIds.Bonewalker:
                     id = Game_Unit.SummonId.Bonewalker;
                     break;
-                case SummonMenuIds.Cyclops:
-                    id = Game_Unit.SummonId.Cyclops;
-                    break;
                 case SummonMenuIds.Gargoyle:
                     id = Game_Unit.SummonId.Gargoyle;
                     break;
@@ -271,6 +304,41 @@ namespace Tactile.Menus.Map.Unit
                     break;
                 case SummonMenuIds.Wolf:
                     id = Game_Unit.SummonId.Wolf;
+                    break;
+            }
+            return id;
+        }
+        private Game_Unit.SummonId betterSummonId(BetterSummonMenuIds command)
+        {
+            Game_Unit.SummonId id = Game_Unit.SummonId.Elder_Bael;
+            switch (command)
+            {
+                case BetterSummonMenuIds.Elder_Bael:
+                    id = Game_Unit.SummonId.Elder_Bael;
+                    break;
+                case BetterSummonMenuIds.Wight:
+                    id = Game_Unit.SummonId.Wight;
+                    break;
+                case BetterSummonMenuIds.Deathgoyle:
+                    id = Game_Unit.SummonId.Deathgoyle;
+                    break;
+                case BetterSummonMenuIds.Maelduin:
+                    id = Game_Unit.SummonId.Maelduin;
+                    break;
+                case BetterSummonMenuIds.Arch_Mogall:
+                    id = Game_Unit.SummonId.Arch_Mogall;
+                    break;
+                case BetterSummonMenuIds.Entombed:
+                    id = Game_Unit.SummonId.Entombed;
+                    break;
+                case BetterSummonMenuIds.Gwyllgi:
+                    id = Game_Unit.SummonId.Gwyllgi;
+                    break;
+                case BetterSummonMenuIds.Cyclops:
+                    id = Game_Unit.SummonId.Cyclops;
+                    break;
+                case BetterSummonMenuIds.Gorgon:
+                    id = Game_Unit.SummonId.Gorgon;
                     break;
             }
             return id;
