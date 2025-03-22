@@ -92,7 +92,7 @@ namespace Tactile
                 !Constants.Gameplay.SIEGE_MANUAL_RELOADING)
             {
                 if (State == Siege_Engine_State.Fired)
-                    State = Siege_Engine_State.Reloading;
+                    State = Siege_Engine_State.Ready;
                 else if (State == Siege_Engine_State.Reloading)
                     State = Siege_Engine_State.Ready;
             }

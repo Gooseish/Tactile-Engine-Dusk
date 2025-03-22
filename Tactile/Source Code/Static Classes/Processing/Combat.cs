@@ -253,6 +253,7 @@ namespace Tactile
                 weapon1 = Global.data_weapons[battler_1.items[(int)weapon_index].Id];
 
             weapon2 = battler_2.actor.weapon;
+            
             // Gets battle_stats
             Dictionary<int, List<int?>> stats_ary = combat_stats(battler_1.id, battler_2.id, atk_distance, weapon_index, true, ignore_terrain);
             float[] result = { 0, 0 };
@@ -530,7 +531,7 @@ namespace Tactile
         public static Attack_Result set_attack(
             Game_Unit battler_1, Game_Unit battler_2, int distance, int actual_dmg, bool hit, bool crt, TactileLibrary.Data_Weapon weapon)
         {
-            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>() };
+            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>(), state_change_attacker = new List<KeyValuePair<int, bool>>() };
 
             result.hit = hit;
             result.crt = crt;
@@ -564,10 +565,31 @@ namespace Tactile
                     if (battler_1.actor.fatality)
                         actual_dmg = hp;
                     battler_1.skill_effects(ref actual_dmg, battler_2, ref result);
-                    dmg = Math.Max(Math.Min(actual_dmg, hp), hp - battler_2.actor.maxhp);
+                    // Skills: Miracle
+                    // Skills: Hold Out
+                    if (battler_2.actor.miracle_activated ||
+                        (battler_2.actor.has_skill("HOLD_OUT") && hp > 1))
+                        dmg = Math.Min(Math.Max(Math.Min(actual_dmg, hp), hp - battler_2.actor.maxhp), hp-1);
+                    else
+                        dmg = Math.Max(Math.Min(actual_dmg, hp), 0);
+                        //dmg = Math.Max(Math.Min(actual_dmg, hp), hp - battler_2.actor.maxhp);
                     result.kill = dmg >= hp;
                     state_change(weapon, ref result);
                     result.delayed_life_steal = weapon.Drains_HP() && dmg > 0;
+
+                    // Skills: Counter
+                    // Skills: Counterspell
+                    result.counter = battler_2.counter_is_active(weapon, distance, battler_1);
+                    if (result.counter.Key)
+                    {
+                        int attacker_hp = battler_1.actor.hp + result.immediate_life_steal;
+                        result.counter_actual_dmg = (int)(dmg * result.counter.Value);
+                        result.counter_dmg = Math.Max(Math.Min(result.counter_actual_dmg, attacker_hp), 0);
+                        result.counter_kill = result.counter_dmg >= attacker_hp;
+                        // Can't delayed heal after dying to counter
+                        if (result.counter_kill)
+                            result.delayed_life_steal = false;
+                    }
                 }
                 result.dmg = dmg;
                 result.actual_dmg = actual_dmg;
@@ -578,6 +600,11 @@ namespace Tactile
             {
                 // WExp Gain
                 wexp = Math.Max(1, wexp / 2);
+
+                // Skills that activate upon missing
+                // Skills: Saving Face
+                battler_1.miss_skills(ref result, battler_2);
+
             }
             result.wexp = battler_1.is_ally ? wexp : 0;
             return result;
@@ -593,7 +620,7 @@ namespace Tactile
         public static Attack_Result set_attack(
             Game_Unit battler_1, Game_Unit battler_2, int distance, TactileLibrary.Data_Weapon weapon, Scripted_Combat_Stats stats)
         {
-            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>() };
+            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>(), state_change_attacker = new List<KeyValuePair<int, bool>>() };
 
             int actual_dmg = stats.Damage;
             result.hit = stats.Result != Attack_Results.Miss;
@@ -654,7 +681,7 @@ namespace Tactile
         public static Attack_Result set_attack(
             Game_Unit battler_1, Combat_Map_Object battler_2, int distance, int actual_dmg, bool hit, bool crt, TactileLibrary.Data_Weapon weapon)
         {
-            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>() };
+            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>(), state_change_attacker = new List<KeyValuePair<int, bool>>() };
 
             result.hit = hit;
             result.crt = crt;
@@ -678,7 +705,7 @@ namespace Tactile
 
         public static Attack_Result set_heal(Game_Unit battler_1, Game_Unit battler_2, int distance, TactileLibrary.Data_Weapon weapon)
         {
-            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>() };
+            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>(), state_change_attacker = new List<KeyValuePair<int, bool>>() };
 
             List<int?> ary = Combat.combat_stats(battler_1.id, battler_2.id, distance);
             int dmg = 0, actual_dmg = 0;
@@ -695,6 +722,16 @@ namespace Tactile
                 {
                     actual_dmg = Math.Max((int)ary[1], -battler_2.actor.maxhp);
                     dmg = Math.Max(actual_dmg, -(battler_2.actor.maxhp - battler_2.actor.hp));
+
+                    // Skills: Live to Serve
+                    result.counter = battler_2.counter_is_active(weapon, distance, battler_1);
+                    if (result.counter.Key)
+                    {
+                        int staffer_hp = battler_1.actor.hp;
+                        int staffer_maxhp = battler_1.actor.maxhp;
+                        result.counter_actual_dmg = (int)(dmg * result.counter.Value);
+                        result.counter_dmg = Math.Max(result.counter_actual_dmg, -(staffer_maxhp-staffer_hp));
+                    }
                 }
             }
             result.hit = true;
@@ -712,7 +749,7 @@ namespace Tactile
 
         public static Attack_Result set_status_staff(Game_Unit battler_1, Game_Unit battler_2, int distance, bool hit, TactileLibrary.Data_Weapon weapon)
         {
-            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>() };
+            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>(), state_change_attacker = new List<KeyValuePair<int, bool>>() };
 
             result.hit = hit;
             result.crt = false;
@@ -730,7 +767,7 @@ namespace Tactile
 
         public static Attack_Result set_torch(Game_Unit battler_1, TactileLibrary.Data_Weapon weapon)
         {
-            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>() };
+            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>(), state_change_attacker = new List<KeyValuePair<int, bool>>() };
 
             result.hit = true;
             result.crt = false;
@@ -914,7 +951,7 @@ namespace Tactile
         }
         #endregion
 
-        public static WeaponTriangle weapon_triangle(
+        public static WeaponTriangle weapon_triangle(   //checks weapon triangle advantage from the perspective of battler_1
             Game_Unit battler_1, Game_Unit battler_2,
             Data_Weapon weapon_1, Data_Weapon weapon_2, int distance)
         {

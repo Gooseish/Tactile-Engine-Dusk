@@ -12,11 +12,15 @@ namespace Tactile
         public BattlerSpriteData(Game_Unit unit)
         {
             _Unit = unit;
+
+            UsedWeaponTypeOverride = null; //goseish
         }
         public BattlerSpriteData(Game_Unit unit, int classId)
         {
             _Unit = unit;
             _ClassId = classId;
+
+            UsedWeaponTypeOverride = null; //gooseish
         }
 
         public Game_Unit Unit { get { return _Unit; } }
@@ -164,10 +168,13 @@ namespace Tactile
             return weaponId == 0 ? null : Global.data_weapons[weaponId];
         }
 
+        public string UsedWeaponTypeOverride; // For promotion previews //gooseish
         public string UsedWeaponType
         {
             get
             {
+                if (UsedWeaponTypeOverride != null)
+                    return UsedWeaponTypeOverride;   
                 var weapon = this.Weapon;
                 // This does need to handle unique anims somehow, though //Yeti
                 string weaponType = Global.weapon_types[0].AnimName;

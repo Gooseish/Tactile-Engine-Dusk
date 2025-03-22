@@ -13,7 +13,7 @@ namespace Tactile
 {
     class Status_Page_2 : Status_Page
     {
-        const int ACTOR_SKILLS = 4;
+        const int ACTOR_SKILLS = 5; // Default value was 4 //gooseish
         const int ITEM_SKILLS = 8;
         const int WLVL_COLUMNS = 2;
 
@@ -28,9 +28,10 @@ namespace Tactile
 
             // Skills Window
             Skills_Window = new System_Color_Window();
-            Skills_Window.loc = new Vector2(8, 96);
+            //Skills_Window.loc = new Vector2(8, 96); Default value
+            Skills_Window.loc = new Vector2(8, 80);
             Skills_Window.width = 144;
-            Skills_Window.height = 96;
+            Skills_Window.height = 96+16;
             Skills_Window.stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
 
             // WLvls Window
@@ -46,7 +47,8 @@ namespace Tactile
             int wlvl_rows = (max_wlvl_index / WLVL_COLUMNS) + 1;
 
             WLvls_Window = new System_Color_Window();
-            WLvls_Window.loc = new Vector2(168, 96);
+            //WLvls_Window.loc = new Vector2(168, 96);
+            WLvls_Window.loc = new Vector2(168, 80);
             WLvls_Window.width = 144;
             WLvls_Window.height = (wlvl_rows + 1) * 16; // 96; //Debug
             WLvls_Window.stereoscopic = Config.STATUS_RIGHT_WINDOW_DEPTH;
@@ -117,7 +119,7 @@ namespace Tactile
 
                 Vector2 loc = Skills_Window.loc +
                     new Vector2(8 + (Config.SKILL_ICON_SIZE - 16) / 2 +
-                        i * Config.SKILL_ICON_SIZE, 72 + 2);
+                        i * Config.SKILL_ICON_SIZE, 72 + 2 + 16);
 
                 nodes.Add(new StatusSkillIconUINode(
                     string.Format("Item Skill{0}", i + 1),

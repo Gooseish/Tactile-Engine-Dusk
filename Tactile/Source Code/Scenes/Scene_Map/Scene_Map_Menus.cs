@@ -30,6 +30,7 @@ namespace Tactile
         Talk = 1 << 4,
         Supply = 1 << 5,
         Dash = 1 << 6, // Skills: Dash
+        JDash = 1 << 7 // Skills: JDash
     }
 #if DEBUG
     partial class Scene_Map : IMapMenuHandler, IUnitMenuHandler, IMapDebugMenuHandler
@@ -227,6 +228,10 @@ namespace Tactile
             if (canto.HasEnumFlag(Canto_Records.Dash))
                 return true;
 
+            // Skills: JDash
+            if (canto.HasEnumFlag(Canto_Records.JDash))
+                return true;
+
             return false;
         }
         internal static bool canto_allows_normal_actions(Canto_Records canto)
@@ -243,6 +248,10 @@ namespace Tactile
             // Skills: Dash
             if (canto.HasEnumFlag(Canto_Records.Dash))
                 return false;
+            // Skills: JDash
+            if (canto.HasEnumFlag(Canto_Records.JDash))
+                return false;
+
 
             if (canto.HasEnumFlag(Canto_Records.Take))
                 return true;
@@ -806,6 +815,45 @@ namespace Tactile
             unit.moved();
             if (unit.has_attack_canto() && !unit.full_move())
                 unit.cantoing = true;
+        }
+
+        // Skills: Swap
+        public void UnitMenuSwap(Game_Unit unit, int targetId)
+        {
+            Global.game_map.clear_move_range();
+            // Lock in unit movement
+            unit.moved();
+
+            Global.game_state.call_swap(unit.id, targetId);
+
+            Global.game_temp.menuing = false;
+            close_unit_menu(true);
+        }
+
+        // Skills: Teleport
+        public void UnitMenuTeleport(Game_Unit unit, int targetId)
+        {
+            Global.game_map.clear_move_range();
+            // Lock in unit movement
+            unit.moved();
+
+            Global.game_state.call_teleport(unit.id, targetId);
+
+            Global.game_temp.menuing = false;
+            close_unit_menu(true);
+        }
+
+        // Skills: Mass Slow
+        public void UnitMenuMassSlow(Game_Unit unit, int targetId)
+        {
+            Global.game_map.clear_move_range();
+            // Lock in unit movement
+            unit.moved();
+
+            Global.game_state.call_mass_slow(unit.id, targetId);
+
+            Global.game_temp.menuing = false;
+            close_unit_menu(true);
         }
 
         public void UnitMenuDiscard(Game_Unit unit, int index)

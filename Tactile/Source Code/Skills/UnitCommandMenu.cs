@@ -13,7 +13,27 @@ namespace Tactile.Menus.Map.Unit
         Trample = 3,
         Sacrifice = 4,
         Refuge = 5,
+        JDash = 6,
+        DTransform = 7,
+        Rally = 8,
+        Summon = 9,
+        Swap = 10,
+        Teleport = 11,
+        Mass_Slow = 12,
         OldSwoop = 20
+    }
+
+    // Skills: Summon
+    enum SummonMenuIds : int
+    {
+        Bael,
+        Bonewalker,
+        Cyclops,
+        Gargoyle,
+        Tarvos,
+        Mogall,
+        Revenant,
+        Wolf
     }
 
     partial class UnitCommandMenu
@@ -42,6 +62,13 @@ namespace Tactile.Menus.Map.Unit
             //   103 = Trample
             //   104 = Sacrifice
             //   105 = Refuge
+            //   106 = JDash
+            //   107 = Transform
+            //   108 = Rally
+            //   109 = Summon
+            //   110 = Swap
+            //   111 = Teleport
+            //   112 = Mass Slow
             //   120 = Old Swoop //Debug
             if (CantoAllowsNormalActions(Canto))
             {
@@ -113,6 +140,86 @@ namespace Tactile.Menus.Map.Unit
                         commands.Insert(index + 0, "Dash");
                         AddSkillIndex(index - 1, SkillMenuIds.Dash);
                     }
+                }
+                // Skills: Dash (Jasper)
+                if (unit.actor.has_skill("JDASH"))
+                {
+                    // Can move
+                    if (unit.base_mov > 0)
+                    {
+                        Global.game_temp.temp_skill_ranges["JDASH"] = unit.jdash_range();
+                        Global.game_map.range_start_timer = 0;
+
+                        int index = Math.Min(
+                            commands.IndexOf("Status"), commands.IndexOf("Wait"));
+                        commands.Insert(index + 0, "Dash");
+                        AddSkillIndex(index - 1, SkillMenuIds.JDash);
+                    }
+                }
+                // Skills: Transform
+                if (unit.actor.has_skill("DTRANSFORM"))
+                {
+                    if (!unit.HasTransformed)
+                    {
+                        int index = Math.Min(
+                                commands.IndexOf("Status"), commands.IndexOf("Wait"));
+                        commands.Insert(index + 0, "Transform");
+                        AddSkillIndex(index - 1, SkillMenuIds.DTransform);
+                    }
+                }
+                // Skills: Rally
+                if (unit.has_rally)
+                {
+                    Global.game_temp.temp_skill_ranges["RALLY"] = unit.rally_range();
+                    Global.game_map.range_start_timer = 0;
+
+                    int index = Math.Min(
+                                commands.IndexOf("Status"), commands.IndexOf("Wait"));
+                    commands.Insert(index + 0, "Rally");
+                    AddSkillIndex(index - 1, SkillMenuIds.Rally);
+                }
+                // Skills: Summon
+                if (unit.actor.has_skill("SUMMON"))
+                {
+                    if (!unit.HasSummoned)
+                    {
+                        int index = Math.Min(
+                                commands.IndexOf("Status"), commands.IndexOf("Wait"));
+                        commands.Insert(index + 0, "Summon");
+                        AddSkillIndex(index - 1, SkillMenuIds.Summon);
+                    }
+                    
+                }
+                // Skills: Swap
+                if (unit.actor.has_skill("SWAP"))
+                {
+                    Global.game_temp.temp_skill_ranges["SWAP"] = unit.swap_range();
+                    Global.game_map.range_start_timer = 0;
+
+                    int index = Math.Min(
+                                commands.IndexOf("Status"), commands.IndexOf("Wait"));
+                    commands.Insert(index + 0, "Swap");
+                    AddSkillIndex(index - 1, SkillMenuIds.Swap);
+                }
+                // Skills: Teleport
+                if (unit.actor.has_skill("TELEPORT") && !unit.HasTeleported)
+                {
+                    Global.game_temp.temp_skill_ranges["TELEPORT"] = unit.teleport_tiles();
+                    Global.game_map.range_start_timer = 0;
+                    int index = Math.Min(
+                        commands.IndexOf("Status"), commands.IndexOf("Wait"));
+                    commands.Insert(index + 0, "Teleport");
+                    AddSkillIndex(index - 1, SkillMenuIds.Teleport);
+                }    
+                // Skills: Mass Slow
+                if (unit.actor.has_skill("MASS_SLOW") && !unit.HasUsedMassSlow)
+                {
+                    Global.game_temp.temp_skill_ranges["MASS_SLOW"] = unit.mass_slow_range_tiles();
+                    Global.game_map.range_start_timer = 0;
+                    int index = Math.Min(
+                        commands.IndexOf("Status"), commands.IndexOf("Wait"));
+                    commands.Insert(index + 0, "Mass Slow");
+                    AddSkillIndex(index - 1, SkillMenuIds.Mass_Slow);
                 }
                 // Skills: Swoop
                 if (unit.actor.has_skill("SWOOP"))

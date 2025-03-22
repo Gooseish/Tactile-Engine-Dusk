@@ -394,6 +394,11 @@ namespace Tactile.Menus.Map.Unit
             if (canto.HasEnumFlag(Canto_Records.Dash))
                 return true;
 
+            // Skills: JDash
+            if (canto.HasEnumFlag(Canto_Records.JDash))
+                return true;
+
+
             return false;
         }
         private static bool CantoAllowsNormalActions(Canto_Records canto)
@@ -410,6 +415,11 @@ namespace Tactile.Menus.Map.Unit
             // Skills: Dash
             if (canto.HasEnumFlag(Canto_Records.Dash))
                 return false;
+
+            // Skills: JDash
+            if (canto.HasEnumFlag(Canto_Records.JDash))
+                return false;
+
 
             if (canto.HasEnumFlag(Canto_Records.Take))
                 return true;
@@ -447,6 +457,11 @@ namespace Tactile.Menus.Map.Unit
             // Skills: Dash
             if (canto.HasEnumFlag(Canto_Records.Dash))
                 return false;
+            
+            // Skills: JDash
+            if (canto.HasEnumFlag(Canto_Records.JDash))
+                return false;
+
 
             return canto != Canto_Records.Horse && canto.HasEnumFlag(Canto_Records.Horse);
         }

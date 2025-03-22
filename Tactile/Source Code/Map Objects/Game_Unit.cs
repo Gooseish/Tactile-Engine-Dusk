@@ -525,6 +525,9 @@ namespace Tactile
                 refresh_hp(hp - actor.hp);
             }
         }
+
+        public bool is_full_hp { get { return actor.is_full_hp(); } }
+
         public override bool is_dead { get { return actor.is_dead(); } }
 
         public override string name { get { return actor.name; } }
@@ -595,6 +598,20 @@ namespace Tactile
                 // Skills: Dash
                 if (DashActivated)
                     return mov;
+
+                // Skills: Dash (Jasper)
+                if (JDashActivated)
+                {
+                    mov -= JDashTempMoved;
+                    mov += 3;
+                    return mov;
+                }
+
+                // Skills: Transform
+                if(DTransformActivated)
+                {
+                    mov -= Math.Min(DTransformTempMoved - 1, 5);
+                }
 
                 if (Cantoing)
                     mov -= Moved_So_Far;
@@ -709,33 +726,33 @@ namespace Tactile
             return Math.Max(0, speed) + stat_bonus(Stat_Labels.Spd);
         }
 
-        public int atk_spd()
+        public int atk_spd(Combat_Map_Object target = null)
         {
-            return atk_spd(1, -1);
+            return atk_spd(1, -1, target);
         }
-        public int atk_spd(int? distance, int item_index = -1)
+        public int atk_spd(int? distance, int item_index = -1, Combat_Map_Object target = null)
         {
             if (item_index == -1)
-                return atk_spd((int)distance, new Item_Data(Item_Data_Type.Weapon, actor.weapon_id, 1));
+                return atk_spd((int)distance, new Item_Data(Item_Data_Type.Weapon, actor.weapon_id, 1), target);
             else
-                return atk_spd((int)distance, items[item_index]);
+                return atk_spd((int)distance, items[item_index], target);
         }
-        internal int atk_spd(int distance, Item_Data item_data)
+        internal int atk_spd(int distance, Item_Data item_data, Combat_Map_Object target = null)
         {
             if (item_data != null && item_data.is_weapon)
-                return atk_spd(distance, item_data.to_weapon);
+                return atk_spd(distance, item_data.to_weapon, target);
 
             int speed = spd();
             return Math.Max(0, speed);
         }
-        internal int atk_spd(int distance, Data_Weapon weapon)
+        internal int atk_spd(int distance, Data_Weapon weapon, Combat_Map_Object target = null) 
         {
             int speed = spd();
 
             if (weapon != null)
             {
                 bool magic_attack = check_magic_attack(weapon, distance);
-                Maybe<int> skill = atk_spd_skill(speed, weapon, magic_attack);
+                Maybe<int> skill = atk_spd_skill(speed, weapon, magic_attack, target);
                 if (skill.IsSomething)
                     speed = skill;
 
@@ -879,7 +896,17 @@ namespace Tactile
             if (!Global.data_weapons.ContainsKey(weapon_id))
                 return 0;
             Data_Weapon weapon = Global.data_weapons[weapon_id];
-            int wgt = actor.weapon_wgt(weapon);
+
+            int wgt;
+            // Skills: Condottiere
+            if (actor.has_skill("CONDOTTIERE"))
+            {
+                wgt = (actor.weapon_wgt(weapon)+1)/2;
+            }
+            else
+            {
+                wgt = actor.weapon_wgt(weapon);
+            }
             return (int)(stat(Stat_Labels.Con) < wgt ? wgt - stat(Stat_Labels.Con) : 0);
         }
 
@@ -1523,6 +1550,8 @@ namespace Tactile
         public override void combat_damage(int dmg, Combat_Map_Object attacker, List<KeyValuePair<int, bool>> states, bool backfire, bool test)
         {
             base.combat_damage(dmg, attacker, states, backfire, test);
+
+
             state_change(states);
 
             if (is_player_team && dmg > 0 && !test)
@@ -1533,7 +1562,7 @@ namespace Tactile
         public void state_change(List<KeyValuePair<int, bool>> states)
         {
             foreach (KeyValuePair<int, bool> state in states)
-                if (state.Value)
+                if (state.Value && !status_immunity().Contains(state.Key))
                     actor.add_state(state.Key);
                 else
                     actor.remove_state(state.Key);
@@ -1562,13 +1591,13 @@ namespace Tactile
             }
             else
             {
-                int spd = atk_spd(distance, item_index == null ? -1 : (int)item_index);
+                int spd = atk_spd(distance, item_index == null ? -1 : (int)item_index, target);
                 return attacks_per_round(spd, target, distance);
             }
         }
         public int attacks_per_round(Combat_Map_Object target, int distance, Data_Weapon weapon)
         {
-            int spd = atk_spd(distance, weapon);
+            int spd = atk_spd(distance, weapon, target);
             if (weapon.Ballista() && Constants.Gameplay.SIEGE_RELOADING)
                 return 1;
             return attacks_per_round(spd, target, distance);
@@ -1577,7 +1606,9 @@ namespace Tactile
         {
             if (target.is_unit() && !is_double_disabled())
             {
-                int target_spd = (target as Game_Unit).atk_spd(distance);
+                if ((target as Game_Unit).is_protected_from_doubling())
+                        return 1;
+                int target_spd = (target as Game_Unit).atk_spd(distance, target: target);
                 // If enough faster than the opponent, attack twice
                 if (spd - Constants.Combat.DBL_ATK_SPD >= target_spd)
                     return 2;
@@ -1595,7 +1626,7 @@ namespace Tactile
             start_attack_skills(attackIndex, target);
         }
 
-        public void end_battle()
+        public void end_battle(Game_Unit target)
         {
             if (Using_Siege_Engine)
                 actor.setup_items();
@@ -1603,7 +1634,7 @@ namespace Tactile
                 Global.game_map.get_siege(Loc).refresh_sprite();
             Using_Siege_Engine = false;
             actor.reset_skills(true);
-            end_battle_skills();
+            end_battle_skills(target);
         }
 
         protected bool is_correct_attack_type()
@@ -2095,6 +2126,28 @@ namespace Tactile
             allies.ExceptWith(berserk_allies);
             return new List<int>(allies);
         }
+
+        public List<int> all_allies()
+        {
+            List<int> allies = new List<int>();
+            foreach(KeyValuePair<int, Game_Unit> unit in Global.game_map.units)
+            {
+                if (!is_attackable_team(unit.Value))
+                    allies.Add(unit.Key);
+            }
+            return allies;
+        }
+
+        public List<int> all_enemies()
+        {
+            List<int> enemies = new List<int>();
+            foreach (KeyValuePair<int, Game_Unit> unit in Global.game_map.units)
+            {
+                if (is_attackable_team(unit.Value))
+                    enemies.Add(unit.Key);
+            }
+            return enemies;
+        }
         #endregion
 
         #region Determine if Moving
@@ -2516,6 +2569,8 @@ namespace Tactile
                     if (Global.game_state.item_user == this)
                         return true;
                     if (Global.game_state.sacrificer_id == Id)
+                        return true;
+                    if (Global.game_state.mass_slower_id == Id)
                         return true;
                     if (Global.game_state.staff_active &&
                             Global.game_state.battler_1_id == Id)
@@ -3191,6 +3246,11 @@ namespace Tactile
                 if (loc == Loc)
                     return false;
 
+            // Skills: Dash (Jasper)
+            if (JDashActivated)
+                if (loc == Loc)
+                    return false;
+
             if (Global.game_map.get_light_rune(loc) != null)
                 return false;
 
@@ -3747,7 +3807,7 @@ namespace Tactile
         {
             Global.game_map.clear_move_range(resetMoveArrow);
             Global.game_map.show_move_range(Id);
-            if (!Cantoing)
+            if (!Cantoing && !JDashActivated) // Skills: Dash (Jasper)
                 Global.game_map.show_attack_range(Id);
         }
 
@@ -3760,6 +3820,10 @@ namespace Tactile
         {
             // Skills: Dash
             if (DashActivated)
+                return false;
+
+            // Skills: Dash (Jasper)
+            if (JDashActivated)
                 return false;
 
             if (this.cantoing)
@@ -3799,6 +3863,8 @@ namespace Tactile
         }
         public void kill(bool dead)
         {
+            // Skills: Transform
+            reset_transform();
             Dead = true;
             if (is_rescuing)
             {
@@ -3820,6 +3886,9 @@ namespace Tactile
 
         public void escape()
         {
+            //Skills: Transform
+            reset_transform();
+
             moved();
             Global.game_system.Selected_Unit_Id = -1;
             Dead = true;
@@ -4183,6 +4252,7 @@ namespace Tactile
         public void end_turn()
         {
             end_turn(true);
+
         }
         public void end_turn(bool charge_skills)
         {
@@ -4213,6 +4283,13 @@ namespace Tactile
             Ready = true;
         }
 
+        // Skills: Transform
+        public void reset_transform()
+        {
+            reset_dtransform();
+        }
+
+
         public void refresh_unit()
         {
             if (Ready)
@@ -4224,6 +4301,8 @@ namespace Tactile
             {
                 end_turn(false);
             }
+            // Skills: Transform
+            DTransformActivated = false;
 
             RefreshMovement();
         }
@@ -4242,6 +4321,18 @@ namespace Tactile
                 charge_masteries(MASTERY_RATE_NEW_TURN);
             // Don't decrement status timers on the first team's first turn,
             // for statuses applied before the map starts
+            // Skills: Transform
+            if (actor.DTransformActive)
+            {
+                RemainingDTransformTurns -= 1;
+                if (RemainingDTransformTurns < 1)
+                {
+                    revert_dtransform();
+                }
+            }
+            // Skills: Galeforce
+            galeforce_used_this_turn = false;
+
             if (!(Global.game_state.turn == 1 && Team == 1))
                 actor.update_states();
             for (int i = 0; i < Stat_Bonuses.Count; i++)
@@ -4979,20 +5070,23 @@ namespace Tactile
 
         #region Battle Animations
         //@Yeti: should this all be moved into BattlerSpriteData?
-        internal void preload_animations(int distance, bool dance = false)
+        internal void preload_animations(int distance, bool dance = false, bool staff = false)
         {
             var content = Global.Battler_Content as ContentManagers.ThreadSafeContentManager;
             // Get battler animation
-            foreach (string name in preload_animation_names(distance, dance)
+            foreach (string name in preload_animation_names(distance, dance, staff)
                 .Distinct())
             {
                 content.Load<Texture2D>(string.Format(@"Graphics/Animations/{0}", name), null);
             }
         }
 
-        private IEnumerable<string> preload_animation_names(int distance, bool dance)
+        private IEnumerable<string> preload_animation_names(int distance, bool dance, bool staff)
         {
             var battlerData = new BattlerSpriteData(this);
+            if (staff && actor.class_id == 144)
+                battlerData.UsedWeaponTypeOverride = "Unarmed"; //Prevents wolfskins from transforming when being healed by staves
+
             var anim_data = battlerData.AnimData(dance);
 
             bool battler_animation_exists = !string.IsNullOrEmpty(anim_data.name);

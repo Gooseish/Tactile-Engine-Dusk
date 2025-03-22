@@ -14,7 +14,7 @@ namespace Tactile.State
     partial class Game_Combat_State : Game_Combat_State_Component
     {
         // Weapons that fire a ballista bolt
-        readonly static int[] BALLISTAE = new int[] { 96, 97, 98 };
+        readonly static int[] BALLISTAE = new int[] { 96, 97, 98, 201 };
 
         protected bool Battle_Calling = false, Staff_Calling = false;
         protected bool In_Battle = false;
@@ -515,7 +515,8 @@ namespace Tactile.State
                                             }
                                             Battler_1.actor.staff_fix();
                                             if (is_target_unit)
-                                                Battler_2.actor.staff_fix();
+                                                if(Battler_2.is_active_team)
+                                                    Battler_2.actor.staff_fix();
                                             cont = false;
                                             Combat_Timer++;
                                         }
@@ -767,9 +768,9 @@ namespace Tactile.State
                                     else
                                         Battler_1.start_wait(false);
                                 }
-                                Battler_1.end_battle();
+                                Battler_1.end_battle(Battler_2);
                                 if (is_target_unit)
-                                    Battler_2.end_battle();
+                                    Battler_2.end_battle(Battler_1);
 
                                 Battler_1.battling = false;
                                 if (is_target_unit)
@@ -1405,6 +1406,8 @@ namespace Tactile.State
                 {
                     Map_Combat_Data.Hp2 -= data.Result.dmg;
                     Map_Combat_Data.Hp1 = Math.Min(Map_Combat_Data.Hp1 + data.Result.immediate_life_steal, Map_Combat_Data.MaxHp1);
+                    if(data.Result.counter.Key)
+                        Map_Combat_Data.Hp1 -= data.Result.counter_dmg;
                 }
                 else
                     Map_Combat_Data.Hp1 = Math.Min(Map_Combat_Data.Hp1 - (data.Result.dmg - data.Result.immediate_life_steal), Map_Combat_Data.MaxHp1);
@@ -1419,6 +1422,8 @@ namespace Tactile.State
                 {
                     Map_Combat_Data.Hp1 -= data.Result.dmg;
                     Map_Combat_Data.Hp2 = Math.Min(Map_Combat_Data.Hp2 + data.Result.immediate_life_steal, Map_Combat_Data.MaxHp2);
+                    if (data.Result.counter.Key)
+                        Map_Combat_Data.Hp2 -= data.Result.counter_dmg;
                 }
                 else
                     Map_Combat_Data.Hp2 = Math.Min(Map_Combat_Data.Hp2 - (data.Result.dmg - data.Result.immediate_life_steal), Map_Combat_Data.MaxHp2);
@@ -1502,8 +1507,10 @@ namespace Tactile.State
                                     Battler_1.frame = 0;
                                     Battler_2.frame = 0;
 
-                                    Battler_1.preload_animations(combat_distance(Battler_1_Id, Battler_2_Id));
-                                    Battler_2.preload_animations(combat_distance(Battler_1_Id, Battler_2_Id));
+                                    bool staff_in_use = Battler_1.actor.weapon.is_staff(); //To suppress transformations on wolfskins //gooseish
+
+                                    Battler_1.preload_animations(combat_distance(Battler_1_Id, Battler_2_Id), false, staff_in_use);
+                                    Battler_2.preload_animations(combat_distance(Battler_1_Id, Battler_2_Id), false, staff_in_use);
                                     Combat_Timer++;
                                 }
                                 break;
@@ -1611,7 +1618,8 @@ namespace Tactile.State
                                     Dying = true;
                                 }
                                 Battler_1.actor.staff_fix();
-                                Battler_2.actor.staff_fix();
+                                if(Battler_2.is_active_team)
+                                    Battler_2.actor.staff_fix();
                                 cont = false;
                                 Combat_Action++;
                                 break;
@@ -1694,8 +1702,8 @@ namespace Tactile.State
                                             else
                                                 Battler_1.start_wait(false);
                                         }
-                                        Battler_1.end_battle();
-                                        Battler_2.end_battle();
+                                        Battler_1.end_battle(Battler_2);
+                                        Battler_2.end_battle(Battler_1);
 
                                         Battler_1.battling = false;
                                         Battler_2.battling = false;
@@ -1876,7 +1884,8 @@ namespace Tactile.State
                                     Dying = true;
                                 Battler_1.actor.staff_fix();
                                 if (is_target_unit)
-                                    Battler_2.actor.staff_fix();
+                                    if(Battler_2.is_active_team)
+                                        Battler_2.actor.staff_fix();
                                 cont = false;
                                 Combat_Action++;
                                 break;
@@ -2001,9 +2010,9 @@ namespace Tactile.State
                                             else
                                                 Battler_1.start_wait(false);
                                         }
-                                        Battler_1.end_battle();
+                                        Battler_1.end_battle(Battler_2);
                                         if (is_target_unit)
-                                            Battler_2.end_battle();
+                                            Battler_2.end_battle(Battler_1);
 
                                         Battler_1.battling = false;
                                         if (is_target_unit)

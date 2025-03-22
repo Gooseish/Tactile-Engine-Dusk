@@ -452,7 +452,8 @@ namespace Tactile
             foreach (Siege_Engine siege in Global.game_map.siege_engines.Values)
             {
                 // If siege engine has uses and is in the move range and can be equipped
-                if (siege.is_ready && siege_move_range.Contains(siege.loc) &&
+                if (
+                    siege_move_range.Contains(siege.loc) &&
                     attacker.actor.is_equippable_as_siege(Global.data_weapons[siege.item.Id]))
                 {
                     Maybe<int> move_distance = Pathfind.get_distance(siege.loc, attacker.id, attacker.canto_mov, false, attacker.loc);

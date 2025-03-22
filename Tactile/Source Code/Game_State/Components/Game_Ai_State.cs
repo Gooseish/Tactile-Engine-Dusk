@@ -853,7 +853,8 @@ namespace Tactile.State
                             // If no target was found, move closer to an enemy instead of attacking
                             if (Temp_Ai_Target == null)
                             {
-                                // Unless this unit is trying to do a strafing attack
+                                // Unless this unit is trying to do a
+                                // attack
                                 if (unit.mission == Game_AI.RETREATING_ATTACK_MISSION)
                                 {
                                     // Most of this was debugged out at some point, why though? //Debug

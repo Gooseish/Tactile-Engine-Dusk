@@ -368,11 +368,11 @@ namespace Tactile.Calculations.Stats
         #endregion
 
         #region Dod
-        public int dodge()
+        public int dodge(Game_Unit target = null)
         {
-            return attacker.stat(Stat_Labels.Lck) +
+            return Math.Max(0, attacker.stat(Stat_Labels.Lck) +
                 support_bonus(Combat_Stat_Labels.Dod) +
-                attacker.dodge_skill();
+                attacker.dodge_skill(target));
         }
         #endregion
     }

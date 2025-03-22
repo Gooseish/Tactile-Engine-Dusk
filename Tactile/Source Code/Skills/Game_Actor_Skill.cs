@@ -6,8 +6,37 @@ using TactileStringExtension;
 
 namespace Tactile
 {
+    
     partial class Game_Actor
     {
+        private static readonly Dictionary<int, List<int>> BaseClasses = new Dictionary<int, List<int>>
+        {
+        
+            {51 , new List<int>{16}},           // Swordmaster
+            {52 , new List<int>{16, 17}},       // Assassin
+            {56 , new List<int>{19}},           // Sniper
+            {60 , new List<int>{23}},           // Wyvern Knight
+            {61 , new List<int>{23}},           // Wyvern Lord
+            {62 , new List<int>{26}},           // Berserker
+            {63 , new List<int>{24, 26}},       // Warrior
+            {65 , new List<int>{24, 27}},       // Hero
+            {68 , new List<int>{27, 19}},       // Ranger
+            {70 , new List<int>{31}},           // Paladin
+            {71 , new List<int>{31, 34}},       // Great Knight
+            {73 , new List<int>{34}},           // General
+            {76 , new List<int>{37}},           // Falcoknight
+            {77 , new List<int>{41}},           // Seraph Knight
+            {78 , new List<int>{38, 39}},       // Oracle
+            {79 , new List<int>{40}},           // Sage
+            {80 , new List<int>{40}},           // Mage Knight
+            {81 , new List<int>{38, 39, 41}},   // Holy Knight
+            {84 , new List<int>{44}},           // Hex
+            {127 , new List<int>{44}},          // Summoner
+            {129 , new List<int>{17}},          // Trickster
+            {136 , new List<int>{37}}           // Kinshi Knight
+
+        };
+
         protected List<int> Added_Attacks = new List<int>();
         protected bool Fatality = false;
         public bool skill_activated;
@@ -36,8 +65,13 @@ namespace Tactile
             Luna_Activated = false;
             Sol_Activated = false;
             Bastion_Activated = false;
+            Pavise_Activated = false;
+            Aegis_Activated = false;
+            Miracle_Activated = false;
             SprlDve_Activated = false;
             Nova_Activated = false;
+            Vengeance_Activated = false;
+            Lethality_Activated = false;
 
             Deter_Activated = false;
             Frenzy_Activated = false;
@@ -46,6 +80,7 @@ namespace Tactile
             AdeptCount = 0;
 
             Fatality = false;
+
 
             //skill_flash = false; //Yeti
             // After reset
@@ -74,6 +109,17 @@ namespace Tactile
                     if (defensive_atk_skl)
                         activate_bastion();
                     break;
+                case "AEGIS":
+                    if (defensive_atk_skl)
+                        activate_aegis();
+                    break;
+                case "PAVISE":
+                    if (defensive_atk_skl)
+                        activate_pavise();
+                    break;
+                case "MIRACLE":
+                    activate_miracle();
+                    break;
                 case "SPRLDVE":
                     if (!defensive_atk_skl)
                         activate_sprldve();
@@ -89,6 +135,12 @@ namespace Tactile
                     break;
                 case "FRENZY":
                     activate_frenzy();
+                    break;
+                case "VENGEANCE":
+                    activate_vengeance();
+                    break;
+                case "NEW_LETHAL":
+                    activate_lethality();
                     break;
             }
         }
@@ -271,6 +323,60 @@ namespace Tactile
             //skill_flash = true; //Yeti
         }
 
+        // Pavise
+        protected bool Pavise_Activated;
+        public bool pavise_activated { get { return Pavise_Activated; } }
+
+        public void activate_pavise()
+        {
+            Pavise_Activated = true;
+            skill_activated = true;
+            //skill_flash = true; //Yeti
+        }
+
+        // Aegis
+        protected bool Aegis_Activated;
+        public bool aegis_activated { get { return Aegis_Activated; } }
+
+        public void activate_aegis()
+        {
+            Aegis_Activated = true;
+            skill_activated = true;
+            //skill_flash = true; //Yeti
+        }
+
+        // Vengeance
+        protected bool Vengeance_Activated;
+        public bool vengeance_activated { get { return Vengeance_Activated; } }
+
+        public void activate_vengeance()
+        {
+            Vengeance_Activated = true;
+            skill_activated = true;
+            //skill_flash = true; //Yeti
+        }
+
+        // Lethality
+        protected bool Lethality_Activated;
+        public bool lethality_activated { get { return Lethality_Activated; } }
+
+        public void activate_lethality()
+        {
+            Lethality_Activated = true;
+            skill_activated = true;
+        }
+
+        // Miracle
+        protected bool Miracle_Activated;
+
+        public bool miracle_activated { get { return Miracle_Activated; } }
+
+        public void activate_miracle()
+        {
+            Miracle_Activated = true;
+            skill_activated = true;
+        }
+
         // Spiral Dive
         protected bool SprlDve_Activated;
         public bool sprldve_activated { get { return SprlDve_Activated; } }
@@ -373,6 +479,7 @@ namespace Tactile
                             wexp = 1;
                 }
             // Skills: Academic
+            /*
             if (has_skill("ACADEMIC"))
                 if (wexp <= 0 && actor_class.Max_WLvl[type.Key - 1] <= 0)
                 {
@@ -380,6 +487,7 @@ namespace Tactile
                         if (type.IsMagic || type.IsStaff)
                             wexp = 1;
                 }
+            */
             return wexp;
         }
 
@@ -394,6 +502,7 @@ namespace Tactile
                             rank = 4;
                 }
             // Skills: Academic
+            /*
             if (has_skill("ACADEMIC"))
                 if (rank <= 4)
                 {
@@ -401,6 +510,7 @@ namespace Tactile
                         if (type.IsMagic || type.IsStaff)
                             rank = 4;
                 }
+            */
             return rank;
         }
 
@@ -442,5 +552,43 @@ namespace Tactile
                 return 0;
             return null;
         }
+
+        // Skills: Transform
+        // Skills: Fire Stone
+        internal int dtransform_stat_bonus(Stat_Labels skill)
+        {
+            float result = 0;
+
+            switch (skill)
+            {
+                case Stat_Labels.Hp:
+                    result = 10 + level * 60 / 100;
+                    break;
+                case Stat_Labels.Pow:
+                    result = 10 + level * 35 / 100;
+                    break;
+                case Stat_Labels.Skl:
+                    result = 5 + level * 10 / 100;
+                    break;
+                case Stat_Labels.Spd:
+                    result = -10 - level * 50 / 100;
+                    break;
+                case Stat_Labels.Lck:
+                    result = 0 + level * 0 / 100;
+                    break;
+                case Stat_Labels.Def:
+                    result = 6 + level * 55 / 100;
+                    break;
+                case Stat_Labels.Res:
+                    result = 10 + level * 30 / 100;
+                    break;
+
+            }
+
+            return (int)result;
+        }
+
+        // Skills: DTransform
+        public bool DTransformActive;
     }
 }

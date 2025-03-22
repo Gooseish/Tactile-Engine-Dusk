@@ -61,6 +61,7 @@ namespace Tactile
         protected int Black_Screen_Time = 0;
         // Map Effect
         protected Map_Effect Unit_Map_Effect;
+        protected Map_Effect Unit_Map_Effect_2;
         // Popup
         private Popup Map_Popup;
         // Game Over
@@ -81,6 +82,7 @@ namespace Tactile
         public bool map_transition { get { return Map_Transition; } }
         public bool map_transition_ready { get { return Map_Transition && Transition_Timer < 0; } }
         public bool map_transition_running { get { return Black_Screen_Time > 0 || (!Map_Transition && Transition_Timer > 0); } }
+        public Character_Sprite player_sprite { get { return Player_Sprite; } }
         #endregion
 
         public Scene_Map()
@@ -116,6 +118,7 @@ namespace Tactile
             Status_Sprites.Clear();
             Turn_Change = null;
             Unit_Map_Effect = null;
+            Unit_Map_Effect_2 = null;
             Map_Popup = null;
             clear_graphic_objects();
             if (reset_content)
@@ -491,6 +494,8 @@ namespace Tactile
 
         public void gameover()
         {
+            // Skills: Transform
+            Global.game_map.reset_transform();
             Game_Over = new GameOver_Background();
         }
 
@@ -780,6 +785,17 @@ namespace Tactile
                 Unit_Map_Effect.texture = Global.Content.Load<Texture2D>(@"Graphics/Pictures/" + name);
             Unit_Map_Effect.stereoscopic = Config.MAP_STATUS_ICON_DEPTH;
         }
+        public void set_map_effect_2(Vector2 loc, int type, int id)
+        {
+            Unit_Map_Effect_2 = new Map_Effect(type, id);
+            Unit_Map_Effect_2.loc = loc * TILE_SIZE + new Vector2(TILE_SIZE, TILE_SIZE) / 2;
+            string name = Unit_Map_Effect_2.filename;
+            if (name == "")
+                Unit_Map_Effect_2 = null;
+            else
+                Unit_Map_Effect_2.texture = Global.Content.Load<Texture2D>(@"Graphics/Pictures/" + name);
+            Unit_Map_Effect_2.stereoscopic = Config.MAP_STATUS_ICON_DEPTH;
+        }
 
         public void set_ballista_effect(Vector2 loc, Vector2 dest_loc)
         {
@@ -788,7 +804,7 @@ namespace Tactile
 
         public bool is_map_effect_active()
         {
-            return Unit_Map_Effect != null;
+            return (Unit_Map_Effect != null || Unit_Map_Effect_2 != null);
         }
 
         public bool is_map_effect_hit()
@@ -1003,6 +1019,12 @@ namespace Tactile
                 Unit_Map_Effect.update();
                 if (Unit_Map_Effect.finished)
                     Unit_Map_Effect = null;
+            }
+            if (Unit_Map_Effect_2 != null)
+            {
+                Unit_Map_Effect_2.update();
+                if (Unit_Map_Effect_2.finished)
+                    Unit_Map_Effect_2 = null;
             }
             if (Map_Popup != null)
             {
@@ -2429,6 +2451,14 @@ namespace Tactile
                     Status_Heal.draw(sprite_batch, Global.game_map.display_loc, camera.matrix);
                     sprite_batch.End();
                 }
+
+                // Draw HP Gauges for Targets of Skill Flashes
+                if (Global.game_state.skill_flash_active && Global.game_state.skill_flash_hit_flash)
+                {
+                    sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, Unit_Transition_State);
+                    Global.game_state.Draw_Target_HP_Gauges(sprite_batch, hp_gauge_draw_vector(), camera, Map_Sprites);
+                    sprite_batch.End();
+                }
             }
         }
 
@@ -2464,6 +2494,15 @@ namespace Tactile
                 DeferredUnitIds.Add(Global.game_state.stealer_id);
                 skip_selected = true;
             }
+            // Skill Flash Aoe Targets ///gooseish
+            if (Global.game_state.skill_flash_targets.Count > 0)
+            {
+                foreach (int id in Global.game_state.skill_flash_targets)
+                    DeferredUnitIds.Add(id);
+            }
+            else if (Global.game_state.skill_flash_hit_flash && Global.game_state.skill_flash_active)
+                DeferredUnitIds.Add(Global.game_state.skill_flash_target);
+
             if (Global.game_state.steal_target_id != -1)
                 DeferredUnitIds.Add(Global.game_state.steal_target_id);
             // Active AI unit
@@ -2554,6 +2593,8 @@ namespace Tactile
             // Unit Effect
             if (Unit_Map_Effect != null)
                 Unit_Map_Effect.draw(sprite_batch, Global.game_map.display_loc, camera.matrix);
+            if (Unit_Map_Effect_2 != null)
+                Unit_Map_Effect_2.draw(sprite_batch, Global.game_map.display_loc, camera.matrix);
             sprite_batch.End();
         }
 

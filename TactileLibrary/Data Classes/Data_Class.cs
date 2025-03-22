@@ -24,7 +24,7 @@ namespace TactileLibrary
             }
         }
 
-        public readonly static List<int> GENERIC_CAPS = new List<int> { 80, 20, 20, 20, 20, 20, 20 };
+        public readonly static List<int> GENERIC_CAPS = new List<int> { 99, 50, 50, 50, 50, 50, 50 };
 
         public int Id;
         public string Name;

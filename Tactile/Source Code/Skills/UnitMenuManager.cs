@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Tactile.Menus.Map.Unit.Item;
 using Tactile.Menus.Map.Unit.Target;
 using Tactile.Windows.Command.Items;
 using Tactile.Windows.Target;
+using Tactile.Source_Code.Menus.Map.Unit.Skill;
 
 namespace Tactile.Menus.Map.Unit
 {
@@ -25,6 +27,27 @@ namespace Tactile.Menus.Map.Unit
             // Skills: Dash
             SimpleCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.Dash),
                 (Game_Unit unit) => Dash(unit));
+            // Skills: Dash (Jasper)
+            SimpleCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.JDash),
+                (Game_Unit unit) => JDash(unit));
+            // Skills: Transform
+            SimpleCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.DTransform),
+                (Game_Unit unit) => DTransform(unit));
+            // Skills: Rally
+            SimpleCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.Rally),
+                (Game_Unit unit) => Rally(unit));
+            // Skills: Summon
+            TargetCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.Summon),
+                (Game_Unit unit, UnitCommandMenu menu) => OpenSummonMenu(unit, menu));
+            // Skills: Swap
+            TargetCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.Swap),
+                (Game_Unit unit, UnitCommandMenu menu) => SwapTargeting(unit, menu));
+            // Skills: Teleport
+            TargetCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.Teleport),
+                (Game_Unit unit, UnitCommandMenu menu) => TeleportTargeting(unit, menu));
+            // Skills: Mass Slow
+            TargetCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.Mass_Slow),
+                (Game_Unit unit, UnitCommandMenu menu) => MassSlowTargeting(unit, menu));
             // Skills: Swoop
             SimpleCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.Swoop),
                 (Game_Unit unit) => Swoop(unit));
@@ -116,6 +139,244 @@ namespace Tactile.Menus.Map.Unit
             unit.activate_dash();
         }
 
+        // Skills: Dash (Jasper)
+
+        private void JDash(Game_Unit unit)
+        {
+            Global.game_system.play_se(System_Sounds.Confirm);
+            var unitMenu = (Menus.Peek() as UnitCommandMenu);
+
+            Global.game_temp.menuing = false;
+            Global.game_system.Menu_Canto = unitMenu.Canto | Canto_Records.JDash;
+            CloseCommandMenu(true);
+
+            unit.activate_jdash();
+        }
+
+        // Skills: Transform
+        private void DTransform(Game_Unit unit)
+        {
+            Global.game_system.play_se(System_Sounds.Confirm);
+            Global.game_temp.menuing = false;
+            CloseCommandMenu(true);
+            Global.game_state.call_transform(unit.id);
+        }
+
+        // Skills: Rally
+        private void Rally(Game_Unit unit)
+        {
+            Global.game_system.play_se(System_Sounds.Confirm);
+            Global.game_temp.menuing = false;
+            CloseCommandMenu(true);
+            Global.game_state.call_skill_flash(unit.id, -1, unit.decide_rally_skill_flash_icon());
+
+        }
+
+        #region summon
+        // Skills: Summon
+        private void OpenSummonMenu(Game_Unit unit, UnitCommandMenu menu)
+        {
+            Global.game_system.play_se(System_Sounds.Confirm);
+
+            var summonMenu = new SummonMenu(unit);
+
+
+            summonMenu.Selected += summonMenu_Selected;
+            summonMenu.Canceled += menu_Closed;
+
+            AddMenu(summonMenu);
+
+        }
+
+        private void summonMenu_Selected(object sender, EventArgs e)
+        {
+            var summonMenu = (sender as SummonMenu);
+            Game_Unit unit = Global.game_map.units[summonMenu.unitId];
+            var unitMenu = (Menus.ElementAt(1) as UnitCommandMenu);
+            Global.game_system.play_se(System_Sounds.Confirm);
+            SummonMenuIds command = summonMenu.SelectedCommand;
+
+            TargetSummonLocation(unit, command);
+
+
+
+        }
+
+        private void TargetSummonLocation(Game_Unit unit, SummonMenuIds command)
+        {
+            Game_Unit.SummonId id = summonId(command);
+            List<Vector2> summon_locs = unit.summon_locs(id);
+
+            if (unit.summon_locs(id).Count < 1)
+                Global.game_system.play_se(System_Sounds.Buzzer);
+            else
+            {
+                Global.game_system.play_se(System_Sounds.Confirm);
+
+                unit.attemptedSummon = id;
+
+                var targetWindow = new Window_Target_Summon(unit.id, id, new Vector2(4, 0));
+                var targetMenu = new UnitTargetMenu(targetWindow);
+                targetMenu.Selected += summonTargetMenu_Selected;
+                targetMenu.Canceled += unitTargetMenu_Canceled;
+                AddMenu(targetMenu);
+                Global.player.facing = 4;
+                Global.player.update_cursor_frame();
+            }
+
+            return;
+        }
+
+        private void summonTargetMenu_Selected(object sender, EventArgs e)
+        {
+            Global.game_system.play_se(System_Sounds.Confirm);
+            var targetMenu = (sender as UnitTargetMenu);
+            targetMenu.Accept();
+
+            Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
+            int val = targetMenu.SelectedUnitId;
+            Vector2 dropLocation = new Vector2(val % Global.game_map.width,
+                val / Global.game_map.width);
+
+            Global.game_state.call_summon(unit.id, dropLocation);
+            Global.game_temp.menuing = false;
+            CloseCommandMenu(true);
+        }
+
+        private Game_Unit.SummonId summonId(SummonMenuIds command)
+        {
+            Game_Unit.SummonId id = Game_Unit.SummonId.Bael;
+            switch (command)
+            {
+                case SummonMenuIds.Bael:
+                    id = Game_Unit.SummonId.Bael;
+                    break;
+                case SummonMenuIds.Bonewalker:
+                    id = Game_Unit.SummonId.Bonewalker;
+                    break;
+                case SummonMenuIds.Cyclops:
+                    id = Game_Unit.SummonId.Cyclops;
+                    break;
+                case SummonMenuIds.Gargoyle:
+                    id = Game_Unit.SummonId.Gargoyle;
+                    break;
+                case SummonMenuIds.Mogall:
+                    id = Game_Unit.SummonId.Mogall;
+                    break;
+                case SummonMenuIds.Revenant:
+                    id = Game_Unit.SummonId.Revenant;
+                    break;
+                case SummonMenuIds.Tarvos:
+                    id = Game_Unit.SummonId.Tarvos;
+                    break;
+                case SummonMenuIds.Wolf:
+                    id = Game_Unit.SummonId.Wolf;
+                    break;
+            }
+            return id;
+        }
+        #endregion
+
+
+        // Skills: Swap
+        #region Swap
+
+        private void SwapTargeting(Game_Unit unit, UnitCommandMenu menu)
+        {
+            if (unit.swap_targets().Count() > 0)
+            {
+                Global.game_system.play_se(System_Sounds.Confirm);
+
+                var targetWindow = new Window_Target_Swap(unit.id, new Vector2(0, 0));
+                var targetMenu = new UnitTargetMenu(targetWindow, menu);
+                targetMenu.Selected += swapTargetMenu_Selected;
+                targetMenu.Canceled += unitTargetMenu_Canceled;
+                AddMenu(targetMenu);
+
+                Global.player.facing = 4;
+                Global.player.update_cursor_frame();
+            }
+            else
+                Global.game_system.play_se(System_Sounds.Buzzer);
+        }
+
+        private void swapTargetMenu_Selected(object sender, EventArgs e)
+        {
+            Global.game_system.play_se(System_Sounds.Confirm);
+            var targetMenu = (sender as UnitTargetMenu);
+            targetMenu.Accept();
+
+            Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
+            MenuHandler.UnitMenuSwap(unit, targetMenu.SelectedUnitId);
+        }
+
+        #endregion
+
+        #region teleport
+
+        // Skills: Teleport
+        private void TeleportTargeting(Game_Unit unit, UnitCommandMenu menu)
+        {
+            if (unit.teleport_tiles().Count() > 0)
+            {
+                Global.game_system.play_se(System_Sounds.Confirm);
+
+                var targetWindow = new Window_Target_Teleport(unit.id, new Vector2(0, 0));
+                var targetMenu = new UnitTargetMenu(targetWindow, menu);
+                targetMenu.Selected += teleportTargetMenu_Selected;
+                targetMenu.Canceled += unitTargetMenu_Canceled;
+                AddMenu(targetMenu);
+
+                Global.player.facing = 4;
+                Global.player.update_cursor_frame();
+            }
+            else
+                Global.game_system.play_se(System_Sounds.Buzzer);
+        }
+
+        private void teleportTargetMenu_Selected(object sender, EventArgs e)
+        {
+            Global.game_system.play_se(System_Sounds.Confirm);
+            var targetMenu = (sender as UnitTargetMenu);
+            targetMenu.Accept();
+
+            Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
+            MenuHandler.UnitMenuTeleport(unit, targetMenu.SelectedUnitId);
+        }
+
+        #endregion
+
+        #region mass slow
+        // Skills: Mass Slow
+        private void MassSlowTargeting(Game_Unit unit, UnitCommandMenu menu)
+        {
+            if (unit.mass_slow_tiles().Count() > 0)
+            {
+                Global.game_system.play_se(System_Sounds.Confirm);
+
+                var targetWindow = new Window_Target_Mass_Slow(unit.id, unit.mass_slow_aoe_tiles(), new Vector2(0, 0));
+                var targetMenu = new UnitTargetMenu(targetWindow, menu);
+                targetMenu.Selected += mass_slowTargetMenu_Selected;
+                targetMenu.Canceled += unitTargetMenu_Canceled;
+                AddMenu(targetMenu);
+
+                Global.player.facing = 4;
+                Global.player.update_cursor_frame();
+            }
+            else
+                Global.game_system.play_se(System_Sounds.Buzzer);
+        }
+
+        private void mass_slowTargetMenu_Selected(object sender, EventArgs e)
+        {
+            Global.game_system.play_se(System_Sounds.Confirm);
+            var targetMenu = (sender as UnitTargetMenu);
+            targetMenu.Accept();
+
+            Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
+            MenuHandler.UnitMenuMassSlow(unit, targetMenu.SelectedUnitId);
+        }
+        #endregion
         // Skills: Swoop
         private void Swoop(Game_Unit unit)
         {
@@ -230,7 +491,7 @@ namespace Tactile.Menus.Map.Unit
         private bool CancelCommandSkillCommand(UnitCommandMenu unitMenu)
         {
             Game_Unit unit = Global.game_map.units[unitMenu.UnitId];
-            if (unit.DashActivated)
+            if (unit.DashActivated || unit.JDashActivated)
             {
                 Global.game_system.Menu_Canto = unitMenu.Canto;
                 menu_ClosedCanceled(unitMenu, new EventArgs());
@@ -278,6 +539,36 @@ namespace Tactile.Menus.Map.Unit
                                     UnitCommandMenu.SkillCommandId(SkillMenuIds.OldSwoop))
                                 return true;
                             break;
+                        // Skills: Rally
+                        case "RALLY":
+                            if (unitMenu.CommandAtIndex ==
+                                    UnitCommandMenu.SkillCommandId(SkillMenuIds.Rally))
+                                return true;
+                            break;
+                        // Skills: Swap
+                        case "SWAP":
+                            if (unitMenu.CommandAtIndex ==
+                                    UnitCommandMenu.SkillCommandId(SkillMenuIds.Swap))
+                                return true;
+                            break;
+                        // Skills: Teleport
+                        case "TELEPORT":
+                            if (unitMenu.CommandAtIndex ==
+                                    UnitCommandMenu.SkillCommandId(SkillMenuIds.Teleport))
+                                return true;
+                            break;
+                        // Skills: Mass Slow
+                        case "MASS_SLOW":
+                            if (unitMenu.CommandAtIndex ==
+                                    UnitCommandMenu.SkillCommandId(SkillMenuIds.Mass_Slow))
+                                return true;
+                            break;
+                        // Skills: JDash
+                        case "JDASH":
+                            if (unitMenu.CommandAtIndex ==
+                                    UnitCommandMenu.SkillCommandId(SkillMenuIds.JDash))
+                                return true;
+                            break;
                     }
                     // Skills: Masteries
                     if (Game_Unit.MASTERIES.Contains(skill))
@@ -298,5 +589,8 @@ namespace Tactile.Menus.Map.Unit
         void UnitMenuShelter(Game_Unit unit, int targetId);
         void UnitMenuRefuge(Game_Unit unit, int targetId);
         void UnitMenuSacrifice(Game_Unit unit, int targetId);
+        void UnitMenuSwap(Game_Unit unit, int targetId);
+        void UnitMenuTeleport(Game_Unit unit, int targetId);
+        void UnitMenuMassSlow(Game_Unit unit, int targetId);
     }
 }

@@ -429,6 +429,11 @@ namespace Tactile
                     return offset.list_add(distance == 1 ? new List<int>() { 270, 268 } : new List<int>() { 267, 268 });
                 case 146: // Fenrir
                     return offset.list_add(distance == 1 ? new List<int>() { 278, 276 } : new List<int>() { 275, 276 });
+                case 148: // Nosferatu
+                    if (hit)
+                        return offset.list_add(distance == 1 ? new List<int>() { 260, 262 } : new List<int>() { 261, 262 });
+                    else
+                        return offset.list_add(distance == 1 ? new List<int>() { 260 } : new List<int>() { 261 });
                 case 151: // Heal
                     return offset.list_add(new List<int>() { 301 });
                 case 152: // Mend
@@ -568,6 +573,8 @@ namespace Tactile
                     return offset.list_add(new List<int>() { 269 });
                 case 146: // Fenrir
                     return offset.list_add(new List<int>() { 277 });
+                case 148: // Nosferatu
+                    return offset.list_add(new List<int>() { 266 });
                 case 158: // Restore
                     return offset.list_add(new List<int>() { 328 });
                 case 160: // Barrier
@@ -596,6 +603,8 @@ namespace Tactile
                     return offset.list_add(new List<int>() { distance == 1 ? 263 : 264 });
                 case 134: // Resire
                     return offset.list_add(new List<int>() { distance == 1 ? 263 : 264 }); //Yeti
+                case 148: //Nosferatu
+                    return offset.list_add(new List<int>() { distance == 1 ? 263 : 264 });
             }
             return new List<int>();
         }
@@ -613,6 +622,8 @@ namespace Tactile
                     return offset.list_add(new List<int>() { 265 });
                 case 134: // Resire
                     return offset.list_add(new List<int>() { 265 }); //Yeti
+                case 148: //Nosferatu
+                    return offset.list_add(new List<int>() { 265 });
             }
             return new List<int>();
         }

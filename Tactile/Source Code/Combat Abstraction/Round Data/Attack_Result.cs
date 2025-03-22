@@ -5,14 +5,18 @@ namespace Tactile
     struct Attack_Result
     {
         public int dmg, actual_dmg;
+        public int counter_dmg, counter_actual_dmg;
         public bool hit;
         public bool crt;
         public int wexp;
         public bool backfire;
+        public KeyValuePair<bool, double> counter;
         public bool kill;
+        public bool counter_kill;
         public int immediate_life_steal;
         public bool delayed_life_steal;
         public List<KeyValuePair<int, bool>> state_change;
+        public List<KeyValuePair<int, bool>> state_change_attacker; //the state change of the attacking unit, NOT in the case of backfiring
 
         public bool status_inflicted()
         {
@@ -25,6 +29,22 @@ namespace Tactile
         public int status_inflict_map_id()
         {
             foreach (KeyValuePair<int, bool> pair in state_change)
+                if (pair.Value && Global.data_statuses[pair.Key].Map_Anim_Id > 0)
+                    return Global.data_statuses[pair.Key].Map_Anim_Id;
+            return 0;
+        }
+
+        // Skills: Saving Face
+        public bool status_received()
+        {
+            foreach (KeyValuePair<int, bool> pair in state_change_attacker)
+                if (pair.Value)
+                    return true;
+            return false;
+        }
+        public int status_received_map_id()
+        {
+            foreach (KeyValuePair<int, bool> pair in state_change_attacker)
                 if (pair.Value && Global.data_statuses[pair.Key].Map_Anim_Id > 0)
                     return Global.data_statuses[pair.Key].Map_Anim_Id;
             return 0;

@@ -63,7 +63,30 @@ namespace TactileWeaponExtension
                         //target.actor.weapon.Scnd_Type == TactileLibrary.Weapon_Types.Dark))
                 effectiveness = Math.Max(2, effectiveness);
             }
-            
+
+            // Skills: Slayer
+            if (unit != null && unit.actor.has_skill("SLAYER"))
+            {
+                if (target != null && !unit.nihil(target))
+                {
+                    if (target.actor.class_types.Contains(ClassTypes.Monster))
+                    {
+                        effectiveness = Math.Max(2, effectiveness);
+                    }
+                }    
+            }
+            // Skills: Natural Predator
+            if (unit != null && unit.actor.has_skill("NATURAL_PREDATOR"))
+            {
+                if (target != null && !unit.nihil(target))
+                {
+                    if (target.actor.class_types.Contains(ClassTypes.Cavalry))
+                    {
+                        effectiveness = Math.Max(2, effectiveness);
+                    }
+                }
+            }
+
             float result = effectiveness;
             if (halveOnHealingTerrain)
             {

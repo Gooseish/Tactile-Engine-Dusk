@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Tactile.Graphics.Text;
 using ListExtension;
+using System.Linq;
+using Tactile.Source_Code.Sprites;
 
 namespace Tactile.Windows.Map.Info
 {
@@ -15,11 +17,13 @@ namespace Tactile.Windows.Map.Info
         protected TextSprite Name;
         protected int Window_Width = 80, Window_Height = 32;
         protected Vector2 NAME_LOC = new Vector2(56, 0);
+        protected Unit_Info_Skill Skills;
 
         public Window_Unit_Info_Panel()
         {
             BOTTOM_Y = Math.Max(Config.WINDOW_HEIGHT / 2,
                 BOTTOM_Y - (Global.game_options.controller == 0 ? 16 : 0));
+            construct_skills();
             initialize();
             refresh();
         }
@@ -40,11 +44,17 @@ namespace Tactile.Windows.Map.Info
             init_hp_gauge();
             Name = new TextSprite();
             Name.SetFont(Config.INFO_FONT, Global.Content);
+            Skills = new Unit_Info_Skill();
         }
 
         protected virtual void init_hp_gauge()
         {
             Hp_Gauge = new Unit_Info_Hp_Gauge();
+        }
+
+        protected virtual void construct_skills()
+        {
+            
         }
 
         protected override void set_images()
@@ -81,12 +91,18 @@ namespace Tactile.Windows.Map.Info
             Face.set_actor(unit.actor);
             if (!unit.actor.generic_face)
                 Face.mirrored = unit.has_flipped_face_sprite;
+            // Skills
+            set_skills(unit);
             // Name
             set_name(unit);
             // HP
             Hp_Gauge.set_val(unit.actor.hp, unit.actor.maxhp);
         }
 
+        protected virtual void set_skills(Game_Unit unit)
+        {
+             Skills.refresh(unit);
+        }
         protected virtual void set_name(Game_Unit unit)
         {
             Name.text = unit.actor.name;
@@ -210,6 +226,12 @@ namespace Tactile.Windows.Map.Info
                 Window_Img.draw(sprite_batch, new Vector2(3, 3) - draw_vector());
                 sprite_batch.End();
                 Face.draw(sprite_batch);
+
+                
+                sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                Skills.draw(sprite_batch, new Vector2(-Window_Width-4, 1) - (loc + draw_vector())); // please don't make fun of me for being bad at programming //gooseish
+                sprite_batch.End();
+                
 
                 sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                 draw_hp(sprite_batch);

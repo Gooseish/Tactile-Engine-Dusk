@@ -84,6 +84,7 @@ namespace Tactile.Menus
             _HidesParent = value;
         }
 
+       
         public event EventHandler<EventArgs> Selected;
         private void OnSelected(EventArgs e)
         {

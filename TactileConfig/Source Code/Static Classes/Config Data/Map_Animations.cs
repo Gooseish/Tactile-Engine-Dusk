@@ -714,8 +714,216 @@ namespace Tactile
         #region Skill Data
         public readonly static Dictionary<int, Map_Effect_Data> SKILL_MAP_EFFECTS =
             new Dictionary<int, Map_Effect_Data>
+            {
+                #region 1: Summon Effect
+                { 1, new Map_Effect_Data { image = new KeyValuePair<string, int>("SummonEffectBrightestSheet", 30),
+                animation_data = new List<KeyValuePair<int[], int>>
+                {
+                    new KeyValuePair<int[], int>(new int[] { 0, 250, 0 }, 2),
+                    new KeyValuePair<int[], int>(new int[] { 1, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] { 2, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { 3, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] { 4, 250, 0 }, 6),
+                    new KeyValuePair<int[], int>(new int[] { 5, 250, 0 }, 2),
+                    new KeyValuePair<int[], int>(new int[] { 6, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] { 7, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] { 8, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] { 9, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {10, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {11, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {12, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {13, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {14, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {15, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {16, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {17, 250, 0 }, 4),
+
+                },
+                processing_data = new List<KeyValuePair<int,string[]>>
+                    {
+                        new KeyValuePair<int, string[]> (2, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (6, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (10, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (14, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (25, new string[] { "s", "Hit_NoDamage" }),
+                        new KeyValuePair<int, string[]> (35, new string[] { "s", "Barrier" })
+                    }
+                }},
+
+                #endregion
+                #region 2: mass slow effect
+                { 2, new Map_Effect_Data { image = new KeyValuePair<string, int>("MassSlowEffect", 30),
+                animation_data = new List<KeyValuePair<int[], int>>
+                {
+                    new KeyValuePair<int[], int>(new int[] { 0, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { 1, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { 2, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { 3, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { 4, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { 5, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { 6, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { 7, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { 8, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { 9, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {10, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {11, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {12, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {13, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {14, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {15, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {16, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {17, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {18, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {19, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {20, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {21, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {22, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {23, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {24, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {25, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {26, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {27, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {28, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {29, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {30, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {31, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {32, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {33, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {34, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {35, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {36, 250, 0 }, 3),
+                    new KeyValuePair<int[], int>(new int[] {37, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {38, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {39, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {40, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {41, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {42, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {43, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {44, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {45, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {46, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {47, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {48, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {49, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {50, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {51, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {52, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {53, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {54, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {55, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {56, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {57, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {58, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {59, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {60, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {61, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {62, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {63, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {64, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {65, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {66, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {67, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {68, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {69, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {70, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {71, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {72, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {73, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {74, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {75, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {76, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {77, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {78, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {79, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {80, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {81, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {82, 250, 0 }, 5),
+                    new KeyValuePair<int[], int>(new int[] {83, 250, 0 }, 7),
+                    new KeyValuePair<int[], int>(new int[] {84, 250, 0 }, 7),
+                    new KeyValuePair<int[], int>(new int[] {85, 250, 0 }, 7),
+                    new KeyValuePair<int[], int>(new int[] {86, 250, 0 }, 7),
+                    new KeyValuePair<int[], int>(new int[] {87, 250, 0 }, 40),
+                    new KeyValuePair<int[], int>(new int[] {88, 250, 0 }, 40),
+                    new KeyValuePair<int[], int>(new int[] {89, 250, 0 }, 40),
+                    new KeyValuePair<int[], int>(new int[] {90, 250, 0 }, 40),
+                    new KeyValuePair<int[], int>(new int[] {91, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {92, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {93, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {94, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {95, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {96, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {97, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {98, 250, 0 }, 4),
+                    new KeyValuePair<int[], int>(new int[] {99, 250, 0 }, 4),
+
+
+
+                },
+                processing_data = new List<KeyValuePair<int,string[]>>
+                    {
+                        new KeyValuePair<int, string[]> (2, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (6, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (12, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (16, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (22, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (26, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (32, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (36, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (42, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (46, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (52, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (56, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (62, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (66, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (72, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (76, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (82, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (86, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (92, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (96, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (102, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (106, new string[] { "s", "Pupil_Charge1" }),
+                        new KeyValuePair<int, string[]> (112, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (116, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (122, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (126, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (132, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (136, new string[] { "s", "Pupil_Charge2" }),
+                        new KeyValuePair<int, string[]> (185, new string[] { "s", "TickTock" }),
+                        new KeyValuePair<int, string[]> (345, new string[] { "s", "Hit_NoDamage" }),
+                        new KeyValuePair<int, string[]> (345, new string[] { "s", "Flux1" })
+                        //new KeyValuePair<int, string[]> (35, new string[] { "s", "Barrier" })
+                    }
+                }}
+                #endregion
+
+            };
+
+        public static Map_Effect_Data SKILL_FLASH_MAP_EFFECT(int id)
         {
-        };
+            return new Map_Effect_Data
+            {
+                image = new KeyValuePair<string, int>("Skill_Flash_Icons", 30),
+                animation_data = new List<KeyValuePair<int[], int>>
+                {
+                    new KeyValuePair<int[], int>(new int[] { id, 250, 255 }, 1),
+                    new KeyValuePair<int[], int>(new int[] { id, 250, 204 }, 1),
+                    new KeyValuePair<int[], int>(new int[] { id, 250, 153 }, 1),
+                    new KeyValuePair<int[], int>(new int[] { id, 250, 102 }, 1),
+                    new KeyValuePair<int[], int>(new int[] { id, 250,  51 }, 1),
+                    new KeyValuePair<int[], int>(new int[] { id, 250,   0 }, 6),
+                    new KeyValuePair<int[], int>(new int[] { id, 250,  51 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { id, 250, 102 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { id, 250, 153 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { id, 250, 204 }, 3),
+                    new KeyValuePair<int[], int>(new int[] { id, 250, 255 }, 3)
+                },
+                processing_data = new List<KeyValuePair<int, string[]>>
+                    {
+                        new KeyValuePair<int, string[]> (5, new string[] { "s", "Skill_Flash" })
+                    }
+            };
+        }
         #endregion
 
         #region Status Data
@@ -1051,6 +1259,8 @@ namespace Tactile
                     if (MAP_EFFECTS.ContainsKey(id))
                         return MAP_EFFECTS[id];
                     break;
+                case 5:
+                    return SKILL_FLASH_MAP_EFFECT(id);
             }
             type = 0;
             id = 1;

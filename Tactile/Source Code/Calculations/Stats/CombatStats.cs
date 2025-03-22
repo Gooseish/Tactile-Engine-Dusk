@@ -361,7 +361,7 @@ namespace Tactile.Calculations.Stats
             support_crt = support_bonus(Combat_Stat_Labels.Crt);
             s_bonus = attacker.actor.s_rank_bonus(weapon);
 
-            target_dod = this.target_stats().dodge();
+            target_dod = this.target_stats().dodge(attacker);
             int crit_rate = actor_crt + weapon_crt + skill_crt + support_crt + s_bonus;
             int total_crt = Math.Max(0, crit_rate - target_dod);
             if (magic_attack && attacker.actor.power_type() == Power_Types.Strength)

@@ -1687,6 +1687,10 @@ namespace Tactile
                 {
                     Combat_Data.Hp2 -= data.Result.dmg;
                     Combat_Data.Hp1 = Math.Min(Combat_Data.Hp1 + data.Result.immediate_life_steal, Combat_Data.MaxHp1);
+                    if(data.Result.counter.Key)
+                    {
+                        Combat_Data.Hp1 -= data.Result.counter_dmg;
+                    }
                 }
                 else
                 {
@@ -1702,6 +1706,10 @@ namespace Tactile
                 {
                     Combat_Data.Hp1 -= data.Result.dmg;
                     Combat_Data.Hp2 = Math.Min(Combat_Data.Hp2 + data.Result.immediate_life_steal, Combat_Data.MaxHp2);
+                    if (data.Result.counter.Key)
+                    {
+                        Combat_Data.Hp2 -= data.Result.counter_dmg;
+                    }
                 }
                 else
                 {
@@ -1713,7 +1721,11 @@ namespace Tactile
             }
             // Status effects
             if (!data.Result.backfire)
+            {
                 battler_2.state_change(data.Result.state_change);
+                if (data.Result.status_received())
+                    battler_1.state_change(data.Result.state_change_attacker); // Skills: Saving Face
+            }
             else
                 battler_1.state_change(data.Result.state_change);
         }

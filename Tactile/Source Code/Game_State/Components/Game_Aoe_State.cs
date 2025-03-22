@@ -390,9 +390,9 @@ namespace Tactile.State
                         switch (Combat_Timer)
                         {
                             case 0:
-                                Battler_1.end_battle();
+                                Battler_1.end_battle(Battler_2);
                                 foreach (int battler_2_id in Aoe_Targets)
-                                    Units[battler_2_id].end_battle();
+                                    Units[battler_2_id].end_battle(Battler_1);
                                 //end battle calls used to be here, testing below to let Trample lead to attack canto //Debug
                                 // Move this up from below, because it needs to kill the target before testing if canto is possible
                                 Battler_1.queue_move_range_update();

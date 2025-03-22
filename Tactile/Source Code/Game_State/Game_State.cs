@@ -7,6 +7,8 @@ using Tactile.State;
 using TactileLibrary;
 using Tactile.Graphics;
 using TactileVersionExtension;
+using Microsoft.Xna.Framework.Graphics;
+using Tactile.Graphics.Map;
 
 namespace Tactile
 {
@@ -143,8 +145,18 @@ namespace Tactile
         internal int dance_target_id { get { return SkillsState.Dance_State.dance_target_id; } }
         internal int dance_item { get { return SkillsState.Dance_State.dance_item; } }
         internal int sacrificer_id { get { return SkillsState.Sacrifice_State.sacrificer_id; } }
+        internal int mass_slower_id { get { return SkillsState.Mass_Slow_State.caster_id; } }
         internal int stealer_id { get { return SkillsState.Steal_State.stealer_id; } }
         internal int steal_target_id { get { return SkillsState.Steal_State.steal_target_id; } }
+
+        internal HashSet<int> skill_flash_targets { get { return SkillsState.Skill_Flash_State.skill_targets; } }
+        internal int skill_flash_target { get { return SkillsState.Skill_Flash_State.skill_flash_target_id; } }
+        internal bool skill_flash_hit_flash { get { return SkillsState.Skill_Flash_State.do_hit_flash; } }
+
+        internal void Draw_Target_HP_Gauges(SpriteBatch sprite_batch, Vector2 hp_gauge_draw_vector, Camera camera, Dictionary<int, Character_Sprite> Map_Sprites)
+        {
+            SkillsState.Skill_Flash_State.Draw_Target_HP_Gauges(sprite_batch, hp_gauge_draw_vector, camera, Map_Sprites);
+        }
 
         internal IEnumerable<int> SupportGainIds { get { return SupportState.SupportGainIds; } }
         internal IEnumerable<int> SupportGainReadyIds { get { return SupportState.SupportGainReadyIds; } }
@@ -374,6 +386,42 @@ namespace Tactile
             Global.game_system.Battler_1_Id = id1;
             Global.game_system.Battler_2_Id = id2;
         }
+        internal void call_skill_flash(int id1, int id2, string identifier)
+        {
+            SkillsState.Skill_Flash_State.skill_flash_calling = true;
+            SkillsState.Skill_Flash_State.identifier = identifier;
+            SkillsState.Skill_Flash_State.skill_flasher_id = id1;
+            SkillsState.Skill_Flash_State.skill_flash_target_id = id2;
+        }
+        internal void call_swap(int id1, int id2)
+        {
+            SkillsState.Swap_State.swap_calling = true;
+            SkillsState.Swap_State.swapper_id = id1;
+            SkillsState.Swap_State.swap_target_id = id2;
+        }
+        internal void call_teleport(int id1, int id2)
+        {
+            SkillsState.Teleport_State.teleport_calling = true;
+            SkillsState.Teleport_State.teleporter_id = id1;
+            SkillsState.Teleport_State.teleport_destination = id2;
+        }
+        internal void call_mass_slow(int id1, int id2)
+        {
+            SkillsState.Mass_Slow_State.mass_slow_calling = true;
+            SkillsState.Mass_Slow_State.caster_id = id1;
+            SkillsState.Mass_Slow_State.mass_slow_target = id2;
+        }
+        internal void call_transform(int id1)
+        {
+            SkillsState.Transform_State.transform_calling = true;
+            SkillsState.Transform_State.transformer_id = id1;
+        }
+        internal void call_summon(int id1, Vector2 summon_location)
+        {
+            SkillsState.Summon_State.summon_calling = true;
+            SkillsState.Summon_State.summoner_id = id1;
+            SkillsState.Summon_State.summon_destination = summon_location;
+        }
         internal void call_steal(int id1, int id2, int steal_item_index)
         {
             SkillsState.Steal_State.steal_calling = true;
@@ -424,6 +472,8 @@ namespace Tactile
         internal bool battle_active { get { return combat_active && !staff_active; } }
         internal bool staff_active { get { return CombatState.staff_calling || CombatState.in_staff_use; } } // || CombatState.in_battle; } } //Debug
         internal bool aoe_active { get { return CombatState.aoe_calling || CombatState.in_aoe; } }
+
+        internal bool skill_flash_active { get { return SkillsState.Skill_Flash_State.in_skill_flash; } } //gooseish
 
         internal bool block_active { get { return BlockState.block_calling || BlockState.in_block; } }
         internal bool chapter_end_active { get { return ChapterEndState.Active; } }

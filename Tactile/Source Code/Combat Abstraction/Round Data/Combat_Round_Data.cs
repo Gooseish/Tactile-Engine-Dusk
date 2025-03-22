@@ -360,6 +360,15 @@ namespace Tactile
             {
                 target.combat_damage(Result.dmg, attacker, Result.state_change, Result.backfire, test);
                 attacker.hp += Result.immediate_life_steal;
+                // Skills: Saving Face
+                if (Result.status_received() && attacker.is_unit())
+                    (attacker as Game_Unit).state_change(Result.state_change_attacker);
+                // Skills: Counter
+                // Skills: Counterspell
+                if(Result.counter.Key)
+                {
+                    attacker.combat_damage(Result.counter_dmg, target, new List<KeyValuePair<int, bool>> { }, Result.backfire, test);
+                }
             }
             // Else it backfired, and damage is caused
             else

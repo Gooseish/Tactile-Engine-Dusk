@@ -323,6 +323,10 @@ namespace Tactile
             if (Battler_2 != null)
             {
                 var battler2Data = new BattlerSpriteData(Battler_2);
+                
+                if (battler1Data.UsedWeaponType == "Staff" && Battler_2.actor.class_id == 144) // Suppress transformation for wolfskin if battler_1 is using a staff //gooseish
+                    battler2Data.UsedWeaponTypeOverride = "Unarmed";
+
                 Battler_2_Sprite = new Battler_Sprite(battler2Data, !Reverse, Distance, Reverse);
             }
             // Initial battle sprite positions to match map sprites: battler 1

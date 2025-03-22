@@ -98,10 +98,17 @@ namespace Tactile.Windows.Map.Info
             Face.set_actor(unit.actor);
             if (!unit.actor.generic_face)
                 Face.mirrored = unit.has_flipped_face_sprite;
+            // Skills
+            set_skills(unit);
             // Name
             set_name(unit);
             // HP
             Hp_Gauge.set_val(unit.actor.hp, unit.actor.maxhp);
+        }
+
+        protected override void set_skills(Game_Unit unit)
+        {
+
         }
 
         protected override void set_name(Game_Unit unit)

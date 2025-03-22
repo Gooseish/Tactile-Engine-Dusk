@@ -1000,20 +1000,45 @@ namespace Tactile
         {
             // Value[0] = id
             // Value[1] = mission id
-            int id = process_unit_id(command.Value[0]);
-            Game_Unit unit = null;
-            if (id == -1)
-                if (Global.game_map.last_added_unit != null)
-                    unit = Global.game_map.last_added_unit;
-            if (Global.game_map.units.ContainsKey(id))
-                unit = Global.game_map.units[id];
-            if (unit != null)
+            // Value[2] = group id (optional)
+            if (command.Value.Length > 2)
             {
-                if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
-                    Unit_Moved = true;
-                unit.full_ai_mission = process_number(command.Value[1]);
-                if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
-                    Unit_Moved = true;
+                int group = process_number(command.Value[2]);
+                List<int> units = Global.game_map.units
+                    .Where(x => x.Value.group == group)
+                    .Select(x => x.Key)
+                    .ToList();
+                foreach (int id in units)
+                {
+                    Game_Unit unit = null;
+                    unit = Global.game_map.units[id];
+                    if (unit != null)
+                    {
+                        if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
+                            Unit_Moved = true;
+                        unit.full_ai_mission = process_number(command.Value[1]);
+                        if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
+                            Unit_Moved = true;
+                    }
+                }
+            }
+            else
+            {
+                int id = process_unit_id(command.Value[0]);
+                Game_Unit unit = null;
+                if (id == -1)
+                    if (Global.game_map.last_added_unit != null)
+                        unit = Global.game_map.last_added_unit;
+                if (Global.game_map.units.ContainsKey(id))
+                    unit = Global.game_map.units[id];
+                if (unit != null)
+                {
+                    if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
+                        Unit_Moved = true;
+                    unit.full_ai_mission = process_number(command.Value[1]);
+                    if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
+                        Unit_Moved = true;
+                }
             }
             Index++;
             return true;
@@ -1717,7 +1742,7 @@ namespace Tactile
                             actor.quick_promotion(process_number(command.Value[2]));
                         else
                         {
-                            throw new NotImplementedException();
+                            //throw new NotImplementedException();
                             actor.class_id = process_number(command.Value[2]);
                         }
                         foreach (Game_Unit unit in Global.game_map.units.Values)
@@ -3994,9 +4019,36 @@ namespace Tactile
                 // This only works pre-battle because it gets set to -1 during battle setup //Yeti
                 case "Team Fighting":
                     // Value[1] = team id
+
                     int team_id = process_number(command.Value[1]);
-                    result = (Global.game_system.Battler_1_Id != -1 && Global.game_map.units[Global.game_system.Battler_1_Id].team == team_id) ||
-                        (Global.game_system.Battler_2_Id != -1 && Global.game_map.units[Global.game_system.Battler_2_Id].team == team_id);
+                    bool Battler_1_check = false;
+                    bool Battler_2_check = false;
+                    if (Global.game_map.units.ContainsKey(Global.game_system.Battler_1_Id))
+                    {
+                        Battler_1_check = Global.game_system.Battler_1_Id != -1 && Global.game_map.units[Global.game_system.Battler_1_Id].team == team_id;
+                    }
+                    if (Global.game_map.units.ContainsKey(Global.game_system.Battler_2_Id))
+                    {
+                        Battler_2_check = Global.game_system.Battler_2_Id != -1 && Global.game_map.units[Global.game_system.Battler_2_Id].team == team_id;
+                    }
+                    result = Battler_1_check || Battler_2_check;
+                    break;
+                case "Group Fighting":
+                    // Value[1] = group id
+
+                    int group = process_number(command.Value[1]);
+                    Battler_1_check = false;
+                    Battler_2_check = false;
+                    if (Global.game_map.units.ContainsKey(Global.game_system.Battler_1_Id))
+                    {
+                        Battler_1_check = Global.game_system.Battler_1_Id != -1 && Global.game_map.units[Global.game_system.Battler_1_Id].group == group;
+                    }
+                    if (Global.game_map.units.ContainsKey(Global.game_system.Battler_2_Id))
+                    {
+                        Battler_2_check = Global.game_system.Battler_2_Id != -1 && Global.game_map.units[Global.game_system.Battler_2_Id].group == group;
+                    }
+                    result = Battler_1_check || Battler_2_check;
+                    
                     break;
                 case "Unit at Loc":
                     // Value[1] = x

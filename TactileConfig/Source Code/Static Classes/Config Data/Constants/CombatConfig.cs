@@ -24,7 +24,7 @@ namespace Tactile.Constants
         public const float MAGIC_WEAPON_MGT_RATE = 1f; // Multiplier to imbued weapon Mgt when casting magic
         public const float MAGIC_WEAPON_CRT_RATE = 0.5f; // Multiplier to imbued weapon final crt rate when casting magic
 
-        public const bool HIT_OVERFLOW = true; // Does Hit over 100 convert into Crit?
+        public const bool HIT_OVERFLOW = false; // Does Hit over 100 convert into Crit?
         public const float HIT_OVERFLOW_RATE = 0.5f;
 
         public const bool BRAVE_BLOCKED_AGAINST_DESTROYABLE = true; // Are brave attacks disallowed when breaking destructible terrain?

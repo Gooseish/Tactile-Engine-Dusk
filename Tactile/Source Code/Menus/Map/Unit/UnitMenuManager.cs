@@ -2137,6 +2137,7 @@ namespace Tactile.Menus.Map.Unit
                 return false;
             }
         }
+
         public bool ShowTalkRange
         {
             get

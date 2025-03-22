@@ -10,6 +10,7 @@ using ListExtension;
 using TactileDictionaryExtension;
 using TactileWeaponExtension;
 using TactileVersionExtension;
+using TactileStringExtension;
 
 namespace Tactile
 {
@@ -354,6 +355,10 @@ namespace Tactile
         {
             get
             {
+                // Skills: Transform
+                if (DTransformActive)
+                    return 110;
+
                 int class_id = Data.ClassId;
 
                 if (!Global.data_classes.ContainsKey(class_id))
@@ -391,6 +396,18 @@ namespace Tactile
                             unequip();
                     // Skill stuff here
                 }
+                else
+                {
+                    int old_class = class_id;
+                    Skills_Need_Updated = true;
+                    Data.ClassId = value;
+                    Promotion_Choices.Clear();
+                    // Remove weapon if new class cannot wield it
+                    if (is_equipped)
+                        if (!is_equippable(this.weapon))
+                            unequip();
+                    // Skill stuff here
+                }
                 /*if (Global.data_classes.ContainsKey(value))
                 {
                     int old_class = ClassId;
@@ -404,6 +421,21 @@ namespace Tactile
             }
         }
 
+        private int generic_base_class_id
+        {
+            get
+            {
+                if(is_generic_actor && BaseClasses.ContainsKey(class_id))
+                {
+                    int number_of_options = BaseClasses[class_id].Count;
+                    return BaseClasses[class_id][gender%number_of_options];
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
         public int promotion_class_id
         {
             set
@@ -489,9 +521,35 @@ namespace Tactile
             }
         }
 
+        private int max_hp_boost
+        {
+            get
+            {
+                int n = 0;
+                // Hp +X
+                foreach (int skill_id in all_skills)
+                {
+                    double str_test;
+                    string name = Global.data_skills[skill_id].Abstract;
+                    if (name.substring(0, 2) == "HP" && double.TryParse(name.substring(2, name.Length - 2), out str_test))
+                        n += Convert.ToInt32(name.Substring(2, name.Length - 2));
+                }
+                // Skills: Fire Stone
+                // Skills: Transform
+                if (has_skill("FIRESTONE"))
+                {
+                    n += dtransform_stat_bonus(Stat_Labels.Hp);
+                }
+                return n;
+            }
+        }
+
         public int maxhp
         {
-            get { return Math.Min(stat(Stat_Labels.Hp), get_cap(Stat_Labels.Hp)); }
+            get 
+            {
+                return Math.Min(stat(Stat_Labels.Hp) + max_hp_boost, get_cap(Stat_Labels.Hp));
+            }
         }
 
         public int hp
@@ -1174,6 +1232,17 @@ namespace Tactile
         #region Class/Tier/Level
         public Data_Class actor_class { get { return Global.data_classes[class_id]; } }
 
+        public Data_Class generic_base_class
+        {
+            get
+            {
+                if (generic_base_class_id == 0)
+                    return null;
+                else
+                    return Global.data_classes[generic_base_class_id];
+            }
+        }
+
         public string class_name { get { return actor_class.name; } }
         public string class_name_full { get { return actor_class.Name; } }
         public string class_name_short() // Should get short versions (Peg Knight, Nmd Trooper, etc)
@@ -1802,7 +1871,34 @@ namespace Tactile
 
         private IEnumerable<int> class_skills()
         {
-            return actor_class.Skills.Where(x => x.Level <= Level).Select(x => x.SkillId);
+            List<int> result = new List<int> { };
+
+            // Base Class Skills
+            if (is_generic_actor)
+            {
+                if (generic_base_class != null)
+                {
+                    result.AddRange(generic_base_class.Skills.Select(x => x.SkillId));
+                }
+            }
+            else
+            {
+                if (Promotion_Choices.Count > 0)
+                    result.AddRange(Global.data_classes[Data.ClassId].Skills.Select(x => x.SkillId));
+            }
+
+            // Current Class Skills
+            result.AddRange(actor_class.Skills.Where(x => x.Level <= Level).Select(x => x.SkillId));
+
+            // Stackable Skills 
+            // Canto stacks to Strafing
+            if (result.Where(id => id == 13).Count() > 1)
+                result.Add(54);
+            // Knife stacks to Poison Knife
+            if (result.Where(id => id == 21).Count() > 1)
+                result.Add(252);
+
+            return result;
         }
 
         internal IEnumerable<int> skills_gained_on_level()

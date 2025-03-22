@@ -46,6 +46,10 @@ namespace Tactile.State
 
         internal void end_chapter(bool showRankings, bool sendMetrics, bool supportPoints)
         {
+            // Skills: Transform
+            Global.game_map.reset_transform();
+
+
             ChapterEndCalling = true;
 
             ShowRankings = showRankings;

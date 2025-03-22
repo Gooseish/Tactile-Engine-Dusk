@@ -167,6 +167,11 @@ namespace Tactile.Menus.Map.Unit.Item
             int promotionClassId = this.PromotionChoice;
             var battlerData = new BattlerSpriteData(this.Unit, promotionClassId);
 
+            if (promotionClassId == 136)
+                battlerData.UsedWeaponTypeOverride = "Bow";     //Show bows for Kinshi Knights //gooseish
+            if (promotionClassId == 61)
+                battlerData.UsedWeaponTypeOverride = "Axe";     //Show axes for wyvern lords //gooseish
+
             Battler = new Battler_Sprite(battlerData, true, 1);
             Battler.loc = new Vector2(BATTLER_X, 176);
             Battler.offset.Y = 120;

@@ -17,8 +17,8 @@ namespace Tactile
 {
     partial class Game_Unit
     {
-        readonly static List<string> ACTIVATION_SKILLS = new List<string> { "DETER", "ADEPT", "FRENZY", "CANCEL", "LETHAL", "BASTION", "THAUM" };
-        readonly static List<string> ANY_ATTACK_TYPE_ACTIVATION = new List<string> { "DETER", "CANCEL", "BASTION", "THAUM" };
+        readonly static List<string> ACTIVATION_SKILLS = new List<string> { "DETER", "ADEPT", "FRENZY", "CANCEL", "LETHAL", "BASTION", "AEGIS", "PAVISE", "MIRACLE", "THAUM" };
+        readonly static List<string> ANY_ATTACK_TYPE_ACTIVATION = new List<string> { "DETER", "CANCEL", "BASTION", "AEGIS", "PAVISE", "MIRACLE", "THAUM" };
         public readonly static List<string> MASTERIES = new List<string> { "ASTRA", "LUNA", "SOL", "SPRLDVE", "NOVA", "FLARE" };
         public readonly static List<string> HEALING_MASTERIES = new List<string> { "SOL" };
         const int MASTERY_MAX_CHARGE = 255;
@@ -33,6 +33,15 @@ namespace Tactile
             Trample_Loc.write(writer);
             Called_Masteries.write(writer);
             Mastery_Gauges.write(writer);
+
+            writer.Write(HasSummoned);
+
+            writer.Write(HasTransformed);
+            writer.Write(actor.DTransformActive);
+            writer.Write(RemainingDTransformTurns);
+
+            writer.Write(HasTeleported);
+            writer.Write(HasUsedMassSlow);
         }
 
         public void skills_read(BinaryReader reader)
@@ -61,6 +70,15 @@ namespace Tactile
                 Called_Masteries.read(reader);
                 Mastery_Gauges.read(reader);
             }
+            HasSummoned = reader.ReadBoolean();
+
+            HasTransformed = reader.ReadBoolean();
+            actor.DTransformActive = reader.ReadBoolean();
+            RemainingDTransformTurns = reader.ReadInt32();
+
+            HasTeleported = reader.ReadBoolean();
+            HasUsedMassSlow = reader.ReadBoolean();
+
         }
         #endregion
 
@@ -84,7 +102,7 @@ namespace Tactile
         {
         }
 
-        private void end_battle_skills()
+        private void end_battle_skills(Game_Unit target)
         {
             // Overwritten by Vendetta and Swoop //Yeti
             // Skills: Swoop
@@ -98,7 +116,97 @@ namespace Tactile
                 if (mastery_called(MASTERIES[i]))
                     Mastery_Gauges[MASTERIES[i]] = 0;
             }
+            // Skills: Volley
+            if(actor.has_skill("VOLLEY"))
+            {
+                if (is_active_team && actor.weapon != null && actor.weapon.main_type().Name == "Bow" && is_attackable_team(target))
+                {
+                    HashSet<Game_Unit> foes_in_volley_aoe = new HashSet<Game_Unit>();
+                    foreach (int id in target.units_in_range(1))
+                    {
+                        Game_Unit unit = Global.game_map.units[id];
+                        if(is_attackable_team(unit))
+                        {
+                            foes_in_volley_aoe.Add(unit);
+                        }
+                    }
+                    if (!target.dead || foes_in_volley_aoe.Count > 0)
+                        Global.game_state.call_skill_flash(id, target.id, "VOLLEY");
+                }
+            }
+            // Skills: Disarm
+            if(actor.has_skill("DISARM"))
+            {
+                if (is_active_team && is_attackable_team(target) && !target.is_dead && target.actor.weapon != null)
+                {
+                    int rate = skill_rate("DISARM");
+                    if (Global.game_system.roll_rng(rate))
+                    {
+                        Global.game_state.call_skill_flash(id, target.id, "DISARM");
+                    }
+                }
+            }
+            // Skills: Indict
+            if(actor.has_skill("INDICT") && !target.dead)
+            {
+                if(!is_active_team)
+                {
+                    if (is_attackable_team(target))
+                        Global.game_state.call_skill_flash(id, target.id, "INDICT");
+                }
+            }
+            // Skills: Dreadful Aura
+            if (actor.has_skill("DREADFUL_AURA"))
+            {
+                if (is_active_team && (target.is_dead || is_attackable_team(target)))
+                {
+                    HashSet<Game_Unit> foes_in_aoe = new HashSet<Game_Unit>();
+                    foreach (int id in target.units_in_range(1))
+                    {
+                        Game_Unit unit = Global.game_map.units[id];
+                        if (is_attackable_team(unit))
+                        {
+                            foes_in_aoe.Add(unit);
+                        }
+                    }
+                    if (!target.dead || foes_in_aoe.Count > 0)
+                        Global.game_state.call_skill_flash(id, target.id, "DREADFUL_AURA");
+                }
+            }
+            // Skills: Shatter Defense
+            if (target != null && target.is_unit() && is_attackable_team(target) && !is_dead)
+                if (target.actor.has_skill("SHATTER_DEFENSE"))
+                    if (!is_active_team)
+                        Global.game_state.call_skill_flash(target.id, id, "SHATTER_DEFENSE");
+
+            // Skills: Draconic Hex
+            if (target != null && target.is_unit() && is_attackable_team(target) && !is_dead)
+                if (target.actor.has_skill("DRACONIC_HEX"))
+                    Global.game_state.call_skill_flash(target.id, id, "DRACONIC_HEX");
+
+
+            // Skills: Grisly Wound
+            if (actor.has_skill("GRISLY_WOUND") && is_attackable_team(target) && !target.is_dead)
+                Global.game_state.call_skill_flash(id, target.id, "GRISLY_WOUND");
+            // Skills: Poison Knife
+            if (actor.has_skill("POISON_KNIFE"))
+                if (is_active_team && is_attackable_team(target) && !target.is_dead)
+                    Global.game_state.call_skill_flash(id, target.id, "POISON_KNIFE");
+
+
+            // Skills: Lifetaker
+            if (actor.has_skill("LIFETAKER"))
+                if (target.is_dead && is_active_team && !is_full_hp)
+                    Global.game_state.call_skill_flash(id, -1, "LIFETAKER");
+
+            // Skills: Galeforce
+            if (actor.has_skill("GALEFORCE"))
+                if (target.is_dead && is_active_team && !galeforce_used_this_turn)
+                    Global.game_state.call_skill_flash(id, -1, "GALEFORCE");
+
             reset_masteries();
+
+            //
         }
         #endregion
 
@@ -110,7 +218,11 @@ namespace Tactile
         public void prehit_def_skill_check(Game_Unit target)
         {
             bastion_prehit_def_skill_check(target);
+            aegis_prehit_def_skill_check(target);
+            pavise_prehit_def_skill_check(target);
+            miracle_prehit_def_skill_check(target);
         }
+
 
         public void prehit_skill_check()
         {
@@ -147,6 +259,8 @@ namespace Tactile
             //nova_hit_skill_check(is_hit, is_crt, target, distance); //Yeti
             //flare_hit_skill_check(is_hit, is_crt, target, distance); //Yeti
             //cancel_hit_skill_check(is_hit, is_crt, target, distance); //Yeti
+            vengeance_hit_skill_check(is_hit);
+            lethality_hit_skill_check(is_hit);
         }
 
         public void onhit_skill_check(bool is_hit)
@@ -160,6 +274,7 @@ namespace Tactile
         public void onhit_skill_check(bool is_hit, Game_Unit target, int? distance)
         {
             deter_hit_skill_check(is_hit, target, distance);
+            
         }
 
         public void posthit_skill_check()
@@ -170,6 +285,7 @@ namespace Tactile
         {
             adept_posthit_skill_check(target);
             frenzy_posthit_skill_check(target);
+
         }
 
         public void hit_skill_update()
@@ -186,8 +302,13 @@ namespace Tactile
             if (actor.luna_activated) result.Add("LUNA");
             if (actor.sol_activated) result.Add("SOL");
             if (actor.bastion_activated) result.Add("BASTION");
+            if (actor.pavise_activated) result.Add("PAVISE");
+            if (actor.aegis_activated) result.Add("AEGIS");
+            if (actor.miracle_activated) result.Add("MIRACLE");
             if (actor.sprldve_activated) result.Add("SPRLDVE");
             if (actor.nova_activated) result.Add("NOVA");
+            if (actor.vengeance_activated) result.Add("VENGEANCE");
+            if (actor.lethality_activated) result.Add("NEW_LETHAL");
             return result;
         }
 
@@ -266,12 +387,24 @@ namespace Tactile
                 // In battle activation skills
                 case "BASTION":
                     return stat(Stat_Labels.Def);
+                case "PAVISE":
+                    return stat(Stat_Labels.Skl);
+                case "AEGIS":
+                    return stat(Stat_Labels.Skl);
+                case "MIRACLE":
+                    return stat(Stat_Labels.Lck);
                 case "DETER":
                     return stat(Stat_Labels.Skl) / 2;
                 case "ADEPT":
                     return stat(Stat_Labels.Spd);
                 case "FRENZY":
                     return stat(Stat_Labels.Pow) / 2;
+                case "VENGEANCE":
+                    return (int)(stat(Stat_Labels.Skl) * 2);
+                case "NEW_LETHAL":
+                    return (int)(stat(Stat_Labels.Skl) / 4);
+                case "DISARM":
+                    return stat(Stat_Labels.Skl);
             }
             return 0;
         }
@@ -290,6 +423,12 @@ namespace Tactile
             // Skills: Bastion
             if (actor.bastion_activated)
                 return Global.skill_from_abstract("BASTION").Animation_Id;
+            // Skills: Aegis
+            //if (actor.aegis_activated)
+            //    return Global.skill_from_abstract("BASTION").Animation_Id;
+            // Skills: Pavise
+            //if (actor.pavise_activated)
+                //return Global.skill_from_abstract("BASTION").Animation_Id;
             // Skills: Spiral Dive
             if (actor.sprldve_activated)
                 return Global.skill_from_abstract("SPRLDVE").Animation_Id;
@@ -331,6 +470,12 @@ namespace Tactile
             // Skills: Bastion
             if (actor.bastion_activated)
                 return Global.skill_from_abstract("BASTION").Map_Anim_Id;
+            // Skills: Pavise
+            //if (actor.pavise_activated)
+            //    return Global.skill_from_abstract("BASTION").Map_Anim_Id;
+            // Skills: Aegis
+            //if (actor.aegis_activated)
+            //    return Global.skill_from_abstract("BASTION").Map_Anim_Id;
             // Skills: Spiral Dive
             if (actor.sprldve_activated)
                 return Global.skill_from_abstract("SPRLDVE").Map_Anim_Id;
@@ -354,7 +499,7 @@ namespace Tactile
         internal Maybe<int> atk_pow_skill(Data_Weapon weapon, bool magic)
         {
             // Skills: Knife
-            if (actor.has_skill("KNIFE"))
+            if (actor.has_skill("KNIFE") || actor.has_skill("POISON_KNIFE"))
                 if (!weapon.is_magic() && !magic && weapon.main_type().Name == "Sword")
                 {
                     int base_pow = stat(Stat_Labels.Pow) - stat_bonus(Stat_Labels.Pow);
@@ -369,11 +514,17 @@ namespace Tactile
             return new Maybe<int>();
         }
 
-        internal Maybe<int> atk_spd_skill(int spd, Data_Weapon weapon, bool magic)
+        internal Maybe<int> atk_spd_skill(int spd, Data_Weapon weapon, bool magic, Combat_Map_Object target)
         {
             // Skills: Crossbow
             if (!magic && weapon.main_type().Name == "Bow" && !weapon.Ballista() && actor.has_skill("CROSSBOW"))
                 return (stat(Stat_Labels.Pow) + spd) / 2;
+
+            // Skills: Darting Blow
+            if (actor.has_skill("DARTING_BLOW"))
+                if (is_active_team && target != null)
+                    return spd + 5;
+            
 
             return new Maybe<int>();
         }
@@ -394,7 +545,7 @@ namespace Tactile
             int? distance, float effectiveness = 1)
         {
             // Skills: Knife
-            if (actor.has_skill("KNIFE"))
+            if (actor.has_skill("KNIFE") || actor.has_skill("POISON_KNIFE"))
                 if (!weapon.is_magic() && !magic &&
                     weapon.main_type().Name == "Sword")
                 {
@@ -443,6 +594,52 @@ namespace Tactile
             // Skills: Mulciber's Steel
             if (actor.has_skill("MULCIBER"))
                 actor_dmg += 5;
+            // Skills: Spotlight
+            if (actor.has_skill("SPOTLIGHT"))
+                if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
+                    if (allies_in_range(2).Count < 1)
+                        actor_dmg += 2;
+            // Skills: Indignation
+            if (actor.has_skill("INDIGNATION"))
+                if (!actor.is_full_hp())
+                    actor_dmg += 4;
+            // Skills: Protector
+            if (actor.has_skill("PROTECTOR"))
+                if (is_rescuing)
+                    actor_dmg += 3;
+            // Skills: Strong Riposte
+            if (actor.has_skill("RIPOSTE"))
+                if (!is_active_team && target != null)
+                    skill_dmg += 3;
+            // Skills: Momentum
+            if (actor.has_skill("MOMENTUM"))
+                if(is_active_team)
+                    skill_dmg += Temp_Moved;
+            // Skills: Merciless
+            if (actor.has_skill("MERCILESS"))
+                if (target != null && !target.can_counter(this, weapon, (int)distance))
+                    weapon_dmg *= 2;
+            // Skills: Laguz Friend
+            if (target != null)
+                if (target.actor.has_skill("LAGUZ_FRIEND") && !actor.weapon.is_staff())
+                {
+                    int dmg = (skill_dmg + weapon_dmg + actor_dmg + support_dmg) - target_def;
+                    target_def += Math.Max(0, (int)Math.Ceiling(dmg / 2f));
+                }
+            // Skills: Spurs
+            if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
+                foreach (int id in units_in_range(1))
+                {
+                    Game_Unit unit = Global.game_map.units[id];
+                    if (unit.actor.has_skill("SPURS") && !is_attackable_team(unit))
+                    {
+                        skill_dmg += 3;
+                        break;
+                    }
+                }
+            
+
+
 
             // Activation skills
             // Skills: Bastion
@@ -452,6 +649,38 @@ namespace Tactile
                     int dmg = (skill_dmg + weapon_dmg + actor_dmg + support_dmg) - target_def;
                     target_def += Math.Max(0, (int)Math.Ceiling(dmg / 2f));
                 }
+            // Skills: Aegis
+            if (target != null)
+                if (target.actor.aegis_activated)
+                {
+                    int dmg = (skill_dmg + weapon_dmg + actor_dmg + support_dmg) - target_def;
+                    target_def += Math.Max(0, (int)Math.Ceiling(dmg / 2f));
+                }
+            // Skills: Pavise
+            if (target != null)
+                if (target.actor.pavise_activated)
+                {
+                    int dmg = (skill_dmg + weapon_dmg + actor_dmg + support_dmg) - target_def;
+                    target_def += Math.Max(0, (int)Math.Ceiling(dmg / 2f));
+                }
+            // Skills: Vengeance
+            if (!nihil(target))
+            {
+                if (actor.vengeance_activated)
+                {
+                    skill_dmg += (actor.maxhp - actor.hp) / 2;
+                }
+
+            }
+            // Skills: Lethality
+            if (!nihil(target))
+            {
+                if(actor.lethality_activated)
+                {
+                    skill_dmg = target.maxhp;
+                    target_def = 0;
+                }
+            }
             // Skills: Luna
             if (!nihil(target))
                 if (actor.luna_activated)
@@ -495,6 +724,18 @@ namespace Tactile
             // Skills: Faith
             if (actor.has_skill("FAITH"))
                 n += 5 * actor.tier;
+            // Skills: Graceful Presence
+            if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
+                foreach (int id in all_allies())
+                {
+                    Game_Unit unit = Global.game_map.units[id];
+                    if (unit.actor.has_skill("GRACEFUL_PRESENCE"))
+                    {
+                        n += 5;
+                        break;
+                    }
+                   
+                }
         }
 
         public int base_hit_skl(Data_Weapon weapon, bool magic)
@@ -517,7 +758,7 @@ namespace Tactile
                     n += Convert.ToInt32(name.Substring(3, name.Length - 3));
             }
             // Skills: Knife
-            if (actor.has_skill("KNIFE"))
+            if (actor.has_skill("KNIFE") || actor.has_skill("POISON_KNIFE"))
                 if (!weapon.is_magic() && !magic &&
                         weapon.main_type().Name == "Sword")
                     weapon_hit += 10;
@@ -559,13 +800,13 @@ namespace Tactile
             if (actor.has_skill("DEUS"))
                 actor_hit += 30;
             // Skills: Prestige
-            if (Global.scene.is_map_scene && !nihil(target) && !Global.game_map.is_off_map(Loc))
+            if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
                 foreach (int id in units_in_range(3))
                 {
                     Game_Unit unit = Global.game_map.units[id];
                     if (unit.actor.has_skill("PSTG") && !is_attackable_team(unit))
                     {
-                        n += 10;
+                        n += 5;
                         break;
                     }
                 }
@@ -580,6 +821,63 @@ namespace Tactile
                             n -= 10;
                             break;
                         }
+                }
+            // Skills: Fundamentals
+            if (actor.has_skill("FUNDAMENTALS") && actor.is_full_hp())
+            {
+                n += 20;
+            }
+            // Skills: Prescience
+            if (actor.has_skill("PRESCIENCE"))
+                if (is_active_team && target != null)
+                    n += 15;
+
+            // Skills: Patience
+            if (actor.has_skill("PATIENCE"))
+            {
+                if (!is_active_team && target != null)
+                {
+                    n += 10;
+                }
+            }
+
+            // Skills: Gamble
+            if(actor.has_skill("GAMBLE"))
+            {
+                n -= 5;
+            }
+
+            // Skills: Divination
+            if (target != null)
+                if (target.actor.has_skill("DIVINATION") && !target.nihil(this))
+                    n -= (int)(actor.stat(Stat_Labels.Lck) * 0.25f);
+
+            // Skill: Air Superiority
+            if (target != null)
+                if (actor.has_skill("AIR_SUPERIORITY"))
+                    if (target.actor.move_type == (int)MovementTypes.Flying)
+                        n += 30;
+
+            // Skills: Frightful Presence
+            if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
+                foreach (int id in all_enemies())
+                {
+                    Game_Unit unit = Global.game_map.units[id];
+                    if (unit.actor.has_skill("FRIGHTFUL_PRESENCE"))
+                    {
+                        n -= 10;
+                        break;
+                    }
+
+                }
+            // Skills: Laguz Friend
+            if (target != null)
+                if (target.actor.has_skill("LAGUZ FRIEND") && !actor.weapon.is_staff())
+                {
+                    n = 100;
+                    actor_hit = 100;
+                    weapon_hit = 100;
+                    return;
                 }
         }
 
@@ -587,18 +885,7 @@ namespace Tactile
             Data_Weapon weapon, Game_Unit target, bool magic, int? distance)
         {
             // Skills: Critical +X
-            actor_crt += class_crt_bonus;
-            // Skills: Prestige
-            if (Global.scene.is_map_scene && !nihil(target) && !Global.game_map.is_off_map(Loc))
-                foreach (int id in units_in_range(3))
-                {
-                    Game_Unit unit = Global.game_map.units[id];
-                    if (unit.actor.has_skill("PSTG") && !is_attackable_team(unit))
-                    {
-                        n += 10;
-                        break;
-                    }
-                }
+            actor_crt += class_crt_bonus;         
             // Skills: Dreaded
             if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
                 foreach (int id in units_in_range(3))
@@ -611,6 +898,44 @@ namespace Tactile
                             break;
                         }
                 }
+            // Skills: Gamble
+            if (actor.has_skill("GAMBLE"))
+            {
+                n += 10;
+            }
+            // Skills: Righteousness
+            if (actor.has_skill("RIGHTEOUS"))
+            {
+                foreach (int id in units_in_range(2))
+                {
+                    Game_Unit unit = Global.game_map.units[id];
+                    if (!is_attackable_team(unit) && !unit.actor.is_full_hp())
+                    {
+                        n += 10;
+                        break;
+                    }
+                }
+            }
+            // Skills: Wrath
+            if (actor.has_skill("WRATH"))
+                n += (int)MathHelper.Clamp(maxhp - hp, 0, 30);
+            // Skills: Death Blow
+            if (actor.has_skill("DEATH_BLOW"))
+                if (is_active_team && target != null)
+                    n += 20;
+            // Skills: Sword Crit +20
+            if (actor.has_skill("Sword Crit +20"))
+                if (weapon.main_type().Name == "Sword")
+                    n += 20;
+            // Skills: Tactical Fighter
+            if (actor.has_skill("TACTICAL_FIGHTER"))
+                if (terrain_avo_bonus() + terrain_def_bonus() + terrain_res_bonus() > 0)
+                    n += 10;
+            // Skills: Pack Tactics
+            if (actor.has_skill("PACK_TACTICS"))
+                if (target != null && (target.units_in_range(1).Count - target.allies_in_range(1).Count) >= 2)
+                    n += 20;
+
             // Activation Skills
             // Skills: Spiral Dive
             if (!nihil(target))
@@ -618,6 +943,7 @@ namespace Tactile
                 {
                     n += 8;
                 }
+
         }
 
         internal void avo_skill(ref int n, ref int actor_avo, ref int terr_avo,
@@ -632,6 +958,17 @@ namespace Tactile
                         double.TryParse(name.substring(3, name.Length - 3), out str_test))
                     n += Convert.ToInt32(name.Substring(3, name.Length - 3));
             }
+            // Skills: Prestige
+            if (Global.scene.is_map_scene && !nihil(target) && !Global.game_map.is_off_map(Loc))
+                foreach (int id in units_in_range(3))
+                {
+                    Game_Unit unit = Global.game_map.units[id];
+                    if (unit.actor.has_skill("PSTG") && !is_attackable_team(unit))
+                    {
+                        n += 5;
+                        break;
+                    }
+                }
             // Skills: Evasiveness
             if (actor.has_skill("EVASIVE"))
                 if (tri != WeaponTriangle.Disadvantage)
@@ -658,6 +995,78 @@ namespace Tactile
             // Skills: Set's Litany
             if (actor.has_skill("SET"))
                 actor_avo += 25;
+
+            // Skills: Duelist's Blow
+            if (actor.has_skill("DUELISTS_BLOW"))
+                if (is_active_team && target != null)
+                    n += 30;
+
+            // Skills: Prescience
+            if (actor.has_skill("PRESCIENCE"))
+                if (is_active_team && target != null)
+                    n += 15;
+
+            // Skills: Patience
+            if (actor.has_skill("PATIENCE"))
+            {
+                if (!is_active_team && target != null)
+                {
+                    n += 10;
+                }
+            }
+
+            // Skills: Resourceful
+            if (actor.has_skill("RESOURCEFUL") && actor.weapon != null)
+            {
+                if (actor.weapon.type == "Sword")
+                {
+                    n += 10;
+                }
+            }
+
+            // Skills: Divination
+            if (target != null)
+                if (target.actor.has_skill("DIVINATION") && !target.nihil(this))
+                    n -= (int)(actor.stat(Stat_Labels.Lck) * 0.75f);
+
+            // Skills: Heartseeker
+            if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
+                foreach (int id in units_in_range(1))
+                {
+                    Game_Unit unit = Global.game_map.units[id];
+                    if (unit.actor.has_skill("HEARTSEEKER") && is_attackable_team(unit))
+                        if (!unit.nihil(this))
+                        {
+                            n -= 20;
+                            break;
+                        }
+                }
+
+            // Skills: Frightful Presence
+            if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
+                foreach (int id in all_enemies())
+                {
+                    Game_Unit unit = Global.game_map.units[id];
+                    if (unit.actor.has_skill("FRIGHTFUL_PRESENCE"))
+                    {
+                        n -= 10;
+                        break;
+                    }
+                }
+
+            // Skills: Laguz Friend
+            if (target != null)
+                if (actor.has_skill("LAGUZ_FRIEND") && !target.actor.weapon.is_staff())
+                {
+                    n = 0;
+                    actor_avo = 0;
+                    terr_avo = 0;
+                    return;
+                }
+
+
+
+
         }
 
         internal void base_avo_skill(ref int spd, ref int lck)
@@ -669,7 +1078,7 @@ namespace Tactile
             }
         }
 
-        public int dodge_skill()
+        public int dodge_skill(Game_Unit target)
         {
             int n = 0;
             // Skills: Dodge +X
@@ -684,7 +1093,33 @@ namespace Tactile
             // Skills: Set's Litany
             if (actor.has_skill("SET"))
                 n += 15;
+
+            // Skills: Anathema
+            if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
+                foreach (int id in units_in_range(2))
+                {
+                    Game_Unit unit = Global.game_map.units[id];
+                    if (unit.actor.has_skill("ANATHEMA") && is_attackable_team(unit))
+                        if (!unit.nihil(this))
+                        {
+                            n -= 10;
+                            break;
+                        }
+                }
+
+            // Skill: Air Superiority
+            if (target != null)
+                if (actor.has_skill("AIR_SUPERIORITY"))
+                    if (target.actor.move_type == (int)MovementTypes.Flying)
+                        n += 30;
+
+            // Skills: Divination
+            if (target != null)
+                if (target.actor.has_skill("DIVINATION") && !target.nihil(this))
+                    n -= (int)(actor.stat(Stat_Labels.Lck) * 0.5f);
+
             return n;
+
         }
 
         private int class_crt_bonus
@@ -713,6 +1148,30 @@ namespace Tactile
                 {
                     dmg -= Math.Min(10, Math.Max(0, dmg));
                 }
+                // Skills: Protector
+                if (target.actor.has_skill("PROTECTOR"))
+                    if (target.is_rescuing)
+                        dmg -= 3;
+
+                // Skills: Malefic Aura
+                if (weapon.is_magic())
+                {
+                    foreach (int id in target.units_in_range(2))
+                    {
+                        Game_Unit unit = Global.game_map.units[id];
+                        if (unit.actor.has_skill("MALEFIC_AURA") && target.is_attackable_team(unit))
+                            if (!unit.nihil(this))
+                            {
+                                dmg += 2;
+                                break;
+                            }
+                    }
+                }
+                // Skills: Armored Blow
+                if (target.actor.has_skill("ARMORED_BLOW"))
+                    if (!weapon.is_staff() && !weapon.is_magic() && target.is_active_team)
+                        dmg -= 4;
+
 
                 // Activation Skills
                 // Skills: Astra
@@ -722,7 +1181,10 @@ namespace Tactile
                 bool magic_attack = weapon == null ? false : check_magic_attack(weapon, (int)distance);
                 if (target.actor.deter_activated)
                     target.actor.deter_counter = !magic_attack && distance == 1;
+
+                
             }
+            dmg = Math.Max(dmg, 0);
             return dmg;
         }
 
@@ -748,6 +1210,10 @@ namespace Tactile
                 if (target.actor.has_skill("FORT"))
                     if (!target.nihil(this))
                         return 0;
+                // Skills: Stalward Scales
+                if (target.actor.has_skill("STALWART_SCALES"))
+                    if (!target.nihil(this))
+                        return 0;
                 // Skills: Aegis
                 if (target.actor.has_skill("AEGIS"))
                     if (!target.nihil(this))
@@ -765,6 +1231,37 @@ namespace Tactile
             // this seems to be called twice while setting up battles, making permanent changes here doubled
             // for example, reducing the enemy stats
             // look into it? //Yeti
+
+            // Skills: Transmute
+            if(target.actor.has_skill("TRANSMUTE"))
+            {
+                if(result.hit && actor.weapon.is_magic() && is_active_team)
+                {
+                    KeyValuePair<int, bool> transmute = new KeyValuePair<int, bool>(24, true);
+                    result.state_change.Add(transmute);
+                }
+            }
+
+
+            // Skills: Poison Knife
+            if (actor.has_skill("POISON_KNIFE"))
+            {
+                if (result.hit && actor.weapon.main_type().Name == "Sword")
+                {
+                    KeyValuePair<int, bool> poison = new KeyValuePair<int, bool>(1, true);
+                    result.state_change.Add(poison);
+                }
+            }
+
+            // Skills: Hobble
+            if (actor.has_skill("HOBBLE"))
+            {
+                if (result.hit && is_active_team)
+                {
+                    KeyValuePair<int, bool> hobble = new KeyValuePair<int, bool>(28, true);
+                    result.state_change.Add(hobble);
+                }
+            }
 
             // Activation skills
             // Skills: Nosferatu
@@ -815,10 +1312,21 @@ namespace Tactile
             }
         }
 
+
+        private bool is_protected_from_doubling()
+        {
+            // Skills: Wary Fighter
+            if(actor.has_skill("WARY_FIGHTER"))
+                return true;
+            return false;
+        }
         private bool is_double_disabled()
         {
             // Skills: Slow
             if (actor.has_skill("SLOW"))
+                return true;
+            // Skills: Wary Fighter
+            if (actor.has_skill("WARY_FIGHTER"))
                 return true;
             return is_doubling_blocked();
         }
@@ -1162,6 +1670,37 @@ namespace Tactile
                 }
             }
         }
+        // Vengeance
+        private void vengeance_hit_skill_check(bool is_hit)
+        {
+            if (actor.has_skill("VENGEANCE"))
+            {
+                if (is_hit)
+                {
+                    int rate = skill_rate("VENGEANCE");
+                    if (Global.game_system.roll_rng(rate))
+                    {
+                        actor.activate_vengeance();
+                    }
+                }
+            }
+        }
+
+        //Lethality
+        private void lethality_hit_skill_check(bool is_hit)
+        {
+            if (actor.has_skill("NEW_LETHAL"))
+            {
+                if (is_hit)
+                {
+                    int rate = skill_rate("NEW_LETHAL");
+                    if (Global.game_system.roll_rng(rate))
+                    {
+                        actor.activate_lethality();
+                    }
+                }
+            }
+        }
 
         // Bastion
         private void bastion_prehit_def_skill_check(Game_Unit target)
@@ -1174,6 +1713,61 @@ namespace Tactile
                     if (Global.game_system.roll_rng(rate))
                     {
                         actor.activate_bastion();
+                    }
+                }
+            }
+        }
+        
+        // Pavise
+        private void pavise_prehit_def_skill_check(Game_Unit target)
+        {
+            if (actor.has_skill("PAVISE"))
+            {
+                List<string> weapon_types_pavise_works_against = (new List<string> { "Sword", "Axe", "Lance", "Monster" });
+                string enemy_weapon_type = target.actor.weapon.main_type().Name;
+                if (valid_mastery_target("PAVISE", target, 1) && weapon_types_pavise_works_against.Contains(enemy_weapon_type))
+                {
+                    int rate = skill_rate("PAVISE");
+                    if (Global.game_system.roll_rng(rate))
+                    {
+                        actor.activate_pavise();
+                    }
+
+                }
+            }
+        }
+
+        // Aegis
+        private void aegis_prehit_def_skill_check(Game_Unit target)
+        {
+            if (actor.has_skill("AEGIS"))
+            {
+                List<string> weapon_types_aegis_works_against = (new List<string> { "Bow", "Fire", "Ice", "Thunder", "Wind", "Light", "Dark", "Dragonstone"});
+                string enemy_weapon_type = target.actor.weapon.main_type().Name;
+                if (valid_mastery_target("AEGIS", target, 1) && weapon_types_aegis_works_against.Contains(enemy_weapon_type))
+                {
+                    int rate = skill_rate("AEGIS");
+                    if (Global.game_system.roll_rng(rate))
+                    {
+                        actor.activate_aegis();
+                    }
+
+                }
+            }
+        }
+
+        // Miracle
+
+        private void miracle_prehit_def_skill_check(Game_Unit target)
+        {
+            if (actor.has_skill("MIRACLE"))
+            {
+                if (valid_mastery_target("MIRACLE", target, 1))
+                {
+                    int rate = skill_rate("MIRACLE");
+                    if (Global.game_system.roll_rng(rate))
+                    {
+                        actor.activate_miracle();
                     }
                 }
             }
@@ -1295,6 +1889,351 @@ namespace Tactile
             Global.player.loc = Global.game_map.units[ally_id].loc;
         }
 
+        // Skills: Shatter Defense
+        public void shatter_defense()
+        {
+            set_stat_bonus(Buffs.Def, -4);
+        }
+        // Skills: Draconic Hex
+        public void draconic_hex()
+        {
+            set_stat_bonus(Buffs.Pow, -3);
+            set_stat_bonus(Buffs.Def, -3);
+            set_stat_bonus(Buffs.Res, -3);
+            set_stat_bonus(Buffs.Skl, -3);
+            set_stat_bonus(Buffs.Lck, -3);
+            set_stat_bonus(Buffs.Spd, -3);
+        }
+
+        #region rally
+        public bool has_rally
+        {
+            get 
+            {
+                if (actor.has_skill("RALLY_LUCK"))
+                    return true;
+                if (actor.has_skill("RALLY_RES"))
+                    return true;
+                if (actor.has_skill("RALLY_SPECTRUM"))
+                    return true;
+                return false;
+            }
+        }
+        public void rally()
+        {
+            if (actor.has_skill("RALLY_LUCK"))
+                rally_luck();
+            if (actor.has_skill("RALLY_RES"))
+                rally_res();
+            if (actor.has_skill("RALLY_SPECTRUM"))
+                rally_spectrum();
+            wait(true);
+        }
+
+        // Skills: Rally Luck
+        public void rally_luck()
+        {
+            actor.add_state(23);
+            foreach (int id in units_in_range(2))
+            {
+                Game_Unit unit = Global.game_map.units[id];
+                if(!is_attackable_team(unit))
+                {
+                    unit.actor.add_state(23);
+                }
+
+            }
+        }
+        // Skills: Rally Res
+        public void rally_res()
+        {
+            actor.add_state(25);
+            foreach (int id in units_in_range(2))
+            {
+                Game_Unit unit = Global.game_map.units[id];
+                if (!is_attackable_team(unit))
+                {
+                    unit.actor.add_state(25);
+                }
+
+            }
+        }
+
+        // Skills: Rally Spectrum
+        public void rally_spectrum()
+        {
+            actor.add_state(29);
+            foreach (int id in units_in_range(2))
+            {
+                Game_Unit unit = Global.game_map.units[id];
+                if (!is_attackable_team(unit))
+                {
+                    unit.actor.add_state(29);
+                }
+
+            }
+        }
+
+        public HashSet<Vector2> rally_range()
+        {
+            HashSet<Vector2> range = Pathfind.get_range_around(new HashSet<Vector2> { Loc }, 2, 0, true);
+            return range;
+        }
+
+        public string decide_rally_skill_flash_icon()
+        {
+            List<string> candidates = new List<string>();
+
+            if (actor.has_skill("RALLY_LUCK"))
+                candidates.Add("RALLY_LUCK");
+            if (actor.has_skill("RALLY_RES"))
+                candidates.Add("RALLY_RES");
+            if (actor.has_skill("RALLY_SPECTRUM"))
+                candidates.Add("RALLY_SPECTRUM");
+            if (candidates.Count > 1)
+                return ("RALLY_SPECTRUM");
+            else
+                return candidates[0];
+        }
+        #endregion
+
+        // Skills: Summon
+        #region summon
+        internal bool HasSummoned;
+
+        public SummonId attemptedSummon;
+        public void summon(Vector2 summonLoc)
+        {
+            HasSummoned = true;
+
+
+            Global.game_map.add_summoned_unit(summonLoc, SummonDataUnit(attemptedSummon));
+            wait(true);
+        }
+
+        public enum SummonId
+        {
+            Bael = 202,
+            Bonewalker = 204,
+            Cyclops = 206,
+            Gargoyle = 207,
+            Tarvos = 210,
+            Mogall = 212,
+            Revenant = 214,
+            Wolf = 216,
+            Bonewalker_Bow = 218
+        }
+
+        private int[] SummonWeapons(SummonId id)
+        {
+            int[] result = {0, 0, 0, 0, 0, 0 };
+            switch(id)
+            {
+                case SummonId.Bael:
+                    result[0] = 202;
+                    break;
+                case SummonId.Bonewalker:
+                    result[0] = 3;
+                    result[1] = 33;
+                    break;
+                case SummonId.Bonewalker_Bow:
+                    result[0] = 83;
+                    break;
+                case SummonId.Cyclops:
+                    result[0] = 59;
+                    break;
+                case SummonId.Gargoyle:
+                    result[0] = 33;
+                    break;
+                case SummonId.Mogall:
+                    result[0] = 141;
+                    break;
+                case SummonId.Revenant:
+                    result[0] = 202;
+                    break;
+                case SummonId.Tarvos:
+                    result[0] = 59;
+                    break;
+                case SummonId.Wolf:
+                    result[0] = 202;
+                    break;
+
+            }
+            return result;
+        }
+        private string SummonData(SummonId id)
+        {
+            int[] summon_weapons = SummonWeapons(id);
+            
+            string summon_name = "Summon|Name";
+            string summon_class_id = $"{(int)id}|Class ID";
+            string summon_gender = "0|Gender";
+            string summon_level = $"{actor.level}|Level";
+            string summon_exp = "0|Exp";
+            string summon_team = $"{team}|Team";
+            string summon_prepromote_levels = "10|Prepromote Levels";
+            string summon_build = "0|Build Type";
+            string summon_con = "-1|Con";
+            string summon_AI_priority = "0|AI Priority";
+            string summon_AI_mission = "2";
+            string summon_item_1 = $"0, {summon_weapons[0]}, -1|Item 1";
+            string summon_item_2 = $"0, {summon_weapons[1]}, -1|Item 1";
+            string summon_item_3 = $"0, {summon_weapons[2]}, -1|Item 1";
+            string summon_item_4 = $"0, {summon_weapons[3]}, -1|Item 1";
+            string summon_item_5 = $"0, {summon_weapons[4]}, -1|Item 1";
+            string summon_item_6 = $"0, {summon_weapons[5]}, -1|Item 1";
+            string summon_last_line = "0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0"; // I don't know what this does -Gooseish
+
+            string[] summon_data_array = { summon_name, summon_class_id, summon_gender, summon_level,
+                summon_exp, summon_team, summon_prepromote_levels, summon_build, summon_con, summon_AI_priority,
+                summon_AI_mission, summon_item_1, summon_item_2, summon_item_3, summon_item_4, 
+                summon_item_5, summon_item_6, summon_last_line};
+
+            string result = String.Join("\n", summon_data_array);
+
+            return result;
+        }
+        private Data_Unit SummonDataUnit(SummonId id)
+        {
+            return new Data_Unit("generic",$"{actor.name}_summon",SummonData(id));
+        }
+
+        public List<Vector2> summon_locs(SummonId summonId)
+        {
+            Global.game_map.add_temp_unit(team, Loc, (int)summonId, 0, "summon_temp");
+            List<Vector2> result = new List<Vector2>();
+            foreach (Vector2 offset in new Vector2[] { new Vector2(0, 1), new Vector2(0, -1), new Vector2(1, 0), new Vector2(-1, 0) })
+                if (!Global.game_map.is_off_map(offset + Loc))
+                    if (!Global.game_map.is_blocked(offset + Loc, id))
+                        if (Pathfind.passable(Global.game_map.last_added_unit, offset + Loc))
+                            result.Add(offset + Loc);
+            Global.game_map.completely_remove_unit(Global.game_map.last_added_unit.id);
+            return result;
+        }
+        #endregion
+
+        // Skills: Swap
+        public void swap(int targetID)
+        {
+            Game_Unit target = Global.game_map.units[targetID];
+
+            Vector2 unit_loc = loc;
+            Vector2 target_loc = target.loc;
+
+            force_loc(target_loc);
+            target.force_loc(unit_loc);
+
+
+            wait(true);
+        }
+        public List<int> swap_targets()
+        {
+            return allies_in_range(5);
+        }
+
+        public HashSet<Vector2> swap_range()
+        {
+            HashSet<Vector2> range = Pathfind.get_range_around(new HashSet<Vector2> { Loc }, 5, 0, true);
+            return range;
+        }
+
+        // Skills: Teleport
+
+        internal bool HasTeleported;
+        public void teleport(int teleportTarget)
+        {
+            HasTeleported = true;
+            force_loc(teleport_vector2_from_int(teleportTarget));
+            wait(true);
+        }
+
+        public Vector2 teleport_vector2_from_int(int teleportTarget)
+        {
+            int x = teleportTarget % Global.game_map.width;
+            int y = teleportTarget / Global.game_map.width;
+            Vector2 target_loc = new Vector2(x, y);
+            return target_loc;
+        }
+        public HashSet<Vector2> teleport_tiles()
+        {
+            HashSet<Vector2> candidate_tiles = Global.game_map.tiles_in_range_of_location(loc, 7);
+            HashSet<Vector2> result = new HashSet<Vector2> { };
+            foreach(Vector2 tile in candidate_tiles)
+            {
+                if (Pathfind.passable(this, tile) && !Global.game_map.is_off_map(tile) && !Global.game_map.is_blocked(tile, id))
+                    result.Add(tile);
+            }
+
+            return result;
+            //need to check each tile and remove any forbidden tiles
+        }
+
+        // Skills: Mass Slow
+
+        internal bool HasUsedMassSlow;
+
+        public void mass_slow(int mass_slow_target_tile)
+        {
+            HasUsedMassSlow = true;
+            foreach (Game_Unit unit in mass_slow_targets(mass_slow_target_tile))
+            {
+                unit.state_change(new List<KeyValuePair<int, bool>>{ new KeyValuePair<int, bool>(5, true)});
+            }
+            wait(true);
+        }
+
+        public HashSet<Vector2> mass_slow_tiles()
+        {
+
+            HashSet<Vector2> result = Global.game_map.tiles_in_range_of_location(loc, mass_slow_range);
+            HashSet<Vector2> points_that_hit_enemies = new HashSet<Vector2> { };
+            foreach(int id in all_enemies())
+            {
+                Game_Unit unit = Global.game_map.units[id];
+                points_that_hit_enemies.UnionWith(Global.game_map.tiles_in_range_of_location(unit.loc, mass_slow_aoe_radius));
+            }
+
+            result.IntersectWith(points_that_hit_enemies);
+            return result;
+        }
+        public HashSet<Vector2> mass_slow_aoe_tiles()
+        {
+            int radius = mass_slow_aoe_radius;
+            HashSet<Vector2> result = new HashSet<Vector2> { };
+            foreach (int a in Enumerable.Range(-radius, radius * 2 + 1))
+            {
+                int b_range = radius - Math.Abs(a);
+                foreach (int b in Enumerable.Range(-b_range, b_range * 2 + 1))
+                //foreach (int b in Enumerable.Range(-radius, radius * 2 + 1))
+                {
+                    result.Add(16 * new Vector2(a, b));
+                }
+            }
+            return result;
+        }
+        public HashSet<Vector2> mass_slow_range_tiles()
+        {
+            HashSet<Vector2> result = Global.game_map.tiles_in_range_of_location(loc, mass_slow_range);
+            return result;
+        }
+
+        public int mass_slow_range {get { return 7; }}
+        public int mass_slow_aoe_radius { get { return 1; } }
+
+        public HashSet<Game_Unit> mass_slow_targets(int mass_slow_target_tile)
+        {
+            Vector2 mass_slow_target_vector = teleport_vector2_from_int(mass_slow_target_tile);
+            HashSet<Game_Unit> result = new HashSet<Game_Unit> { };
+            foreach(Game_Unit unit in Global.game_map.units_in_range_of_location(mass_slow_target_vector, mass_slow_aoe_radius))
+            {
+                if(is_attackable_team(unit))
+                {
+                    result.Add(unit);
+                }
+            }
+            return result;
+        }
+
         // Skills: Dash
         #region Dash
         internal bool DashActivated { get; private set; }
@@ -1322,6 +2261,110 @@ namespace Tactile
             Global.game_map.remove_updated_move_range(Id);
         }
         #endregion
+
+        // Skills: Dash (Jasper)
+        #region JDash
+        internal bool JDashActivated { get; private set; }
+        private Vector2 JDashPrevLoc;
+        private int JDashTempMoved;
+        public void activate_jdash()
+        {
+            JDashActivated = true;
+            JDashPrevLoc = Prev_Loc;
+            JDashTempMoved = Temp_Moved;
+            Temp_Moved = Moved_So_Far;
+
+            Global.game_map.remove_updated_move_range(Id);
+            update_move_range();
+
+            open_move_range();
+        }
+
+        public void cancel_jdash()
+        {
+            JDashActivated = false;
+            Prev_Loc = JDashPrevLoc;
+            Temp_Moved = JDashTempMoved;
+
+            Global.game_map.remove_updated_move_range(Id);
+        }
+
+        public HashSet<Vector2> jdash_range()
+        {
+
+            var map = new Pathfinding.UnitMovementMap.Builder()
+                .Build(Id);
+            var pathfinder = map.Pathfind();
+            HashSet<Vector2> result = pathfinder.get_range(loc, loc, mov-Temp_Moved+3);
+
+            return result;
+        }
+
+        #endregion
+
+
+        // Skills: Transform
+        #region transform
+        internal bool HasTransformed;
+        internal bool DTransformActivated;
+        
+        private int RemainingDTransformTurns = 3;
+        private int DTransformTempMoved;
+        public void activate_dtransform()
+        {
+            DTransformActivated = true;
+            actor.DTransformActive = true;
+            HasTransformed = true;
+            //RemainingDTransformTurns = 3;
+
+            DTransformTempMoved = Temp_Moved;
+
+            refresh_sprite();
+            Global.game_map.remove_updated_move_range(Id);
+
+            update_move_range();
+
+            actor.setup_items(false); // equip dragonstone
+
+            hp += actor.dtransform_stat_bonus(Stat_Labels.Hp);
+
+            open_move_range();
+        }
+
+        public void revert_dtransform()
+        {
+
+
+            actor.DTransformActive = false;
+            refresh_sprite();
+            if (hp > maxhp)
+                hp = maxhp;
+
+            actor.setup_items(false);
+
+            update_move_range();
+        }
+
+        public void reset_dtransform()
+        {
+            if (actor.class_id == 109 || actor.class_id == 110)
+            {
+                DTransformActivated = false;
+                actor.DTransformActive = false;
+                HasTransformed = false;
+            }
+            
+
+        }
+
+        #endregion
+        // Skills: Galeforce
+        internal bool galeforce_used_this_turn;
+        public void activate_galeforce()
+        {
+            refresh_unit();
+            galeforce_used_this_turn = true;
+        }
 
         readonly static Dictionary<int, Vector2> COMMAND_DIRS = new Dictionary<int, Vector2> {
             { 2, new Vector2(0, 1) }, { 4, new Vector2(-1, 0) }, { 6, new Vector2(1, 0) }, { 8, new Vector2(0, -1) } };
@@ -1631,6 +2674,36 @@ namespace Tactile
 
                 return true;
             }
+            // Skills: JDash
+            if (JDashActivated)
+            {
+                JDashActivated = false;
+                Prev_Loc = JDashPrevLoc;
+                Temp_Moved = JDashTempMoved;
+
+                if (Input.ControlScheme == ControlSchemes.Buttons)
+                {
+                    Global.player.force_loc(Loc);
+                    Global.player.instant_move = true;
+                }
+
+                Global.game_map.remove_updated_move_range(Id);
+                update_move_range(Prev_Loc, Prev_Loc);
+
+                Global.game_map.clear_move_range();
+                Global.game_map.show_move_range(Id);
+                Global.game_map.show_attack_range(Id);
+
+                Global.game_system.Menu_Canto &= ~Canto_Records.JDash;
+
+                Global.game_map.move_range_visible = false;
+                Global.game_temp.menu_call = true;
+                Global.game_temp.unit_menu_call = true;
+
+                return true;
+            }
+
+
             return false;
         }
 
@@ -1643,6 +2716,20 @@ namespace Tactile
 
                 DashActivated = false;
             }
+
+            // Skills: Jdash
+            if (JDashActivated)
+            {
+                Temp_Moved += JDashTempMoved;
+
+                JDashActivated = false;
+            }
+            // Skills: Transform
+            if (DTransformActivated)
+            {
+                DTransformActivated = false;
+            }
+
         }
         #endregion
 
@@ -1664,13 +2751,14 @@ namespace Tactile
             return n;
         }
 
+
         public int pow_bonus_display
         {
             get
             {
                 int n = stat_bonus(Stat_Labels.Pow);
                 // Skills: Knife
-                if (actor.has_skill("KNIFE"))
+                if (actor.has_skill("KNIFE") || actor.has_skill("POISON_KNIFE"))
                     if (actor.weapon != null && actor.weapon.main_type().Name == "Sword" && !actor.weapon.is_magic())
                     {
                         int base_pow = stat(Stat_Labels.Pow) - stat_bonus(Stat_Labels.Pow);
@@ -1697,6 +2785,46 @@ namespace Tactile
                     if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
                         n += Convert.ToInt32(name.Substring(4, name.Length - 4));
                 }
+                // Skills: Str-
+                if (actor.weapon != null)
+                {
+                    if (!actor.weapon.is_magic())
+                    {
+                        foreach (int skill_id in actor.all_skills
+                            .Where(x => Global.data_skills[x].Abstract.substring(0, 4) == "STR-"))
+                        {
+                            double str_test;
+                            string name = Global.data_skills[skill_id].Abstract;
+                            if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
+                                n -= Convert.ToInt32(name.Substring(4, name.Length - 4));
+                        }
+                    }
+                }
+                // Skills: Str+
+                if (actor.weapon != null)
+                {
+                    if (!actor.weapon.is_magic())
+                    {
+                        foreach (int skill_id in actor.all_skills
+                            .Where(x => Global.data_skills[x].Abstract.substring(0, 4) == "STR+"))
+                        {
+                            double str_test;
+                            string name = Global.data_skills[skill_id].Abstract;
+                            if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
+                                n += Convert.ToInt32(name.Substring(4, name.Length - 4));
+                        }
+                    }
+                }
+
+                // Skills: Resourceful
+                if (actor.has_skill("RESOURCEFUL") && actor.weapon != null)
+                {
+                    if(actor.weapon.is_magic())
+                    {
+                        n += 2;
+                    }
+                }
+                
                 // Skills: Affinity+
                 affinity_stat_boost(ref n, Stat_Labels.Pow);
                 // Skills: Guts
@@ -1711,7 +2839,7 @@ namespace Tactile
                         n += 2;
                 // Skills: Fire Stone
                 if (actor.has_skill("FIRESTONE"))
-                    n += 10;
+                    n += actor.dtransform_stat_bonus(Stat_Labels.Pow);
                 return n;
             }
         }
@@ -1737,7 +2865,7 @@ namespace Tactile
                     n += ((actor.maxhp - actor.hp) / 10);
                 // Skills: Fire Stone
                 if (actor.has_skill("FIRESTONE"))
-                    n += 10;
+                    n += actor.dtransform_stat_bonus(Stat_Labels.Skl);
                 return n;
             }
         }
@@ -1773,11 +2901,23 @@ namespace Tactile
                     if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
                         n += Convert.ToInt32(name.Substring(4, name.Length - 4));
                 }
+                // Skills: Spd-
+                foreach (int skill_id in actor.all_skills
+                    .Where(x => Global.data_skills[x].Abstract.substring(0, 4) == "SPD-"))
+                {
+                    double str_test;
+                    string name = Global.data_skills[skill_id].Abstract;
+                    if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
+                        n -= Convert.ToInt32(name.Substring(4, name.Length - 4));
+                }
                 // Skills: Affinity+
                 affinity_stat_boost(ref n, Stat_Labels.Spd);
                 // Skills: El's Passage
                 if (actor.has_skill("EL"))
                     n += 5;
+                // Skills: Fire Stone
+                if (actor.has_skill("FIRESTONE"))
+                    n += actor.dtransform_stat_bonus(Stat_Labels.Spd);
                 return n;
             }
         }
@@ -1795,6 +2935,15 @@ namespace Tactile
                     string name = Global.data_skills[skill_id].Abstract;
                     if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
                         n += Convert.ToInt32(name.Substring(4, name.Length - 4));
+                }
+                // Skills: Lck-
+                foreach (int skill_id in actor.all_skills
+                    .Where(x => Global.data_skills[x].Abstract.substring(0, 4) == "LCK-"))
+                {
+                    double str_test;
+                    string name = Global.data_skills[skill_id].Abstract;
+                    if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
+                        n -= Convert.ToInt32(name.Substring(4, name.Length - 4));
                 }
                 // Skills: Affinity+
                 affinity_stat_boost(ref n, Stat_Labels.Lck);
@@ -1830,6 +2979,15 @@ namespace Tactile
                     if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
                         n += Convert.ToInt32(name.Substring(4, name.Length - 4));
                 }
+                // Skills: Def-
+                foreach (int skill_id in actor.all_skills
+                    .Where(x => Global.data_skills[x].Abstract.substring(0, 4) == "DEF-"))
+                {
+                    double str_test;
+                    string name = Global.data_skills[skill_id].Abstract;
+                    if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
+                        n -= Convert.ToInt32(name.Substring(4, name.Length - 4));
+                }
                 // Skills: Affinity+
                 affinity_stat_boost(ref n, Stat_Labels.Def);
                 // Skills: Focus
@@ -1838,7 +2996,7 @@ namespace Tactile
                         n += 2;
                 // Skills: Fire Stone
                 if (actor.has_skill("FIRESTONE"))
-                    n += 20;
+                    n += actor.dtransform_stat_bonus(Stat_Labels.Def);
                 return n;
             }
         }
@@ -1872,7 +3030,7 @@ namespace Tactile
                 affinity_stat_boost(ref n, Stat_Labels.Res);
                 // Skills: Fire Stone
                 if (actor.has_skill("FIRESTONE"))
-                    n += 10;
+                    n += actor.dtransform_stat_bonus(Stat_Labels.Res);
                 return n;
             }
         }
@@ -2059,6 +3217,9 @@ namespace Tactile
         private int mov_plus_skill()
         {
             int n = 0;
+            // Skills: Freeze
+            if (actor.has_skill("FREEZE"))
+                return -(base_mov + temporary_stat_buff(Buffs.Mov));
             // Skills: Mov+
             foreach (int skill_id in actor.all_skills
                 .Where(x => Global.data_skills[x].Abstract.substring(0, 4) == "MOV+"))
@@ -2068,12 +3229,27 @@ namespace Tactile
                 if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
                     n += Convert.ToInt32(name.Substring(4, name.Length - 4));
             }
+            // Skills: Mov-
+            foreach (int skill_id in actor.all_skills
+                .Where(x => Global.data_skills[x].Abstract.substring(0, 4) == "MOV-"))
+            {
+                double str_test;
+                string name = Global.data_skills[skill_id].Abstract;
+                if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
+                    n -= Convert.ToInt32(name.Substring(4, name.Length - 4));
+            }
             // Skills: Flight
             if (actor.has_skill("FLIGHT") && !is_weighted_by_ally)
                 n += 2;
             // Skills: Celerity
             if (actor.has_skill("CELERITY"))
                 n += 2;
+            // Skills: Swift Wing
+            if (actor.has_skill("SWIFT_WINGS"))
+                n += 1;
+            // Skills: Running Wild
+            if (actor.has_skill("RUNNING_WILD"))
+                n += 1;
             // Skills: El's Passage
             if (actor.has_skill("EL"))
                 n += 2;
@@ -2118,15 +3294,57 @@ namespace Tactile
                 if (weapon.main_type().Name == "Bow" && !weapon.Ballista())
                     return max_range + 1;
             // Skills: Knife
-            if (actor.has_skill("KNIFE"))
+            if (actor.has_skill("KNIFE") || actor.has_skill("POISON_KNIFE"))
                 if (!weapon.is_magic() && weapon.main_type().Name == "Sword" && max_range == 1)
                     return 2;
             // Skills: Kamaitachi
             if (actor.has_skill("KAMAI"))
                 if (!weapon.is_magic() && weapon.Max_Range == 1)
                     return 2;
+            // Skills: Meddler
+            if (actor.has_skill("MEDDLER"))
+                if (weapon.main_type().Name == "Staff")
+                    return max_range + 1;
+            // Skills: Magic Range + 1
+            if (actor.has_skill("MAGIC_RANGE+1"))
+                if (weapon.is_magic())
+                    return max_range + 1;
+            // Skills: Dark Reach
+            if (actor.has_skill("DARK_REACH"))
+                if (weapon.is_attack_staff())
+                    return max_range + 5;
+
             return max_range;
         }
+
+        
+
+        // Skills: Adaptable
+        #region Adaptable
+        private int Adaptable_Equip = -1;
+
+        private int get_adaptable_weapon_equip(Game_Unit attacker, Data_Weapon weapon1, int distance)
+        {
+            List<KeyValuePair<int, float>> weapons_that_can_counter = new List<KeyValuePair<int, float>> { };
+            for (int i = 0; i < Global.ActorConfig.NumItems; i++)
+                if (can_counter(attacker, weapon1, distance, i))
+                {
+                    Data_Weapon weapon2 = Global.data_weapons[items[i].Id];
+                    float unit_dpr = Combat.damage_per_round(this, attacker, new List<int> { distance }, i)[0];
+                    float enemy_dpr = Combat.damage_per_round(this, attacker, new List<int> { distance }, i)[1];
+                    weapons_that_can_counter.Add(new KeyValuePair<int, float>(i, unit_dpr - enemy_dpr));
+                }
+            if(weapons_that_can_counter.Count > 0 )
+            {
+                return weapons_that_can_counter.OrderByDescending(x => x.Value).First().Key;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+
+        #endregion
 
         private int Anticipation_Equip = -1;
         public void target_unit(Game_Unit attacker, Data_Weapon weapon1, int distance)
@@ -2141,6 +3359,16 @@ namespace Tactile
                             actor.equip(i + 1);
                             break;
                         }
+
+            // Skills: Adaptable
+            Adaptable_Equip = actor.equipped;
+            if (actor.has_skill("ADAPTABLE") && !attacker.actor.has_skill("ADAPTABLE"))
+                if (!weapon1.No_Counter)
+                {
+                    int adaptable_check = get_adaptable_weapon_equip(attacker, weapon1, distance);
+                    if (adaptable_check != -1)
+                        actor.equip(get_adaptable_weapon_equip(attacker, weapon1, distance) + 1);
+                }
         }
 
         public void accept_targeting()
@@ -2149,6 +3377,11 @@ namespace Tactile
             if (actor.has_skill("ANTICI") && Anticipation_Equip != -1)
                 actor.organize_items();
             Anticipation_Equip = -1;
+
+            // Skills Adaptable
+            if (actor.has_skill("ADAPTABLE") && Adaptable_Equip != -1)
+                actor.organize_items();
+            Adaptable_Equip = -1;
         }
 
         public void cancel_targeted()
@@ -2156,6 +3389,10 @@ namespace Tactile
             // Skills: Anticipation
             actor.equip(Anticipation_Equip);
             Anticipation_Equip = -1;
+
+            // Skills: Adaptable
+            actor.equip(Adaptable_Equip);
+            Adaptable_Equip = -1;
         }
 
         #region MOVE COST MODS
@@ -2170,11 +3407,19 @@ namespace Tactile
                     { 16, new Tuple<bool, int>(true, 5) }, // River
                     { 17, new Tuple<bool, int>(false, -1) } // Hill
                 }},
-                { "SEAMV", new Dictionary<int, Tuple<bool, int>> {
+                { "TRAVERSAL", new Dictionary<int, Tuple<bool, int>> {
                     { 16, new Tuple<bool, int>(true, 2) }, // River
                     { 21, new Tuple<bool, int>(true, 2) }, // Sea
                     { 22, new Tuple<bool, int>(true, 3) }, // Lake
                     { 60, new Tuple<bool, int>(true, 3) } // Water
+                }},
+                { "SEAMV", new Dictionary<int, Tuple<bool, int>> {
+                    { 16, new Tuple<bool, int>(true, 2) }, // River
+                    { 21, new Tuple<bool, int>(true, 2) }, // Sea
+                    { 22, new Tuple<bool, int>(true, 3) }, // Lake
+                    { 60, new Tuple<bool, int>(true, 3) }, // Water
+                    { 17, new Tuple<bool, int>(false, -1) }, // Hill
+                    { 18, new Tuple<bool, int>(true, 4) } // Peak
                 }},
                 { "MNTNMV", new Dictionary<int, Tuple<bool, int>> {
                     { 17, new Tuple<bool, int>(false, -1) }, // Hill
@@ -2215,6 +3460,36 @@ namespace Tactile
                 if (plains_cost > 0)
                     return Math.Min(plains_cost, cost);
             }
+            // Skills: Running Wild
+            if (actor.has_skill("RUNNING_WILD") && cost > 0)
+            {
+                // Get the plains cost of this tile in this weather
+                int plains_cost = Global.game_map.terrain_cost(this, 1);
+                // Return whichever is lower
+                if (plains_cost > 0)
+                    return Math.Min(plains_cost, cost);
+            }
+
+            // This might actually be pretty slow //gooseish
+            // Skills: Clear the Way
+            if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
+                foreach (Game_Unit unit in Global.game_map.units_in_range_of_location(target_loc, 1))
+                {
+                    if (unit.actor.has_skill("CLEAR_THE_WAY") && !is_attackable_team(unit) && (this != unit))
+                    {
+                        // Get the plains cost of this tile in this weather
+                        int plains_cost = Global.game_map.terrain_cost(this, 1);
+                        // Return whichever is lower
+                        if (plains_cost > 0)
+                            return Math.Min(plains_cost, cost);
+                    }
+                    // Skills: Ground Control
+                    if (unit.actor.has_skill("GROUND_CONTROL") && is_attackable_team(unit))
+                    {
+                        return cost + 1;
+                    }
+
+                }
             return cost;
         }
 
@@ -2291,14 +3566,16 @@ namespace Tactile
                 new Color(48, 16, 64, 96),
                 new Color(32, 16, 40, 40), 3f) },
             //{ "DREAD", new UnitAura("DREAD", new Color(40, 16, 48, 104)) },
+            /*
             { "PSTG", new UnitAura("PSTG",
-                new Color(48, 32, 8, 40),
-                new Color(72, 56, 16, 40), 3f) }
+                new Color(48, 32, 8, 10),
+                new Color(72, 56, 16, 10), 3f) }
+            */
             //{ "PSTG", new UnitAura("PSTG", new Color(72, 56, 16, 64)) }
         };
         public readonly static List<string> AURA_COLOR_ORDER = new List<string>{
             "DREAD",
-            "PSTG",
+            //"PSTG",
             "SANC"
         };
 
@@ -2311,8 +3588,10 @@ namespace Tactile
             if (actor.has_skill("DREAD"))
                 return true;
             // Skills: Prestige
+            /*
             if (actor.has_skill("PSTG"))
                 return true;
+            */
 
             return false;
         }
@@ -2369,6 +3648,9 @@ namespace Tactile
             // Skills: Renewal
             if (actor.has_skill("RENEW"))
                 n += (int)(actor.maxhp * 0.15f);
+            // Skills: Recover
+            if (actor.has_skill("RECOVER"))
+                n += (int)(actor.maxhp * 0.30f);
             // Skills: Provision
             if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
                 foreach (int id in units_in_range(1))
@@ -2377,6 +3659,17 @@ namespace Tactile
                     if (unit.actor.has_skill("PROVISION") && !is_attackable_team(unit))
                     {
                         n += 10;
+                        break;
+                    }
+                }
+            // Skills: Amaretsu
+            if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
+                foreach (int id in units_in_range(1))
+                {
+                    Game_Unit unit = Global.game_map.units[id];
+                    if (unit.actor.has_skill("AMARETSU") && !is_attackable_team(unit))
+                    {
+                        n += (int)(actor.maxhp * 0.20f);
                         break;
                     }
                 }
@@ -2403,6 +3696,55 @@ namespace Tactile
             if (actor.has_skill("VANT"))
                 return true;
             return false;
+        }
+        public List<int> status_immunity()
+        {
+            List<int> result = new List<int> { };
+
+            if(actor.has_skill("WARD"))
+            {
+                result.Add(2); //Silence
+                result.Add(3); //Sleep
+                result.Add(4); //Berserk
+                result.Add(5); //Slow
+
+                result.Add(21); //Burn
+                result.Add(22); //Chilled
+            }
+
+            return result;
+        }
+        public KeyValuePair<bool, double> counter_is_active(Data_Weapon attacker_weapon, int distance, Combat_Map_Object target)
+        {
+            // Skills: Counter
+            if (actor.has_skill("COUNTER"))
+                if (!attacker_weapon.is_magic() && distance < 2 && !is_active_team)
+                {
+                    return new KeyValuePair<bool, double>(true, 0.5);
+                }
+            // Skills: Counterspell
+            if (actor.has_skill("COUNTERSPELL") && !is_active_team)
+                if (attacker_weapon.is_magic())
+                {
+                    return new KeyValuePair<bool, double>(true, 0.5);
+                }
+            // Skills: Live to Serve
+            if (target.is_unit())
+            {
+                Game_Unit staffer = (target as Game_Unit);
+                if (staffer.actor.has_skill("LIVE_TO_SERVE") && staffer.actor.weapon.is_staff() && staffer.actor.weapon.Heals() && !is_attackable_team(staffer))
+                    return new KeyValuePair<bool, double>(true, 1);
+            }
+            
+            return new KeyValuePair<bool, double>(false, -1); ;
+        }
+
+        public void miss_skills(ref Attack_Result result, Game_Unit target)
+        {
+            // Skills: Saving_Face
+            if(actor.has_skill("SAVING_FACE"))
+                if(is_active_team)
+                    result.state_change_attacker.Add(new KeyValuePair<int, bool>(27, true)); // Add the saving face status
         }
     }
 

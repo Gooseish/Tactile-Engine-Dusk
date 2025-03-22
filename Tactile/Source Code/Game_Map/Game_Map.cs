@@ -259,7 +259,7 @@ namespace Tactile
             Thief_Escape_Points.read(reader);
             if (Global.LOADED_VERSION.older_than(0, 5, 0, 7)) // This is a suspend load, so this isn't needed for public release //Debug
             {
-                List<Dictionary<Vector2, Vector2>> old_escape_points = new List<Dictionary<Vector2,Vector2>>();
+                List<Dictionary<Vector2, Vector2>> old_escape_points = new List<Dictionary<Vector2, Vector2>>();
                 old_escape_points.read(reader);
                 EscapePoints = Enumerable.Range(0, old_escape_points.Count)
                     .SelectMany(team => old_escape_points[team].Select(escape_loc => new EscapePoint(escape_loc.Key, escape_loc.Value, team, -1, "")))
@@ -372,7 +372,7 @@ namespace Tactile
                     return !this.active_team_ready_units.Any();
             }
         }
-        
+
         public bool ready_movable_units
         {
             get
@@ -620,7 +620,33 @@ namespace Tactile
                 .ToDictionary(p => p.Key, p => p.Value);
             }
         }
+
 #endif
+
+        public List<Game_Unit> units_in_range_of_location(Vector2 Loc, int range)
+        {
+            List<Game_Unit> result = new List<Game_Unit> { };
+            foreach(Vector2 location in tiles_in_range_of_location(Loc, range))
+            {
+                if(get_unit(location) != null)
+                    result.Add(get_unit(location));
+            }
+            return result;
+        }
+
+        public HashSet<Vector2> tiles_in_range_of_location(Vector2 Loc, int range)
+        {
+            HashSet<Vector2> result = new HashSet<Vector2> { };
+            for(int x = -range; x <= range; x++)
+            {
+                int ymax = range - Math.Abs(x);
+                for(int y = -ymax; y<=ymax; y++)
+                {
+                    result.Add(Loc + new Vector2(x, y));
+                }
+            }
+            return result;
+        }
 
         public bool fow
         {
@@ -3687,6 +3713,16 @@ namespace Tactile
         internal void add_vision_point(Fow_View_Object visionPoint)
         {
             VisionPoints.Add(visionPoint);
+        }
+
+
+        // Skills: Transform
+        public void reset_transform()
+        {
+            foreach (int id in this.units.Keys)
+            {
+                this.units[id].reset_transform();
+            }
         }
     }
 }

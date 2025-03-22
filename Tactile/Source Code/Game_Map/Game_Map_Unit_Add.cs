@@ -55,6 +55,8 @@ namespace Tactile
         }
 
         #region Add Units
+        
+
         protected void add_unit(Vector2 loc, Data_Unit data)
         {
             add_unit(loc, data, data.identifier);
@@ -287,6 +289,14 @@ namespace Tactile
                 return false;
             add_unit(loc, Unit_Data.Reinforcements[index], identifier, team);
             return true;
+        }
+
+        // Skills: Summon
+        public void add_summoned_unit(Vector2 loc, Data_Unit data)
+        {
+            add_unit(loc, data);
+            last_added_unit.fix_unit_location(true);
+            
         }
         #endregion
 

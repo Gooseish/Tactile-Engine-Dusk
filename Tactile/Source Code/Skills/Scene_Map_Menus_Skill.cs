@@ -68,6 +68,83 @@ namespace Tactile
                 }
                 sprite_batch.End();
             }
+            // Skills: Rally
+            if (Global.game_temp.temp_skill_ranges.ContainsKey("RALLY") &&
+                UnitMenu.ShowSkillRange("RALLY"))
+            {
+                sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                int opacity = 144;
+                Color color = new Color(opacity, opacity, opacity, opacity);
+                foreach (Vector2 loc in Global.game_temp.temp_skill_ranges["RALLY"])
+                {
+                    sprite_batch.Draw(Staff_Range_Texture,
+                        loc * TILE_SIZE + move_range_draw_vector() - Global.game_map.display_loc + new Vector2(0, width - timer),
+                        rect, color);
+                }
+                sprite_batch.End();
+            }
+            // Skills: Swap
+            if (Global.game_temp.temp_skill_ranges.ContainsKey("SWAP") &&
+                UnitMenu.ShowSkillRange("SWAP"))
+            {
+                sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                int opacity = 144;
+                Color color = new Color(opacity, opacity, opacity, opacity);
+                foreach (Vector2 loc in Global.game_temp.temp_skill_ranges["SWAP"])
+                {
+                    sprite_batch.Draw(Move_Range_Texture,
+                        loc * TILE_SIZE + move_range_draw_vector() - Global.game_map.display_loc + new Vector2(0, width - timer),
+                        rect, color);
+                }
+                sprite_batch.End();
+            }
+            // Skills: Teleport
+            if (Global.game_temp.temp_skill_ranges.ContainsKey("TELEPORT") &&
+                UnitMenu.ShowSkillRange("TELEPORT"))
+            {
+                sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                int opacity = 144;
+                Color color = new Color(opacity, opacity, opacity, opacity);
+                foreach (Vector2 loc in Global.game_temp.temp_skill_ranges["TELEPORT"])
+                {
+                    sprite_batch.Draw(Move_Range_Texture,
+                        loc * TILE_SIZE + move_range_draw_vector() - Global.game_map.display_loc + new Vector2(0, width - timer),
+                        rect, color);
+                }
+                sprite_batch.End();
+            }
+            // Skills: Mass Slow
+            if (Global.game_temp.temp_skill_ranges.ContainsKey("MASS_SLOW") &&
+                UnitMenu.ShowSkillRange("MASS_SLOW"))
+            {
+                sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                int opacity = 144;
+                Color color = new Color(opacity, opacity, opacity, opacity);
+                foreach (Vector2 loc in Global.game_temp.temp_skill_ranges["MASS_SLOW"])
+                {
+                    sprite_batch.Draw(Attack_Range_Texture,
+                        loc * TILE_SIZE + move_range_draw_vector() - Global.game_map.display_loc + new Vector2(0, width - timer),
+                        rect, color);
+                }
+                sprite_batch.End();
+            }
+
+
+            // Skills: JDASH
+            if (Global.game_temp.temp_skill_ranges.ContainsKey("JDASH") &&
+                UnitMenu.ShowSkillRange("JDASH"))
+            {
+                sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                int opacity = 144;
+                Color color = new Color(opacity, opacity, opacity, opacity);
+                foreach (Vector2 loc in Global.game_temp.temp_skill_ranges["JDASH"])
+                {
+                    sprite_batch.Draw(Move_Range_Texture,
+                        loc * TILE_SIZE + move_range_draw_vector() - Global.game_map.display_loc + new Vector2(0, width - timer),
+                        rect, color);
+                }
+                sprite_batch.End();
+            }
             // Skills: Masteries
             for (int i = 0; i < Game_Unit.MASTERIES.Count; i++)
             {
