@@ -2283,8 +2283,13 @@ namespace Tactile
         {
             get
             {
+                if (is_summon)
+                {
+                    return false;
+                }
                 bool has_items = actor.has_items;
                 bool can_trade = false;
+                
                 // If rescuing, check for trading with rescued unit
                 if (is_rescuing)
                 {
@@ -2298,7 +2303,7 @@ namespace Tactile
                     foreach (int id in allies_in_range(1))
                     {
                         Game_Unit other_unit = Global.game_map.units[id];
-                        if (different_team(other_unit))
+                        if (different_team(other_unit) || other_unit.is_summon)
                             continue;
                         if (other_unit.actor.has_no_items && !has_items)
                         {

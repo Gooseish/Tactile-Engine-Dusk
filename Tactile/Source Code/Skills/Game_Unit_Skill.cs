@@ -1999,6 +1999,11 @@ namespace Tactile
 
         // Skills: Summon
         #region summon
+        public bool is_summon
+        {
+            get { return actor.is_summon; }
+        }
+
         internal bool HasSummoned;
 
         public SummonId attemptedSummon;

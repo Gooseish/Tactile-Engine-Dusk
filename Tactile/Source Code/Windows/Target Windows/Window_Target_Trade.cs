@@ -61,7 +61,7 @@ namespace Tactile.Windows.Target
             foreach (int id in temp_targets)
             {
                 Game_Unit other_unit = Global.game_map.units[id];
-                if (unit.different_team(other_unit))
+                if (unit.different_team(other_unit) || other_unit.is_summon)
                     continue;
 
                 if (has_items || other_unit.actor.has_items)
