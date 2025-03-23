@@ -62,6 +62,7 @@ namespace Tactile
         // Map Effect
         protected Map_Effect Unit_Map_Effect;
         protected Map_Effect Unit_Map_Effect_2;
+        protected Map_Effect Unit_Map_Effect_3;
         // Popup
         private Popup Map_Popup;
         // Game Over
@@ -119,6 +120,7 @@ namespace Tactile
             Turn_Change = null;
             Unit_Map_Effect = null;
             Unit_Map_Effect_2 = null;
+            Unit_Map_Effect_3 = null;
             Map_Popup = null;
             clear_graphic_objects();
             if (reset_content)
@@ -796,6 +798,17 @@ namespace Tactile
                 Unit_Map_Effect_2.texture = Global.Content.Load<Texture2D>(@"Graphics/Pictures/" + name);
             Unit_Map_Effect_2.stereoscopic = Config.MAP_STATUS_ICON_DEPTH;
         }
+        public void set_map_effect_3(Vector2 loc, int type, int id)
+        {
+            Unit_Map_Effect_3 = new Map_Effect(type, id);
+            Unit_Map_Effect_3.loc = loc * TILE_SIZE + new Vector2(TILE_SIZE, TILE_SIZE) / 2;
+            string name = Unit_Map_Effect_3.filename;
+            if (name == "")
+                Unit_Map_Effect_3 = null;
+            else
+                Unit_Map_Effect_3.texture = Global.Content.Load<Texture2D>(@"Graphics/Pictures/" + name);
+            Unit_Map_Effect_3.stereoscopic = Config.MAP_STATUS_ICON_DEPTH;
+        }
 
         public void set_ballista_effect(Vector2 loc, Vector2 dest_loc)
         {
@@ -1025,6 +1038,12 @@ namespace Tactile
                 Unit_Map_Effect_2.update();
                 if (Unit_Map_Effect_2.finished)
                     Unit_Map_Effect_2 = null;
+            }
+            if (Unit_Map_Effect_3 != null)
+            {
+                Unit_Map_Effect_3.update();
+                if (Unit_Map_Effect_3.finished)
+                    Unit_Map_Effect_3 = null;
             }
             if (Map_Popup != null)
             {
@@ -2595,6 +2614,8 @@ namespace Tactile
                 Unit_Map_Effect.draw(sprite_batch, Global.game_map.display_loc, camera.matrix);
             if (Unit_Map_Effect_2 != null)
                 Unit_Map_Effect_2.draw(sprite_batch, Global.game_map.display_loc, camera.matrix);
+            if (Unit_Map_Effect_3 != null)
+                Unit_Map_Effect_3.draw(sprite_batch, Global.game_map.display_loc, camera.matrix);
             sprite_batch.End();
         }
 

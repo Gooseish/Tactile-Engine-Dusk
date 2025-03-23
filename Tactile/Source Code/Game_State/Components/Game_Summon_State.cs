@@ -140,7 +140,30 @@ namespace Tactile.State
             switch (Summon_Timer)
             {
                 case 0:
-                    scene_map.set_map_effect(summon_destination + new Vector2(0, -1), 2, 1);
+
+                    List<Vector2> summonLoc_offsets = new List<Vector2> { };
+                    Vector2 offset = summon_destination - summoner.loc;
+                    double theta = 90 * Math.PI / 180;
+                    summonLoc_offsets.Add(new Vector2(offset.X * (float)Math.Cos(theta) - offset.Y * (float)Math.Sin(theta), offset.X * (float)Math.Sin(theta) + offset.Y * (float)Math.Cos(theta)));
+                    summonLoc_offsets.Add(new Vector2(offset.X * (float)Math.Cos(-theta) - offset.Y * (float)Math.Sin(-theta), offset.X * (float)Math.Sin(-theta) + offset.Y * (float)Math.Cos(-theta)));
+
+
+                    switch (summoner.attemptedSummon.Count)
+                    {
+                        case 2:
+                            scene_map.set_map_effect(summon_destination + summonLoc_offsets[0] + new Vector2(0, -1), 2, 1);
+                            scene_map.set_map_effect_2(summon_destination + summonLoc_offsets[1] + new Vector2(0, -1), 2, 1);
+                            break;
+                        case 3:
+                            scene_map.set_map_effect(summon_destination + summonLoc_offsets[0] + new Vector2(0, -1), 2, 1);
+                            scene_map.set_map_effect_3(summon_destination + summonLoc_offsets[1] + new Vector2(0, -1), 2, 1);
+                            scene_map.set_map_effect_2(summon_destination + new Vector2(0, -1), 2, 1);
+                            break;
+                        default:
+                            scene_map.set_map_effect(summon_destination + new Vector2(0, -1), 2, 1);
+                            break;
+                    }
+                    
                     Summon_Timer++;
                     break;
                 default:
