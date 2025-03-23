@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 using System.Collections;
-using Vector2Extension;
+using TactileVector2Extension;
 
 namespace Tactile.State
 {
@@ -40,7 +40,7 @@ namespace Tactile.State
             Summon_Phase = reader.ReadInt32();
             Summon_Timer = reader.ReadInt32();
             Summon_Id = reader.ReadInt32();
-            Summon_Destination.read(reader);
+            Summon_Destination = Summon_Destination.read(reader);
         }
         #endregion
 

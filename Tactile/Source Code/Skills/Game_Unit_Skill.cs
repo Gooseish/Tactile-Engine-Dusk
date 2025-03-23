@@ -12,6 +12,7 @@ using TactileStringExtension;
 using TactileVersionExtension;
 using TactileWeaponExtension;
 using Vector2Extension;
+using ListExtension;
 
 namespace Tactile
 {
@@ -35,6 +36,7 @@ namespace Tactile
             Mastery_Gauges.write(writer);
 
             writer.Write(HasSummoned);
+            AttemptedSummon.write(writer);
 
             writer.Write(HasTransformed);
             writer.Write(actor.DTransformActive);
@@ -71,6 +73,7 @@ namespace Tactile
                 Mastery_Gauges.read(reader);
             }
             HasSummoned = reader.ReadBoolean();
+            AttemptedSummon.read(reader);
 
             HasTransformed = reader.ReadBoolean();
             actor.DTransformActive = reader.ReadBoolean();
@@ -117,7 +120,7 @@ namespace Tactile
                     Mastery_Gauges[MASTERIES[i]] = 0;
             }
             // Skills: Volley
-            if(actor.has_skill("VOLLEY"))
+            if (actor.has_skill("VOLLEY"))
             {
                 if (is_active_team && actor.weapon != null && actor.weapon.main_type().Name == "Bow" && is_attackable_team(target))
                 {
@@ -125,7 +128,7 @@ namespace Tactile
                     foreach (int id in target.units_in_range(1))
                     {
                         Game_Unit unit = Global.game_map.units[id];
-                        if(is_attackable_team(unit))
+                        if (is_attackable_team(unit))
                         {
                             foes_in_volley_aoe.Add(unit);
                         }
@@ -135,7 +138,7 @@ namespace Tactile
                 }
             }
             // Skills: Disarm
-            if(actor.has_skill("DISARM"))
+            if (actor.has_skill("DISARM"))
             {
                 if (is_active_team && is_attackable_team(target) && !target.is_dead && target.actor.weapon != null)
                 {
@@ -147,9 +150,9 @@ namespace Tactile
                 }
             }
             // Skills: Indict
-            if(actor.has_skill("INDICT") && !target.dead)
+            if (actor.has_skill("INDICT") && !target.dead)
             {
-                if(!is_active_team)
+                if (!is_active_team)
                 {
                     if (is_attackable_team(target))
                         Global.game_state.call_skill_flash(id, target.id, "INDICT");
@@ -274,7 +277,7 @@ namespace Tactile
         public void onhit_skill_check(bool is_hit, Game_Unit target, int? distance)
         {
             deter_hit_skill_check(is_hit, target, distance);
-            
+
         }
 
         public void posthit_skill_check()
@@ -428,7 +431,7 @@ namespace Tactile
             //    return Global.skill_from_abstract("BASTION").Animation_Id;
             // Skills: Pavise
             //if (actor.pavise_activated)
-                //return Global.skill_from_abstract("BASTION").Animation_Id;
+            //return Global.skill_from_abstract("BASTION").Animation_Id;
             // Skills: Spiral Dive
             if (actor.sprldve_activated)
                 return Global.skill_from_abstract("SPRLDVE").Animation_Id;
@@ -524,7 +527,7 @@ namespace Tactile
             if (actor.has_skill("DARTING_BLOW"))
                 if (is_active_team && target != null)
                     return spd + 5;
-            
+
 
             return new Maybe<int>();
         }
@@ -613,7 +616,7 @@ namespace Tactile
                     skill_dmg += 3;
             // Skills: Momentum
             if (actor.has_skill("MOMENTUM"))
-                if(is_active_team)
+                if (is_active_team)
                     skill_dmg += Temp_Moved;
             // Skills: Merciless
             if (actor.has_skill("MERCILESS"))
@@ -637,7 +640,7 @@ namespace Tactile
                         break;
                     }
                 }
-            
+
 
 
 
@@ -675,7 +678,7 @@ namespace Tactile
             // Skills: Lethality
             if (!nihil(target))
             {
-                if(actor.lethality_activated)
+                if (actor.lethality_activated)
                 {
                     skill_dmg = target.maxhp;
                     target_def = 0;
@@ -734,7 +737,7 @@ namespace Tactile
                         n += 5;
                         break;
                     }
-                   
+
                 }
         }
 
@@ -842,7 +845,7 @@ namespace Tactile
             }
 
             // Skills: Gamble
-            if(actor.has_skill("GAMBLE"))
+            if (actor.has_skill("GAMBLE"))
             {
                 n -= 5;
             }
@@ -885,7 +888,7 @@ namespace Tactile
             Data_Weapon weapon, Game_Unit target, bool magic, int? distance)
         {
             // Skills: Critical +X
-            actor_crt += class_crt_bonus;         
+            actor_crt += class_crt_bonus;
             // Skills: Dreaded
             if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
                 foreach (int id in units_in_range(3))
@@ -1082,14 +1085,14 @@ namespace Tactile
         {
             int n = 0;
             // Skills: Dodge +X
-                foreach (int skill_id in actor.all_skills
-                    .Where(x => Global.data_skills[x].Abstract.substring(0, 5) == "DODGE"))
-                {
-                    double str_test;
-                    string name = Global.data_skills[skill_id].Abstract;
-                    if (double.TryParse(name.substring(5, name.Length - 5), out str_test))
-                        n += Convert.ToInt32(name.Substring(5, name.Length - 5));
-                }
+            foreach (int skill_id in actor.all_skills
+                .Where(x => Global.data_skills[x].Abstract.substring(0, 5) == "DODGE"))
+            {
+                double str_test;
+                string name = Global.data_skills[skill_id].Abstract;
+                if (double.TryParse(name.substring(5, name.Length - 5), out str_test))
+                    n += Convert.ToInt32(name.Substring(5, name.Length - 5));
+            }
             // Skills: Set's Litany
             if (actor.has_skill("SET"))
                 n += 15;
@@ -1182,7 +1185,7 @@ namespace Tactile
                 if (target.actor.deter_activated)
                     target.actor.deter_counter = !magic_attack && distance == 1;
 
-                
+
             }
             dmg = Math.Max(dmg, 0);
             return dmg;
@@ -1233,9 +1236,9 @@ namespace Tactile
             // look into it? //Yeti
 
             // Skills: Transmute
-            if(target.actor.has_skill("TRANSMUTE"))
+            if (target.actor.has_skill("TRANSMUTE"))
             {
-                if(result.hit && actor.weapon.is_magic() && is_active_team)
+                if (result.hit && actor.weapon.is_magic() && is_active_team)
                 {
                     KeyValuePair<int, bool> transmute = new KeyValuePair<int, bool>(24, true);
                     result.state_change.Add(transmute);
@@ -1316,7 +1319,7 @@ namespace Tactile
         private bool is_protected_from_doubling()
         {
             // Skills: Wary Fighter
-            if(actor.has_skill("WARY_FIGHTER"))
+            if (actor.has_skill("WARY_FIGHTER"))
                 return true;
             return false;
         }
@@ -1431,7 +1434,7 @@ namespace Tactile
         /// <summary>
         ///  Current charge rate of each mastery
         /// </summary>
-        private Dictionary<string, int> Mastery_Gauges = new Dictionary<string,int>();
+        private Dictionary<string, int> Mastery_Gauges = new Dictionary<string, int>();
 
         public IEnumerable<string> called_masteries
         {
@@ -1450,7 +1453,7 @@ namespace Tactile
 
         public void activate_masteries()
         {
-            foreach(string skill in MASTERIES)
+            foreach (string skill in MASTERIES)
                 if (mastery_called(skill))
                     switch (skill)
                     {
@@ -1717,7 +1720,7 @@ namespace Tactile
                 }
             }
         }
-        
+
         // Pavise
         private void pavise_prehit_def_skill_check(Game_Unit target)
         {
@@ -1742,7 +1745,7 @@ namespace Tactile
         {
             if (actor.has_skill("AEGIS"))
             {
-                List<string> weapon_types_aegis_works_against = (new List<string> { "Bow", "Fire", "Ice", "Thunder", "Wind", "Light", "Dark", "Dragonstone"});
+                List<string> weapon_types_aegis_works_against = (new List<string> { "Bow", "Fire", "Ice", "Thunder", "Wind", "Light", "Dark", "Dragonstone" });
                 string enemy_weapon_type = target.actor.weapon.main_type().Name;
                 if (valid_mastery_target("AEGIS", target, 1) && weapon_types_aegis_works_against.Contains(enemy_weapon_type))
                 {
@@ -1908,7 +1911,7 @@ namespace Tactile
         #region rally
         public bool has_rally
         {
-            get 
+            get
             {
                 if (actor.has_skill("RALLY_LUCK"))
                     return true;
@@ -1937,7 +1940,7 @@ namespace Tactile
             foreach (int id in units_in_range(2))
             {
                 Game_Unit unit = Global.game_map.units[id];
-                if(!is_attackable_team(unit))
+                if (!is_attackable_team(unit))
                 {
                     unit.actor.add_state(23);
                 }
@@ -2006,13 +2009,42 @@ namespace Tactile
 
         internal bool HasSummoned;
 
-        public SummonId attemptedSummon;
+        private List<int> AttemptedSummon = new List<int> { };
+        public List<SummonId> attemptedSummon
+        {
+            get { return AttemptedSummon.Select(x=>(SummonId)x).ToList(); }
+            set { AttemptedSummon = value.Select(x => (int)x).ToList(); }
+        }
         public void summon(Vector2 summonLoc)
         {
             HasSummoned = true;
 
+            List<Vector2> summonLoc_offsets = new List<Vector2> { };
 
-            Global.game_map.add_summoned_unit(summonLoc, SummonDataUnit(attemptedSummon));
+            Vector2 offset = summonLoc - Loc;
+            double theta = 90 * Math.PI / 180;
+            summonLoc_offsets.Add(new Vector2(offset.X * (float)Math.Cos(theta) - offset.Y * (float)Math.Sin(theta), offset.X * (float)Math.Sin(theta) + offset.Y * (float)Math.Cos(theta)));
+            summonLoc_offsets.Add(new Vector2(offset.X * (float)Math.Cos(-theta) - offset.Y * (float)Math.Sin(-theta), offset.X * (float)Math.Sin(-theta) + offset.Y * (float)Math.Cos(-theta)));
+
+            switch (attemptedSummon.Count)
+            {
+                case 2:
+
+                    Global.game_map.add_summoned_unit(summonLoc + summonLoc_offsets[0], SummonDataUnit(attemptedSummon[0]));
+                    Global.game_map.add_summoned_unit(summonLoc + summonLoc_offsets[1], SummonDataUnit(attemptedSummon[1]));
+
+                    break;
+                case 3:
+                    Global.game_map.add_summoned_unit(summonLoc + summonLoc_offsets[0], SummonDataUnit(attemptedSummon[0]));
+                    Global.game_map.add_summoned_unit(summonLoc + summonLoc_offsets[1], SummonDataUnit(attemptedSummon[1]));
+                    Global.game_map.add_summoned_unit(summonLoc, SummonDataUnit(attemptedSummon[2]));
+                    break;
+                default:
+                    Global.game_map.add_summoned_unit(summonLoc, SummonDataUnit(attemptedSummon[0]));
+                    break;
+            }
+
+            attemptedSummon = new List<SummonId> { };
             wait(true);
         }
 
@@ -2143,13 +2175,75 @@ namespace Tactile
 
         public List<Vector2> summon_locs(SummonId summonId)
         {
-            Global.game_map.add_temp_unit(team, Loc, (int)summonId, 0, "summon_temp");
             List<Vector2> result = new List<Vector2>();
-            foreach (Vector2 offset in new Vector2[] { new Vector2(0, 1), new Vector2(0, -1), new Vector2(1, 0), new Vector2(-1, 0) })
-                if (!Global.game_map.is_off_map(offset + Loc))
-                    if (!Global.game_map.is_blocked(offset + Loc, id))
-                        if (Pathfind.passable(Global.game_map.last_added_unit, offset + Loc))
+            Vector2[] candidates = new Vector2[] { new Vector2(0, 1), new Vector2(0, -1), new Vector2(1, 0), new Vector2(-1, 0) };
+            Global.game_map.add_temp_unit(team, Loc, (int)summonId, 0, "summon_temp");
+
+            switch (summonId)
+            {
+                case SummonId.Bonewalker:
+                case SummonId.Wight:
+                case SummonId.Wolf:
+                case SummonId.Gwyllgi:
+                    foreach (Vector2 offset in candidates)
+                    {
+                        List<Vector2> offset_to_summon_location = new List<Vector2> { };
+
+                        // I don't seem to have simple 2x2 rotation matrix method available so I'm just going to hard code the matrix math
+                        // because I'm dumb -gooseish
+                        double theta = 45 * Math.PI / 180;
+                        offset_to_summon_location.Add(new Vector2(offset.X * (float)Math.Cos(theta) - offset.Y * (float)Math.Sin(theta), offset.X * (float)Math.Sin(theta) + offset.Y * (float)Math.Cos(theta)) * (float)Math.Sqrt(2));
+                        offset_to_summon_location.Add(new Vector2(offset.X * (float)Math.Cos(-theta) - offset.Y * (float)Math.Sin(-theta), offset.X * (float)Math.Sin(-theta) + offset.Y * (float)Math.Cos(-theta)) * (float)Math.Sqrt(2));
+                        int verified_locations = 0;
+                        foreach (Vector2 real_offset in offset_to_summon_location)
+                        {
+                            if (!Global.game_map.is_off_map(real_offset + Loc))
+                                if (!Global.game_map.is_blocked(real_offset + Loc, id))
+                                    if (Pathfind.passable(Global.game_map.last_added_unit, real_offset + Loc))
+                                        verified_locations++;
+
+                        }
+                        if (verified_locations == 2)
                             result.Add(offset + Loc);
+                    }
+                    break;
+
+                case SummonId.Revenant:
+                case SummonId.Entombed:
+                    foreach (Vector2 offset in candidates)
+                    {
+                        List<Vector2> offset_to_summon_location = new List<Vector2> { };
+
+                        // I don't seem to have simple 2x2 rotation matrix method available so I'm just going to hard code the matrix math
+                        // because I'm dumb -gooseish
+                        double theta = 45 * Math.PI / 180;
+                        offset_to_summon_location.Add(offset);
+                        offset_to_summon_location.Add(new Vector2(offset.X * (float)Math.Cos(theta) - offset.Y * (float)Math.Sin(theta), offset.X * (float)Math.Sin(theta) + offset.Y * (float)Math.Cos(theta)) * (float)Math.Sqrt(2));
+                        offset_to_summon_location.Add(new Vector2(offset.X * (float)Math.Cos(-theta) - offset.Y * (float)Math.Sin(-theta), offset.X * (float)Math.Sin(-theta) + offset.Y * (float)Math.Cos(-theta)) * (float)Math.Sqrt(2));
+                        int verified_locations = 0;
+                        foreach (Vector2 real_offset in offset_to_summon_location)
+                        {
+                            if (!Global.game_map.is_off_map(real_offset + Loc))
+                                if (!Global.game_map.is_blocked(real_offset + Loc, id))
+                                    if (Pathfind.passable(Global.game_map.last_added_unit, real_offset + Loc))
+                                        verified_locations++;
+
+                        }
+                        if (verified_locations == 3)
+                            result.Add(offset + Loc);
+                    }
+                    break;
+
+
+                default:
+                    foreach (Vector2 offset in candidates)
+                        if (!Global.game_map.is_off_map(offset + Loc))
+                            if (!Global.game_map.is_blocked(offset + Loc, id))
+                                if (Pathfind.passable(Global.game_map.last_added_unit, offset + Loc))
+                                    result.Add(offset + Loc);
+                    break;
+            }
+
             Global.game_map.completely_remove_unit(Global.game_map.last_added_unit.id);
             return result;
         }

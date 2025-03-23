@@ -194,27 +194,23 @@ namespace Tactile.Menus.Map.Unit
             Game_Unit unit = Global.game_map.units[summonMenu.unitId];
             var unitMenu = (Menus.ElementAt(1) as UnitCommandMenu);
             Global.game_system.play_se(System_Sounds.Confirm);
+            Game_Unit.SummonId id;
             if(unit.actor.has_skill("BETTER_SUMMON"))
             {
                 BetterSummonMenuIds command = summonMenu.BetterSelectedCommand;
-
-                TargetBetterSummonLocation(unit, command);
+                id = betterSummonId(command);
             }
             else
             {
                 SummonMenuIds command = summonMenu.SelectedCommand;
-
-                TargetSummonLocation(unit, command);
+                id = summonId(command);
             }
-            
 
-
-
+            TargetSummonLocation(unit, id);
         }
 
-        private void TargetSummonLocation(Game_Unit unit, SummonMenuIds command)
+        private void TargetSummonLocation(Game_Unit unit, Game_Unit.SummonId id)
         {
-            Game_Unit.SummonId id = summonId(command);
             List<Vector2> summon_locs = unit.summon_locs(id);
 
             if (unit.summon_locs(id).Count < 1)
@@ -222,35 +218,29 @@ namespace Tactile.Menus.Map.Unit
             else
             {
                 Global.game_system.play_se(System_Sounds.Confirm);
+                switch(id)
+                {
+                    case Game_Unit.SummonId.Wight:
+                        unit.attemptedSummon = new List<Game_Unit.SummonId> { id, Game_Unit.SummonId.Wight_Bow };
+                        break;
+                    case Game_Unit.SummonId.Bonewalker:
+                        unit.attemptedSummon = new List<Game_Unit.SummonId> { id, Game_Unit.SummonId.Bonewalker_Bow };
+                        break;
 
-                unit.attemptedSummon = id;
+                    case Game_Unit.SummonId.Revenant:
+                    case Game_Unit.SummonId.Entombed:
+                        unit.attemptedSummon = new List<Game_Unit.SummonId> { id, id, id };
+                        break;
 
-                var targetWindow = new Window_Target_Summon(unit.id, id, new Vector2(4, 0));
-                var targetMenu = new UnitTargetMenu(targetWindow);
-                targetMenu.Selected += summonTargetMenu_Selected;
-                targetMenu.Canceled += unitTargetMenu_Canceled;
-                AddMenu(targetMenu);
-                Global.player.facing = 4;
-                Global.player.update_cursor_frame();
-            }
+                    case Game_Unit.SummonId.Wolf:
+                    case Game_Unit.SummonId.Gwyllgi:
+                        unit.attemptedSummon = new List<Game_Unit.SummonId> { id, id };
+                        break;
 
-            return;
-        }
-
-        public void TargetBetterSummonLocation(Game_Unit unit, BetterSummonMenuIds command)
-        {
-            Game_Unit.SummonId id = betterSummonId(command);
-
-            List<Vector2> summon_locs = unit.summon_locs(id);
-
-            if (unit.summon_locs(id).Count < 1)
-                Global.game_system.play_se(System_Sounds.Buzzer);
-            else
-            {
-                Global.game_system.play_se(System_Sounds.Confirm);
-
-                unit.attemptedSummon = id;
-
+                    default:
+                        unit.attemptedSummon = new List<Game_Unit.SummonId> { id };
+                        break;
+                }
                 var targetWindow = new Window_Target_Summon(unit.id, id, new Vector2(4, 0));
                 var targetMenu = new UnitTargetMenu(targetWindow);
                 targetMenu.Selected += summonTargetMenu_Selected;
