@@ -33,6 +33,7 @@ namespace Tactile.Source_Code.Menus.Map.Unit.Skill
             if(unit.actor.has_skill("BETTER_SUMMON"))
             {
                 commands = (Enum.GetNames(typeof(BetterSummonMenuIds))).ToList();
+                commands = commands.Select(x => x.Replace("_", " ")).ToList();
             }
             else
             {
