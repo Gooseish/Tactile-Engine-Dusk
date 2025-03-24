@@ -17,12 +17,21 @@ namespace Tactile.Windows.Target
         Hand_Cursor Hand;
         Sprite Rescue_Icon;
         protected Game_Unit.SummonId summonId;
+        private HashSet<Vector2> Cursor_Draw_Displacements;
 
         #region Accessors
 
         protected override int window_width
         {
             get { return 80; }
+        }
+        Character_Sprite Extra_Cursor_Sprite
+        {
+            get
+            {
+                Character_Sprite result = Global.game_map.get_scene_map().player_sprite;
+                return result;
+            }
         }
         /*
         private bool target_position_reversed
@@ -58,6 +67,8 @@ namespace Tactile.Windows.Target
             initialize_images();
             refresh();
             index = this.index;
+
+            Cursor_Draw_Displacements = new HashSet<Vector2> { new Vector2(1, 1)*16 };
         }
 
         protected override List<int> sort_targets(List<int> targets)
@@ -283,6 +294,33 @@ namespace Tactile.Windows.Target
 
         public override void draw(SpriteBatch sprite_batch)
         {
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            Vector2 displacement = Global.player.loc - Global.game_map.units[Unit_Id].loc;
+            Cursor_Draw_Displacements = new HashSet<Vector2> { };
+            double theta = 90 * Math.PI / 180;
+            
+
+            switch (Global.game_map.units[Unit_Id].attemptedSummon.Count)
+            {
+                case 3:
+                    Cursor_Draw_Displacements.Add(new Vector2(displacement.X * (float)Math.Cos(theta) - displacement.Y * (float)Math.Sin(theta), displacement.X * (float)Math.Sin(theta) + displacement.Y * (float)Math.Cos(theta)));
+                    Cursor_Draw_Displacements.Add(new Vector2(displacement.X * (float)Math.Cos(-theta) - displacement.Y * (float)Math.Sin(-theta), displacement.X * (float)Math.Sin(-theta) + displacement.Y * (float)Math.Cos(-theta)));
+                    break;
+                case 2:
+                    Global.game_map.get_scene_map().suppress_cursor = true;
+                    Cursor_Draw_Displacements.Add(new Vector2(displacement.X * (float)Math.Cos(theta) - displacement.Y * (float)Math.Sin(theta), displacement.X * (float)Math.Sin(theta) + displacement.Y * (float)Math.Cos(theta)));
+                    Cursor_Draw_Displacements.Add(new Vector2(displacement.X * (float)Math.Cos(-theta) - displacement.Y * (float)Math.Sin(-theta), displacement.X * (float)Math.Sin(-theta) + displacement.Y * (float)Math.Cos(-theta)));
+                    break;
+                default:
+                    break;
+            }
+
+
+            foreach (Vector2 cursor_clone_displacement in Cursor_Draw_Displacements)
+            {
+                Extra_Cursor_Sprite.draw(sprite_batch, Global.game_map.display_loc - cursor_clone_displacement * 16);
+            }
+            sprite_batch.End();
             /*
             if (mode != 1)
             {

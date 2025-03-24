@@ -84,6 +84,7 @@ namespace Tactile
         public bool map_transition_ready { get { return Map_Transition && Transition_Timer < 0; } }
         public bool map_transition_running { get { return Black_Screen_Time > 0 || (!Map_Transition && Transition_Timer > 0); } }
         public Character_Sprite player_sprite { get { return Player_Sprite; } }
+        public bool suppress_cursor;
         #endregion
 
         public Scene_Map()
@@ -1358,7 +1359,11 @@ namespace Tactile
             // Draw Player
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             draw_formation_change2(sprite_batch);
-            Player_Sprite.draw(sprite_batch, Global.game_map.display_loc);
+            if (!suppress_cursor)
+            {
+                Player_Sprite.draw(sprite_batch, Global.game_map.display_loc);
+            }
+            suppress_cursor = false;
             draw_formation_change1(sprite_batch);
             sprite_batch.End();
 
@@ -1486,7 +1491,11 @@ namespace Tactile
             draw_arrow(sprite_batch);
             // Draw Player
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            Player_Sprite.draw(sprite_batch, Global.game_map.display_loc);
+            if(!suppress_cursor)
+            {
+                Player_Sprite.draw(sprite_batch, Global.game_map.display_loc);
+            }
+            suppress_cursor = false;
             sprite_batch.End();
 
             // Modifies Map view angle
