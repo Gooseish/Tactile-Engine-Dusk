@@ -3358,6 +3358,8 @@ namespace Tactile
         }
         public bool can_supply()
         {
+            if (is_summon)
+                return false;
             if (is_convoy())
                 return true;
             HashSet<int> units = units_in_range(1);

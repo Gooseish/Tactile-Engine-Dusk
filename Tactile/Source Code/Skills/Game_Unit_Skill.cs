@@ -2086,7 +2086,9 @@ namespace Tactile
                     result[0] = 83;
                     break;
                 case SummonId.Cyclops:
-                    result[0] = 59;
+                    result[0] = 64;
+                    result[1] = 58;
+                    result[2] = 62;
                     break;
                 case SummonId.Gargoyle:
                     result[0] = 33;
@@ -2099,6 +2101,7 @@ namespace Tactile
                     break;
                 case SummonId.Tarvos:
                     result[0] = 59;
+                    result[1] = 83;
                     break;
                 case SummonId.Wolf:
                     result[0] = 202;
@@ -2107,17 +2110,21 @@ namespace Tactile
                     result[0] = 202;
                     break;
                 case SummonId.Wight:
-                    result[0] = 3;
-                    result[1] = 33;
+                    result[0] = 16;
+                    result[1] = 46;
                     break;
                 case SummonId.Wight_Bow:
-                    result[0] = 83;
+                    result[0] = 90;
                     break;
                 case SummonId.Deathgoyle:
-                    result[0] = 33;
+                    result[0] = 46;
+                    result[1] = 48;
                     break;
                 case SummonId.Maelduin:
-                    result[0] = 59;
+                    result[0] = 71;
+                    result[1] = 68;
+                    result[2] = 90;
+                    result[3] = 87;
                     break;
                 case SummonId.Arch_Mogall:
                     result[0] = 141;
