@@ -194,27 +194,53 @@ namespace Tactile.Menus.Map.Unit
             Game_Unit unit = Global.game_map.units[summonMenu.unitId];
             var unitMenu = (Menus.ElementAt(1) as UnitCommandMenu);
             Global.game_system.play_se(System_Sounds.Confirm);
-            SummonMenuIds command = summonMenu.SelectedCommand;
+            Game_Unit.SummonId id;
+            if(unit.actor.has_skill("BETTER_SUMMON"))
+            {
+                BetterSummonMenuIds command = summonMenu.BetterSelectedCommand;
+                id = betterSummonId(command);
+            }
+            else
+            {
+                SummonMenuIds command = summonMenu.SelectedCommand;
+                id = summonId(command);
+            }
 
-            TargetSummonLocation(unit, command);
-
-
-
+            TargetSummonLocation(unit, id);
         }
 
-        private void TargetSummonLocation(Game_Unit unit, SummonMenuIds command)
+        private void TargetSummonLocation(Game_Unit unit, Game_Unit.SummonId id)
         {
-            Game_Unit.SummonId id = summonId(command);
-            List<Vector2> summon_locs = unit.summon_locs(id);
+            List<Vector2> valid_target_summon_locs = unit.valid_target_summon_locs(id);
 
-            if (unit.summon_locs(id).Count < 1)
+            if (valid_target_summon_locs.Count < 1)
                 Global.game_system.play_se(System_Sounds.Buzzer);
             else
             {
                 Global.game_system.play_se(System_Sounds.Confirm);
+                switch(id)
+                {
+                    case Game_Unit.SummonId.Wight:
+                        unit.attemptedSummon = new List<Game_Unit.SummonId> { id, Game_Unit.SummonId.Wight_Bow };
+                        break;
+                    case Game_Unit.SummonId.Bonewalker:
+                        unit.attemptedSummon = new List<Game_Unit.SummonId> { id, Game_Unit.SummonId.Bonewalker_Bow };
+                        break;
 
-                unit.attemptedSummon = id;
+                    case Game_Unit.SummonId.Revenant:
+                    case Game_Unit.SummonId.Entombed:
+                        unit.attemptedSummon = new List<Game_Unit.SummonId> { id, id, id };
+                        break;
 
+                    case Game_Unit.SummonId.Wolf:
+                    case Game_Unit.SummonId.Gwyllgi:
+                        unit.attemptedSummon = new List<Game_Unit.SummonId> { id, id };
+                        break;
+
+                    default:
+                        unit.attemptedSummon = new List<Game_Unit.SummonId> { id };
+                        break;
+                }
                 var targetWindow = new Window_Target_Summon(unit.id, id, new Vector2(4, 0));
                 var targetMenu = new UnitTargetMenu(targetWindow);
                 targetMenu.Selected += summonTargetMenu_Selected;
@@ -233,12 +259,18 @@ namespace Tactile.Menus.Map.Unit
             var targetMenu = (sender as UnitTargetMenu);
             targetMenu.Accept();
 
+            
+
             Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
             int val = targetMenu.SelectedUnitId;
-            Vector2 dropLocation = new Vector2(val % Global.game_map.width,
+            Vector2 summon_target_location = new Vector2(val % Global.game_map.width,
                 val / Global.game_map.width);
 
-            Global.game_state.call_summon(unit.id, dropLocation);
+            Vector2 orientation = summon_target_location - unit.loc;
+
+
+
+            Global.game_state.call_summon(unit.id, orientation);
             Global.game_temp.menuing = false;
             CloseCommandMenu(true);
         }
@@ -254,9 +286,6 @@ namespace Tactile.Menus.Map.Unit
                 case SummonMenuIds.Bonewalker:
                     id = Game_Unit.SummonId.Bonewalker;
                     break;
-                case SummonMenuIds.Cyclops:
-                    id = Game_Unit.SummonId.Cyclops;
-                    break;
                 case SummonMenuIds.Gargoyle:
                     id = Game_Unit.SummonId.Gargoyle;
                     break;
@@ -271,6 +300,41 @@ namespace Tactile.Menus.Map.Unit
                     break;
                 case SummonMenuIds.Wolf:
                     id = Game_Unit.SummonId.Wolf;
+                    break;
+            }
+            return id;
+        }
+        private Game_Unit.SummonId betterSummonId(BetterSummonMenuIds command)
+        {
+            Game_Unit.SummonId id = Game_Unit.SummonId.Elder_Bael;
+            switch (command)
+            {
+                case BetterSummonMenuIds.Elder_Bael:
+                    id = Game_Unit.SummonId.Elder_Bael;
+                    break;
+                case BetterSummonMenuIds.Wight:
+                    id = Game_Unit.SummonId.Wight;
+                    break;
+                case BetterSummonMenuIds.Deathgoyle:
+                    id = Game_Unit.SummonId.Deathgoyle;
+                    break;
+                case BetterSummonMenuIds.Maelduin:
+                    id = Game_Unit.SummonId.Maelduin;
+                    break;
+                case BetterSummonMenuIds.Arch_Mogall:
+                    id = Game_Unit.SummonId.Arch_Mogall;
+                    break;
+                case BetterSummonMenuIds.Entombed:
+                    id = Game_Unit.SummonId.Entombed;
+                    break;
+                case BetterSummonMenuIds.Gwyllgi:
+                    id = Game_Unit.SummonId.Gwyllgi;
+                    break;
+                case BetterSummonMenuIds.Cyclops:
+                    id = Game_Unit.SummonId.Cyclops;
+                    break;
+                case BetterSummonMenuIds.Gorgon:
+                    id = Game_Unit.SummonId.Gorgon;
                     break;
             }
             return id;

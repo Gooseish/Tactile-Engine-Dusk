@@ -17,12 +17,21 @@ namespace Tactile.Windows.Target
         Hand_Cursor Hand;
         Sprite Rescue_Icon;
         protected Game_Unit.SummonId summonId;
+        private HashSet<Vector2> Extra_Cursor_Positions;
 
         #region Accessors
 
         protected override int window_width
         {
             get { return 80; }
+        }
+        Character_Sprite Extra_Cursor_Sprite
+        {
+            get
+            {
+                Character_Sprite result = Global.game_map.get_scene_map().player_sprite;
+                return result;
+            }
         }
         /*
         private bool target_position_reversed
@@ -58,6 +67,8 @@ namespace Tactile.Windows.Target
             initialize_images();
             refresh();
             index = this.index;
+
+            Extra_Cursor_Positions = new HashSet<Vector2> { new Vector2(1, 1)*16 }; //is this still needed?
         }
 
         protected override List<int> sort_targets(List<int> targets)
@@ -87,7 +98,7 @@ namespace Tactile.Windows.Target
             Game_Unit unit = get_unit();
             List<int> temp_targets = new List<int>();
                 // Looking for drop locations
-            foreach (Vector2 loc in unit.summon_locs(summonId))
+            foreach (Vector2 loc in unit.valid_target_summon_locs(summonId))
                 temp_targets.Add((int)(loc.X + loc.Y * Global.game_map.width));
             return temp_targets;
         }
@@ -283,27 +294,22 @@ namespace Tactile.Windows.Target
 
         public override void draw(SpriteBatch sprite_batch)
         {
-            /*
-            if (mode != 1)
-            {
-                sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                Window.draw(sprite_batch);
-                Target_Window.draw(sprite_batch);
-                Unit_Sprite.draw(sprite_batch);
-                Target_Sprite.draw(sprite_batch);
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            Vector2 orientation = Global.player.loc - Global.game_map.units[Unit_Id].loc;
+            Extra_Cursor_Positions = new HashSet<Vector2> { };
+            Global.game_map.get_scene_map().suppress_cursor = true;
 
-                Name1.draw(sprite_batch);
-                Name2.draw(sprite_batch);
-                Aid_Label.draw(sprite_batch);
-                Con_Label.draw(sprite_batch);
-                Aid_Value.draw(sprite_batch);
-                Con_Value.draw(sprite_batch);
-                Hand.draw(sprite_batch);
-                if (Global.game_map.icons_visible)
-                    Rescue_Icon.draw(sprite_batch);
-                sprite_batch.End();
+            foreach (Vector2 summon_location in get_unit().Multi_Summon_Locations(summonId, orientation))
+            {
+                Extra_Cursor_Positions.Add(summon_location);
             }
-            */
+
+            foreach (Vector2 Extra_Cursor_Position in Extra_Cursor_Positions)
+            {
+                Extra_Cursor_Sprite.loc = Extra_Cursor_Position*16;
+                Extra_Cursor_Sprite.draw(sprite_batch, Global.game_map.display_loc);
+            }
+            sprite_batch.End();
         }
     }
 }

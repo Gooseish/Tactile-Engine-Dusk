@@ -590,5 +590,11 @@ namespace Tactile
 
         // Skills: DTransform
         public bool DTransformActive;
+
+        // Skills: Summon
+        public bool is_summon
+        {
+            get { return name == "Summon"; }
+        }
     }
 }

@@ -30,7 +30,15 @@ namespace Tactile.Source_Code.Menus.Map.Unit.Skill
         public List<String> SetCommands(Game_Unit unit)
         {
             List<String> commands;
-            commands = (Enum.GetNames(typeof(SummonMenuIds))).ToList();
+            if(unit.actor.has_skill("BETTER_SUMMON"))
+            {
+                commands = (Enum.GetNames(typeof(BetterSummonMenuIds))).ToList();
+                commands = commands.Select(x => x.Replace("_", " ")).ToList();
+            }
+            else
+            {
+                commands = (Enum.GetNames(typeof(SummonMenuIds))).ToList();
+            }
             return commands;
         }
         private Window_Command NewUnitWindow(List<string> commands, int width)
@@ -50,6 +58,13 @@ namespace Tactile.Source_Code.Menus.Map.Unit.Skill
             get
             {
                 return (SummonMenuIds)Window.selected_index().Index;
+            }
+        }
+        public BetterSummonMenuIds BetterSelectedCommand
+        {
+            get
+            {
+                return (BetterSummonMenuIds)Window.selected_index().Index;
             }
         }
     }

@@ -2384,11 +2384,18 @@ namespace Tactile
         /// <param name="item_data">Item data to add</param>
         public void gain_item(Item_Data item_data)
         {
-            if (is_full_items)
-                Items.Add(item_data);
+            if(is_summon) //items acquired by summons go straight to the convoy
+            {
+                Global.game_battalions.add_item_to_convoy(item_data);
+            }
             else
-                Items[num_items] = item_data;
-            sort_items();
+            {
+                if (is_full_items)
+                    Items.Add(item_data);
+                else
+                    Items[num_items] = item_data;
+                sort_items();
+            }
         }
         public void set_items(IEnumerable<Item_Data> items)
         {

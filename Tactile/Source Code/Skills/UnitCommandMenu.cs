@@ -28,12 +28,23 @@ namespace Tactile.Menus.Map.Unit
     {
         Bael,
         Bonewalker,
-        Cyclops,
         Gargoyle,
         Tarvos,
         Mogall,
         Revenant,
         Wolf
+    }
+    enum BetterSummonMenuIds: int
+    {
+        Elder_Bael,
+        Wight,
+        Deathgoyle,
+        Maelduin,
+        Arch_Mogall,
+        Entombed,
+        Gwyllgi,
+        Cyclops,
+        Gorgon
     }
 
     partial class UnitCommandMenu
