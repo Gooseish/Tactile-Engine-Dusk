@@ -259,12 +259,18 @@ namespace Tactile.Menus.Map.Unit
             var targetMenu = (sender as UnitTargetMenu);
             targetMenu.Accept();
 
+            
+
             Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
             int val = targetMenu.SelectedUnitId;
-            Vector2 dropLocation = new Vector2(val % Global.game_map.width,
+            Vector2 summon_target_location = new Vector2(val % Global.game_map.width,
                 val / Global.game_map.width);
 
-            Global.game_state.call_summon(unit.id, dropLocation);
+            Vector2 orientation = summon_target_location - unit.loc;
+
+
+
+            Global.game_state.call_summon(unit.id, orientation);
             Global.game_temp.menuing = false;
             CloseCommandMenu(true);
         }

@@ -4,6 +4,8 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using System.Collections;
 using TactileVector2Extension;
+using TactileListExtension;
+using Tactile;
 
 namespace Tactile.State
 {
@@ -16,7 +18,7 @@ namespace Tactile.State
 
         protected int Summon_Id = -1;
 
-        protected Vector2 Summon_Destination = new Vector2(-1, -1);
+        protected Vector2 Orientation = new Vector2 (-1, -1);
 
 
 
@@ -29,8 +31,7 @@ namespace Tactile.State
             writer.Write(Summon_Phase);
             writer.Write(Summon_Timer);
             writer.Write(Summon_Id);
-            Summon_Destination.write(writer);
-
+            Orientation.write(writer);
         }
 
         internal override void read(BinaryReader reader)
@@ -40,7 +41,7 @@ namespace Tactile.State
             Summon_Phase = reader.ReadInt32();
             Summon_Timer = reader.ReadInt32();
             Summon_Id = reader.ReadInt32();
-            Summon_Destination = Summon_Destination.read(reader);
+            Orientation = Orientation.read(reader);
         }
         #endregion
 
@@ -55,8 +56,10 @@ namespace Tactile.State
         public bool in_summon { get { return In_Summon; } }
 
         public int summoner_id { get { return Summon_Id; } set { Summon_Id = value; } }
-        public Vector2 summon_destination { get { return Summon_Destination; } set { Summon_Destination = value; } }
-
+        public List<Vector2> summon_destinations {
+            get { return summoner.Multi_Summon_Locations(summoner.attemptedSummon[0], Orientation); }
+        }
+        public Vector2 orientation { get { return Orientation; } set { Orientation = value; } }
 
         protected Game_Unit summoner { get { return Summon_Id == -1 ? null : Units[Summon_Id]; } }
 
@@ -141,26 +144,21 @@ namespace Tactile.State
             {
                 case 0:
 
-                    List<Vector2> summonLoc_offsets = new List<Vector2> { };
-                    Vector2 offset = summon_destination - summoner.loc;
-                    double theta = 90 * Math.PI / 180;
-                    summonLoc_offsets.Add(new Vector2(offset.X * (float)Math.Cos(theta) - offset.Y * (float)Math.Sin(theta), offset.X * (float)Math.Sin(theta) + offset.Y * (float)Math.Cos(theta)));
-                    summonLoc_offsets.Add(new Vector2(offset.X * (float)Math.Cos(-theta) - offset.Y * (float)Math.Sin(-theta), offset.X * (float)Math.Sin(-theta) + offset.Y * (float)Math.Cos(-theta)));
 
 
                     switch (summoner.attemptedSummon.Count)
                     {
                         case 2:
-                            scene_map.set_map_effect(summon_destination + summonLoc_offsets[0] + new Vector2(0, -1), 2, 1);
-                            scene_map.set_map_effect_2(summon_destination + summonLoc_offsets[1] + new Vector2(0, -1), 2, 1);
+                            scene_map.set_map_effect(summon_destinations[0] + new Vector2(0, -1), 2, 1);
+                            scene_map.set_map_effect_2(summon_destinations[1] + new Vector2(0, -1), 2, 1);
                             break;
                         case 3:
-                            scene_map.set_map_effect(summon_destination + summonLoc_offsets[0] + new Vector2(0, -1), 2, 1);
-                            scene_map.set_map_effect_3(summon_destination + summonLoc_offsets[1] + new Vector2(0, -1), 2, 1);
-                            scene_map.set_map_effect_2(summon_destination + new Vector2(0, -1), 2, 1);
+                            scene_map.set_map_effect(summon_destinations[0] + new Vector2(0, -1), 2, 1);
+                            scene_map.set_map_effect_3(summon_destinations[1] + new Vector2(0, -1), 2, 1);
+                            scene_map.set_map_effect_2(summon_destinations[2] + new Vector2(0, -1), 2, 1);
                             break;
                         default:
-                            scene_map.set_map_effect(summon_destination + new Vector2(0, -1), 2, 1);
+                            scene_map.set_map_effect(summon_destinations[0] + new Vector2(0, -1), 2, 1);
                             break;
                     }
                     
@@ -178,7 +176,7 @@ namespace Tactile.State
 
         protected void apply_summon()
         {
-            summoner.summon(summon_destination);
+            summoner.summon(summon_destinations);
             Summon_Phase++;
         }
 
@@ -202,7 +200,7 @@ namespace Tactile.State
                     Summon_Phase = 0;
                     Summon_Timer = 0;
                     Summon_Id = -1;
-                    Summon_Destination = new Vector2(-1, -1);
+                    Orientation = new Vector2(-1, -1);
                     Summon_Calling = false;
                     In_Summon = false;
                     Global.game_map.move_range_visible = true;

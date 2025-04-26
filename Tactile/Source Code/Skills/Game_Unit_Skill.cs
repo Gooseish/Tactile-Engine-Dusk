@@ -2015,32 +2015,22 @@ namespace Tactile
             get { return AttemptedSummon.Select(x=>(SummonId)x).ToList(); }
             set { AttemptedSummon = value.Select(x => (int)x).ToList(); }
         }
-        public void summon(Vector2 summonLoc)
+        public void summon(List<Vector2> summonLocs)
         {
             HasSummoned = true;
-
-            List<Vector2> summonLoc_offsets = new List<Vector2> { };
-
-            Vector2 offset = summonLoc - Loc;
-            double theta = 90 * Math.PI / 180;
-            summonLoc_offsets.Add(new Vector2(offset.X * (float)Math.Cos(theta) - offset.Y * (float)Math.Sin(theta), offset.X * (float)Math.Sin(theta) + offset.Y * (float)Math.Cos(theta)));
-            summonLoc_offsets.Add(new Vector2(offset.X * (float)Math.Cos(-theta) - offset.Y * (float)Math.Sin(-theta), offset.X * (float)Math.Sin(-theta) + offset.Y * (float)Math.Cos(-theta)));
-
             switch (attemptedSummon.Count)
             {
                 case 2:
-
-                    Global.game_map.add_summoned_unit(summonLoc + summonLoc_offsets[0], SummonDataUnit(attemptedSummon[0]));
-                    Global.game_map.add_summoned_unit(summonLoc + summonLoc_offsets[1], SummonDataUnit(attemptedSummon[1]));
-
+                    Global.game_map.add_summoned_unit(summonLocs[0], SummonDataUnit(attemptedSummon[0]));
+                    Global.game_map.add_summoned_unit(summonLocs[1], SummonDataUnit(attemptedSummon[1]));
                     break;
                 case 3:
-                    Global.game_map.add_summoned_unit(summonLoc + summonLoc_offsets[0], SummonDataUnit(attemptedSummon[0]));
-                    Global.game_map.add_summoned_unit(summonLoc + summonLoc_offsets[1], SummonDataUnit(attemptedSummon[1]));
-                    Global.game_map.add_summoned_unit(summonLoc, SummonDataUnit(attemptedSummon[2]));
+                    Global.game_map.add_summoned_unit(summonLocs[0], SummonDataUnit(attemptedSummon[0]));
+                    Global.game_map.add_summoned_unit(summonLocs[1], SummonDataUnit(attemptedSummon[1]));
+                    Global.game_map.add_summoned_unit(summonLocs[2], SummonDataUnit(attemptedSummon[2]));
                     break;
                 default:
-                    Global.game_map.add_summoned_unit(summonLoc, SummonDataUnit(attemptedSummon[0]));
+                    Global.game_map.add_summoned_unit(summonLocs[0], SummonDataUnit(attemptedSummon[0]));
                     break;
             }
 

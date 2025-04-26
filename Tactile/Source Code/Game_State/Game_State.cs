@@ -416,11 +416,11 @@ namespace Tactile
             SkillsState.Transform_State.transform_calling = true;
             SkillsState.Transform_State.transformer_id = id1;
         }
-        internal void call_summon(int id1, Vector2 summon_location)
+        internal void call_summon(int id1, Vector2 orientation)
         {
             SkillsState.Summon_State.summon_calling = true;
             SkillsState.Summon_State.summoner_id = id1;
-            SkillsState.Summon_State.summon_destination = summon_location;
+            SkillsState.Summon_State.orientation = orientation;
         }
         internal void call_steal(int id1, int id2, int steal_item_index)
         {
