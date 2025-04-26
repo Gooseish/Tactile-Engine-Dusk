@@ -211,9 +211,9 @@ namespace Tactile.Menus.Map.Unit
 
         private void TargetSummonLocation(Game_Unit unit, Game_Unit.SummonId id)
         {
-            List<Vector2> summon_locs = unit.summon_locs(id);
+            List<Vector2> valid_target_summon_locs = unit.valid_target_summon_locs(id);
 
-            if (unit.summon_locs(id).Count < 1)
+            if (valid_target_summon_locs.Count < 1)
                 Global.game_system.play_se(System_Sounds.Buzzer);
             else
             {

@@ -2180,77 +2180,74 @@ namespace Tactile
             return new Data_Unit("generic",$"{actor.name}_summon",SummonData(id));
         }
 
-        public List<Vector2> summon_locs(SummonId summonId)
+        public int Summon_Multiplicity(SummonId summonId)
         {
-            List<Vector2> result = new List<Vector2>();
-            Vector2[] candidates = new Vector2[] { new Vector2(0, 1), new Vector2(0, -1), new Vector2(1, 0), new Vector2(-1, 0) };
-            Global.game_map.add_temp_unit(team, Loc, (int)summonId, 0, "summon_temp");
 
-            switch (summonId)
+            switch(summonId)
             {
+                case SummonId.Revenant:
+                case SummonId.Entombed:
+                    return 3;
                 case SummonId.Bonewalker:
                 case SummonId.Wight:
                 case SummonId.Wolf:
                 case SummonId.Gwyllgi:
-                    foreach (Vector2 offset in candidates)
-                    {
-                        List<Vector2> offset_to_summon_location = new List<Vector2> { };
-
-                        // I don't seem to have simple 2x2 rotation matrix method available so I'm just going to hard code the matrix math
-                        // because I'm dumb -gooseish
-                        double theta = 45 * Math.PI / 180;
-                        offset_to_summon_location.Add(new Vector2(offset.X * (float)Math.Cos(theta) - offset.Y * (float)Math.Sin(theta), offset.X * (float)Math.Sin(theta) + offset.Y * (float)Math.Cos(theta)) * (float)Math.Sqrt(2));
-                        offset_to_summon_location.Add(new Vector2(offset.X * (float)Math.Cos(-theta) - offset.Y * (float)Math.Sin(-theta), offset.X * (float)Math.Sin(-theta) + offset.Y * (float)Math.Cos(-theta)) * (float)Math.Sqrt(2));
-                        int verified_locations = 0;
-                        foreach (Vector2 real_offset in offset_to_summon_location)
-                        {
-                            if (!Global.game_map.is_off_map(real_offset + Loc))
-                                if (!Global.game_map.is_blocked(real_offset + Loc, id))
-                                    if (Pathfind.passable(Global.game_map.last_added_unit, real_offset + Loc))
-                                        verified_locations++;
-
-                        }
-                        if (verified_locations == 2)
-                            result.Add(offset + Loc);
-                    }
-                    break;
-
-                case SummonId.Revenant:
-                case SummonId.Entombed:
-                    foreach (Vector2 offset in candidates)
-                    {
-                        List<Vector2> offset_to_summon_location = new List<Vector2> { };
-
-                        // I don't seem to have simple 2x2 rotation matrix method available so I'm just going to hard code the matrix math
-                        // because I'm dumb -gooseish
-                        double theta = 45 * Math.PI / 180;
-                        offset_to_summon_location.Add(offset);
-                        offset_to_summon_location.Add(new Vector2(offset.X * (float)Math.Cos(theta) - offset.Y * (float)Math.Sin(theta), offset.X * (float)Math.Sin(theta) + offset.Y * (float)Math.Cos(theta)) * (float)Math.Sqrt(2));
-                        offset_to_summon_location.Add(new Vector2(offset.X * (float)Math.Cos(-theta) - offset.Y * (float)Math.Sin(-theta), offset.X * (float)Math.Sin(-theta) + offset.Y * (float)Math.Cos(-theta)) * (float)Math.Sqrt(2));
-                        int verified_locations = 0;
-                        foreach (Vector2 real_offset in offset_to_summon_location)
-                        {
-                            if (!Global.game_map.is_off_map(real_offset + Loc))
-                                if (!Global.game_map.is_blocked(real_offset + Loc, id))
-                                    if (Pathfind.passable(Global.game_map.last_added_unit, real_offset + Loc))
-                                        verified_locations++;
-
-                        }
-                        if (verified_locations == 3)
-                            result.Add(offset + Loc);
-                    }
-                    break;
-
-
+                    return 2;
                 default:
-                    foreach (Vector2 offset in candidates)
-                        if (!Global.game_map.is_off_map(offset + Loc))
-                            if (!Global.game_map.is_blocked(offset + Loc, id))
-                                if (Pathfind.passable(Global.game_map.last_added_unit, offset + Loc))
-                                    result.Add(offset + Loc);
+                    return 1;
+            }
+        }
+
+        public List<Vector2> Multi_Summon_Locations(SummonId summonId, Vector2 orientation)
+        {
+            List<Vector2> result = new List<Vector2>();
+            List<Vector2> summon_locations_relative = new List<Vector2> { };
+            double theta = 45 * Math.PI / 180;
+            switch (Summon_Multiplicity(summonId))
+            {
+                case 3:
+                    // I don't seem to have simple 2x2 rotation matrix method available so I'm just going to hard code the matrix math
+                    // because I'm dumb -gooseish
+                    summon_locations_relative.Add(orientation);
+                    summon_locations_relative.Add(new Vector2(orientation.X * (float)Math.Cos(theta) - orientation.Y * (float)Math.Sin(theta), orientation.X * (float)Math.Sin(theta) + orientation.Y * (float)Math.Cos(theta)) * (float)Math.Sqrt(2));
+                    summon_locations_relative.Add(new Vector2(orientation.X * (float)Math.Cos(-theta) - orientation.Y * (float)Math.Sin(-theta), orientation.X * (float)Math.Sin(-theta) + orientation.Y * (float)Math.Cos(-theta)) * (float)Math.Sqrt(2));
+                    break;
+                case 2:
+                    summon_locations_relative.Add(new Vector2(orientation.X * (float)Math.Cos(theta) - orientation.Y * (float)Math.Sin(theta), orientation.X * (float)Math.Sin(theta) + orientation.Y * (float)Math.Cos(theta)) * (float)Math.Sqrt(2));
+                    summon_locations_relative.Add(new Vector2(orientation.X * (float)Math.Cos(-theta) - orientation.Y * (float)Math.Sin(-theta), orientation.X * (float)Math.Sin(-theta) + orientation.Y * (float)Math.Cos(-theta)) * (float)Math.Sqrt(2));
+                    break;
+                default:
+                    summon_locations_relative.Add(orientation);
                     break;
             }
+            foreach (Vector2 summon_location_relative in summon_locations_relative)
+            {
+                result.Add(summon_location_relative + Loc);
+            }
+            return result;
+        }
 
+        public List<Vector2> valid_target_summon_locs(SummonId summonId)
+        {
+            List<Vector2> result = new List<Vector2>();
+            Vector2[] candidates = new Vector2[] { new Vector2(0, 1), new Vector2(0, -1), new Vector2(1, 0), new Vector2(-1, 0) };
+            Global.game_map.add_temp_unit(team, Loc, (int)summonId, 0, "summon_temp");
+            foreach (Vector2 orientation in candidates)
+            {
+                List<Vector2> tested_summon_locations = Multi_Summon_Locations(summonId, orientation);
+                int verified_locations = 0;
+                foreach(Vector2 tested_summon_location in tested_summon_locations)
+                {
+                    if (!Global.game_map.is_off_map(tested_summon_location))
+                        if (!Global.game_map.is_blocked(tested_summon_location, id))
+                            if (Pathfind.passable(Global.game_map.last_added_unit, tested_summon_location))
+                                verified_locations++;
+                }
+                if(verified_locations == Summon_Multiplicity(summonId))
+                {
+                    result.Add(orientation + Loc);
+                }
+            }
             Global.game_map.completely_remove_unit(Global.game_map.last_added_unit.id);
             return result;
         }

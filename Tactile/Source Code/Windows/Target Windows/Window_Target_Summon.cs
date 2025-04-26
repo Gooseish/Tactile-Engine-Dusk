@@ -17,7 +17,7 @@ namespace Tactile.Windows.Target
         Hand_Cursor Hand;
         Sprite Rescue_Icon;
         protected Game_Unit.SummonId summonId;
-        private HashSet<Vector2> Cursor_Draw_Displacements;
+        private HashSet<Vector2> Extra_Cursor_Positions;
 
         #region Accessors
 
@@ -68,7 +68,7 @@ namespace Tactile.Windows.Target
             refresh();
             index = this.index;
 
-            Cursor_Draw_Displacements = new HashSet<Vector2> { new Vector2(1, 1)*16 };
+            Extra_Cursor_Positions = new HashSet<Vector2> { new Vector2(1, 1)*16 }; //is this still needed?
         }
 
         protected override List<int> sort_targets(List<int> targets)
@@ -98,7 +98,7 @@ namespace Tactile.Windows.Target
             Game_Unit unit = get_unit();
             List<int> temp_targets = new List<int>();
                 // Looking for drop locations
-            foreach (Vector2 loc in unit.summon_locs(summonId))
+            foreach (Vector2 loc in unit.valid_target_summon_locs(summonId))
                 temp_targets.Add((int)(loc.X + loc.Y * Global.game_map.width));
             return temp_targets;
         }
@@ -295,53 +295,21 @@ namespace Tactile.Windows.Target
         public override void draw(SpriteBatch sprite_batch)
         {
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-            Vector2 displacement = Global.player.loc - Global.game_map.units[Unit_Id].loc;
-            Cursor_Draw_Displacements = new HashSet<Vector2> { };
-            double theta = 90 * Math.PI / 180;
-            
+            Vector2 orientation = Global.player.loc - Global.game_map.units[Unit_Id].loc;
+            Extra_Cursor_Positions = new HashSet<Vector2> { };
+            Global.game_map.get_scene_map().suppress_cursor = true;
 
-            switch (Global.game_map.units[Unit_Id].attemptedSummon.Count)
+            foreach (Vector2 summon_location in get_unit().Multi_Summon_Locations(summonId, orientation))
             {
-                case 3:
-                    Cursor_Draw_Displacements.Add(new Vector2(displacement.X * (float)Math.Cos(theta) - displacement.Y * (float)Math.Sin(theta), displacement.X * (float)Math.Sin(theta) + displacement.Y * (float)Math.Cos(theta)));
-                    Cursor_Draw_Displacements.Add(new Vector2(displacement.X * (float)Math.Cos(-theta) - displacement.Y * (float)Math.Sin(-theta), displacement.X * (float)Math.Sin(-theta) + displacement.Y * (float)Math.Cos(-theta)));
-                    break;
-                case 2:
-                    Global.game_map.get_scene_map().suppress_cursor = true;
-                    Cursor_Draw_Displacements.Add(new Vector2(displacement.X * (float)Math.Cos(theta) - displacement.Y * (float)Math.Sin(theta), displacement.X * (float)Math.Sin(theta) + displacement.Y * (float)Math.Cos(theta)));
-                    Cursor_Draw_Displacements.Add(new Vector2(displacement.X * (float)Math.Cos(-theta) - displacement.Y * (float)Math.Sin(-theta), displacement.X * (float)Math.Sin(-theta) + displacement.Y * (float)Math.Cos(-theta)));
-                    break;
-                default:
-                    break;
+                Extra_Cursor_Positions.Add(summon_location);
             }
 
-
-            foreach (Vector2 cursor_clone_displacement in Cursor_Draw_Displacements)
+            foreach (Vector2 Extra_Cursor_Position in Extra_Cursor_Positions)
             {
-                Extra_Cursor_Sprite.draw(sprite_batch, Global.game_map.display_loc - cursor_clone_displacement * 16);
+                Extra_Cursor_Sprite.loc = Extra_Cursor_Position*16;
+                Extra_Cursor_Sprite.draw(sprite_batch, Global.game_map.display_loc);
             }
             sprite_batch.End();
-            /*
-            if (mode != 1)
-            {
-                sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
-                Window.draw(sprite_batch);
-                Target_Window.draw(sprite_batch);
-                Unit_Sprite.draw(sprite_batch);
-                Target_Sprite.draw(sprite_batch);
-
-                Name1.draw(sprite_batch);
-                Name2.draw(sprite_batch);
-                Aid_Label.draw(sprite_batch);
-                Con_Label.draw(sprite_batch);
-                Aid_Value.draw(sprite_batch);
-                Con_Value.draw(sprite_batch);
-                Hand.draw(sprite_batch);
-                if (Global.game_map.icons_visible)
-                    Rescue_Icon.draw(sprite_batch);
-                sprite_batch.End();
-            }
-            */
         }
     }
 }
