@@ -2294,7 +2294,7 @@ namespace Tactile
                 if (is_rescuing)
                 {
                     Game_Unit rescued_unit = Global.game_map.units[Rescuing];
-                    if ((has_items || rescued_unit.actor.has_items) && same_team(rescued_unit))
+                    if ((has_items || rescued_unit.actor.has_items) && same_team(rescued_unit) && !rescued_unit.is_summon)
                         can_trade = true;
                 }
                 // If no rescued unit to trade with, check allies nearby
@@ -2303,15 +2303,15 @@ namespace Tactile
                     foreach (int id in allies_in_range(1))
                     {
                         Game_Unit other_unit = Global.game_map.units[id];
-                        if (different_team(other_unit) || other_unit.is_summon)
+                        if (different_team(other_unit))
                             continue;
-                        if (other_unit.actor.has_no_items && !has_items)
+                        if ((other_unit.actor.has_no_items && !has_items) || other_unit.is_summon)
                         {
                             // If target is rescuing, check their rescued unit for items too
                             if (other_unit.is_rescuing)
                             {
                                 Game_Unit rescued_unit = Global.game_map.units[other_unit.rescuing];
-                                if (rescued_unit.actor.has_no_items || same_team(rescued_unit))
+                                if ((rescued_unit.actor.has_no_items && !has_items) || !same_team(rescued_unit) || rescued_unit.is_summon)
                                     continue;
                             }
                             else
