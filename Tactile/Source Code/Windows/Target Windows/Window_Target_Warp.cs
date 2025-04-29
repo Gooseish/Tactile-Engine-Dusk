@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Tactile.Graphics.Map;
 using Tactile.Graphics.Text;
 using Tactile.Graphics.Windows;
+using TactileWeaponExtension;
 
 namespace Tactile.Windows.Target
 {
-    class Window_Target_Teleport : Window_Target_Unit
+    class Window_Target_Warp : Window_Target_Unit
     {
         SystemWindowHeadered Window, Target_Window;
         Character_Sprite Unit_Sprite, Target_Sprite;
@@ -25,7 +27,7 @@ namespace Tactile.Windows.Target
         }
         #endregion
 
-        public Window_Target_Teleport(int unit_id, Vector2 loc)
+        public Window_Target_Warp(int unit_id, Vector2 loc)
         {
             initialize(loc);
             Right_X = Config.WINDOW_WIDTH - this.window_width;

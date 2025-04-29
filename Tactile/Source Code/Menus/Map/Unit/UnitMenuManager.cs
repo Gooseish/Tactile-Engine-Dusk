@@ -613,9 +613,35 @@ namespace Tactile.Menus.Map.Unit
                     targetId = targetMenu.SelectedUnitId;
                     targetLoc = Global.game_map.attackable_map_object(targetId).loc;
                 }
-                MenuHandler.UnitMenuStaff(unit, targetId, targetLoc);
+                if (unit.items[0].to_weapon.Warp())
+                {
+                    var warpTargetWindow = new Window_Target_Warp(
+                        unit.id, new Vector2(0, 0));
+                    var warpTargetMenu = new UnitTargetMenu(warpTargetWindow, attackMenu);
+                    warpTargetMenu.Selected += warpTargetMenu_Selected;
+                    warpTargetMenu.Canceled += unitTargetMenu_Canceled;
+                    AddMenu(warpTargetMenu);
+                }
+                else
+                {
+                    MenuHandler.UnitMenuStaff(unit, targetId, targetLoc);
+                }
+                
             }
         }
+        private void warpTargetMenu_Selected(object sender, EventArgs e)
+        {
+            Global.game_system.play_se(System_Sounds.Confirm);
+            var targetMenu = (sender as UnitTargetMenu);
+            targetMenu.Accept();
+
+            Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
+            int targetId = targetMenu.SelectedUnitId;
+            Vector2 targetLoc = new Vector2(1, 2);
+            MenuHandler.UnitMenuStaff(unit, targetId, targetLoc);
+        }
+
+
         #endregion
 
         #region 2: Rescue/Drop
