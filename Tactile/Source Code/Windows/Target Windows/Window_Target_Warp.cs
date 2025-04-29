@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Tactile.Graphics.Map;
 using Tactile.Graphics.Text;
 using Tactile.Graphics.Windows;
+using TactileWeaponExtension;
 
 namespace Tactile.Windows.Target
 {
-    class Window_Target_Teleport : Window_Target_Unit
+    class Window_Target_Warp : Window_Target_Unit
     {
         SystemWindowHeadered Window, Target_Window;
         Character_Sprite Unit_Sprite, Target_Sprite;
@@ -16,6 +18,8 @@ namespace Tactile.Windows.Target
         TextSprite Name2, Con_Label, Con_Value;
         Hand_Cursor Hand;
         Sprite Rescue_Icon;
+
+        private int Target_Id;
 
         #region Accessors
 
@@ -25,19 +29,20 @@ namespace Tactile.Windows.Target
         }
         #endregion
 
-        public Window_Target_Teleport(int unit_id, Vector2 loc)
+        public Window_Target_Warp(int unit_id, int target_id, Vector2 loc)
         {
-            Manual_Targeting = true;
             initialize(loc);
             Right_X = Config.WINDOW_WIDTH - this.window_width;
             Unit_Id = unit_id;
+            Target_Id = target_id;
             List<int> targets = get_targets();
             //Targets = sort_targets(targets);
             Targets = targets;
             this.index = 0;
             Temp_Index = this.index;
             cursor_move_to(this.target);
-            //Manual_Targeting = true;
+            if(Global.game_map.units[unit_id].items[0].to_weapon.Warp())
+                Manual_Targeting = true;
 
             Global.player.instant_move = true;
             Global.player.update_movement();
@@ -73,7 +78,7 @@ namespace Tactile.Windows.Target
             Game_Unit unit = get_unit();
             List<int> temp_targets = new List<int>();
             // Looking for drop locations
-            foreach (Vector2 loc in unit.teleport_tiles())
+            foreach (Vector2 loc in unit.warp_staff_tiles(Global.game_map.units[Target_Id]))
                 temp_targets.Add((int)(loc.X + loc.Y * Global.game_map.width));
             return temp_targets;
         }

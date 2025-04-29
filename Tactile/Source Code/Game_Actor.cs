@@ -526,7 +526,7 @@ namespace Tactile
             get
             {
                 int n = 0;
-                // Hp +X
+                // Skills: Hp +X
                 foreach (int skill_id in all_skills)
                 {
                     double str_test;
@@ -536,9 +536,15 @@ namespace Tactile
                 }
                 // Skills: Fire Stone
                 // Skills: Transform
-                if (has_skill("FIRESTONE"))
+                if (has_skill("FIRESTONE") && DTransformActive)
                 {
                     n += dtransform_stat_bonus(Stat_Labels.Hp);
+                }
+                // Skills: Hex
+                if (has_skill("HEX"))
+                {
+                    n = n / 2;
+                    n -= stat(Stat_Labels.Hp) / 2;
                 }
                 return n;
             }
@@ -583,7 +589,19 @@ namespace Tactile
         public List<Item_Data> items { get { return Items.GetRange(0, Global.ActorConfig.NumItems); } }
         public List<Item_Data> whole_inventory { get { return Items; } }
 
-        public List<ClassTypes> class_types { get { return actor_class.Class_Types; } }
+        public List<ClassTypes> class_types { get 
+            {
+                // Skills: Gravity
+                if (is_grounded)
+                {
+                    List<ClassTypes> result = actor_class.Class_Types;
+                    result.Remove(ClassTypes.Flier);
+                    return result;
+                }
+                else
+                    return actor_class.Class_Types; 
+            }
+        }
 
         public int con_plus { get { return Stats[(int)Stat_Labels.Con]; } }
 
@@ -591,7 +609,16 @@ namespace Tactile
 
         public int mov_plus { get { return Stats[(int)Stat_Labels.Mov]; } }
 
-        public int move_type { get { return (int)actor_class.Movement_Type; } }
+        public int class_move_type { get { return (int)actor_class.Movement_Type; } }
+        public int move_type { get 
+            {
+                // Skills: Gravity
+                if (is_grounded)
+                    return (int)MovementTypes.Mounted;
+                else
+                    return class_move_type; 
+            } 
+        }
 
         public int mov_cap { get { return (int)actor_class.Mov_Cap; } }
 
@@ -2384,7 +2411,7 @@ namespace Tactile
         /// <param name="item_data">Item data to add</param>
         public void gain_item(Item_Data item_data)
         {
-            if(is_summon) //items acquired by summons go straight to the convoy
+            if(is_trade_blocked) //items acquired by summons go straight to the convoy
             {
                 Global.game_battalions.add_item_to_convoy(item_data);
             }
@@ -2496,6 +2523,8 @@ namespace Tactile
         /// <param name="index">Index of the item to test</param>
         public bool CanDiscard(int index)
         {
+            if (has_skill("BEWITCH"))
+                return false;
             return CanDiscard(Items[index]);
         }
         /// <summary>
@@ -3273,9 +3302,9 @@ namespace Tactile
                     // If the weapon is an attack staff return false
                     if (weapon.is_attack_staff())
                         return false;
-                    // Staff must heal, or heal statuses, or barrier, or apply statuses
+                    // Staff must heal, or heal statuses, or barrier, or apply statuses, or warp
                     return weapon.Heals() || weapon.Status_Remove.Count > 0 ||
-                        weapon.Barrier() || weapon.Status_Inflict.Count > 0;
+                        weapon.Barrier() || weapon.Status_Inflict.Count > 0 || weapon.Warp() || weapon.Rescue();
                 })
                 .ToList();
             /*List<int> result = useable_staves(items); //Debug

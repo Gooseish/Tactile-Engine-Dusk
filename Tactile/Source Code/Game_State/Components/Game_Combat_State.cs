@@ -5,6 +5,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using TactileLibrary;
 using ListExtension;
+using Vector2Extension;
 
 namespace Tactile.State
 {
@@ -31,6 +32,7 @@ namespace Tactile.State
         protected int Attack_Id = -1;
         protected int Battler_1_Id = -1, Battler_2_Id = -1;
         protected Vector2 Staff_Target_Loc;
+        protected Vector2 Warp_Target_Loc = new Vector2(-1, -1);
         protected bool Dying = false;
         protected Data_Weapon Weapon1 = null, Weapon2 = null;
 
@@ -47,6 +49,7 @@ namespace Tactile.State
             Battle_Action.write(writer);
             Cleanup_Action.write(writer);
             writer.Write(Skip_Attack_Anim);
+            Warp_Target_Loc.write(writer);
 
             writer.Write(Map_Battle);
 
@@ -65,6 +68,7 @@ namespace Tactile.State
             Battle_Action.read(reader);
             Cleanup_Action.read(reader);
             Skip_Attack_Anim = reader.ReadBoolean();
+            Warp_Target_Loc = Warp_Target_Loc.read(reader);
 
             Map_Battle = reader.ReadBoolean();
 
@@ -162,6 +166,11 @@ namespace Tactile.State
                 }
                 return filename;
             }
+        }
+
+        private bool warping
+        {
+            get { return  !(Warp_Target_Loc == new Vector2(-1, -1)); }
         }
         #endregion
 
@@ -297,6 +306,7 @@ namespace Tactile.State
                                     Battler_1_Id = Global.game_system.Battler_1_Id;
                                     Battler_2_Id = Global.game_system.Battler_2_Id;
                                     Staff_Target_Loc = Global.game_system.Staff_Target_Loc;
+                                    Warp_Target_Loc = Global.game_system.Warp_Target_Loc;
                                     Battler_1 = Units[Battler_1_Id];
                                     target = attackable_map_object(battler_2_id);
                                     if (target != null && target.is_unit())
@@ -310,6 +320,7 @@ namespace Tactile.State
                                     Global.game_system.Battler_1_Id = -1;
                                     Global.game_system.Battler_2_Id = -1;
                                     Global.game_system.Staff_Target_Loc = new Vector2(-1, -1);
+                                    Global.game_system.Warp_Target_Loc = new Vector2(-1, -1);
                                     // Turns map sprites toward each other
                                     if (In_Staff_Use)
                                     {
@@ -350,7 +361,7 @@ namespace Tactile.State
                                     Combat_Timer++;
                                 break;
                             case 16:
-                                if (target != null)
+                                if (target != null && !warping)
                                     scene_map.create_hud(Map_Combat_Data);
                                 update_hud_stats();
                                 Combat_Timer++;
@@ -1434,6 +1445,8 @@ namespace Tactile.State
             }
             if (weapon.Torch())
                 Global.game_map.add_torch_staff(Staff_Target_Loc);
+            if (warping)
+                battler_2.force_loc(Warp_Target_Loc);
         }
         #endregion
 
@@ -1805,6 +1818,7 @@ namespace Tactile.State
                                 Battler_1_Id = Global.game_system.Battler_1_Id;
                                 Battler_2_Id = Global.game_system.Battler_2_Id;
                                 Staff_Target_Loc = Global.game_system.Staff_Target_Loc;
+                                Warp_Target_Loc = Global.game_system.Warp_Target_Loc;
                                 Battler_1 = Units[Battler_1_Id];
                                 target = attackable_map_object(battler_2_id);
                                 if (target != null && target.is_unit())
@@ -2179,7 +2193,7 @@ namespace Tactile.State
                     Map_Combat_Data = new Combat_Data(
                         battler_1_id, battler_2_id, combat_distance(battler_1_id, battler_2_id));
                 }
-            }
+                }
         }
 
         public void to_arena()

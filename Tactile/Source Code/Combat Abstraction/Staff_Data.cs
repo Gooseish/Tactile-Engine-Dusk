@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Tactile
 {
-    enum Staff_Modes { Heal, Status_Inflict, Torch, Other }
+    enum Staff_Modes { Heal, Status_Inflict, Torch, Warp, Other }
     class Staff_Data : Combat_Data
     {
         readonly static List<Staff_Modes> ATTACK_MODES = new List<Staff_Modes> { Staff_Modes.Status_Inflict };
@@ -52,6 +52,9 @@ namespace Tactile
             // Status healing
             else if (!weapon.is_attack_staff() && weapon.Status_Remove.Count > 0)
                 return Staff_Modes.Heal;
+            // Warp
+            else if (weapon.Warp() || weapon.Rescue())
+                return Staff_Modes.Warp;
             // Status infliction
             else if (weapon.is_attack_staff())
                 return Staff_Modes.Status_Inflict;

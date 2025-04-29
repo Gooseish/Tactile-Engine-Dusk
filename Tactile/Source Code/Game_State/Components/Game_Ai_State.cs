@@ -177,7 +177,11 @@ namespace Tactile.State
                             {
                                 Ai_Turn_Rn = Global.game_system.get_rng();
                                 Ai_Team.Clear();
-                                Ai_Team.AddRange(Global.game_map.teams[Team_Turn]);
+                                foreach (Game_Unit ai_unit in Global.game_map.units.Values)
+                                {
+                                    if (ai_unit.team == Team_Turn)
+                                        Ai_Team.Add(ai_unit.id);
+                                }
                                 // Remove rescued units
                                 int i = 0;
                                 while (i < Ai_Team.Count)

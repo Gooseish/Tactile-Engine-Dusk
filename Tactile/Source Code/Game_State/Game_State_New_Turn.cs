@@ -94,7 +94,11 @@ namespace Tactile
                     switch (New_Turn_Phase)
                     {
                         case 0:
-                            New_Turn_Team.AddRange(Global.game_map.teams[Team_Turn]);
+                            foreach (Game_Unit unit in Global.game_map.units.Values)
+                            {
+                                if (unit.team == Team_Turn)
+                                    New_Turn_Team.Add(unit.id);
+                            }
                             foreach (int id in New_Turn_Team)
                                 Global.game_map.units[id].new_turn_fow();
                             Global.game_map.update_fow();

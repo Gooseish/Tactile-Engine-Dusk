@@ -613,9 +613,80 @@ namespace Tactile.Menus.Map.Unit
                     targetId = targetMenu.SelectedUnitId;
                     targetLoc = Global.game_map.attackable_map_object(targetId).loc;
                 }
-                MenuHandler.UnitMenuStaff(unit, targetId, targetLoc);
+                if (unit.items[0].to_weapon.Warp() || unit.items[0].to_weapon.Rescue())
+                {
+                    var warpTargetWindow = new Window_Target_Warp(
+                        unit.id, targetId, new Vector2(0, 0));
+                    var warpTargetMenu = new UnitTargetMenu(warpTargetWindow, attackMenu);
+                    warpTargetMenu.Selected += warpTargetMenu_Selected;
+                    warpTargetMenu.Canceled += warpTargetMenu_Canceled;
+                    Global.game_temp.temp_staff_range = unit.warp_staff_tiles(Global.game_map.units[targetId]);
+                    AddMenu(warpTargetMenu);
+                    StaffRangeIsMove = true;
+                }
+                else
+                {
+                    MenuHandler.UnitMenuStaff(unit, targetId, targetLoc);
+                }
+                
             }
         }
+        public bool StaffRangeIsMove;
+        private void warpTargetMenu_Selected(object sender, EventArgs e)
+        {
+            if (this.ManualTargeting && !Global.game_temp.temp_staff_range.Contains(Global.player.loc))
+                Global.game_system.play_se(System_Sounds.Buzzer);
+            else
+            {
+                Global.game_system.play_se(System_Sounds.Confirm);
+                var targetMenu = (sender as UnitTargetMenu);
+                targetMenu.Accept();
+
+
+
+                Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
+
+
+                int targetId = (Menus.Skip(1).First() as UnitTargetMenu).SelectedUnitId;
+                Vector2 targetLoc = Global.game_map.attackable_map_object(targetId).loc;
+                Vector2 warpLoc;
+
+
+
+                if (this.ManualTargeting)
+                {
+                    warpLoc = Global.player.loc;
+                }
+                else
+                {
+                    int val = targetMenu.SelectedUnitId;
+                    warpLoc = new Vector2(val % Global.game_map.width,
+                        val / Global.game_map.width);
+                }
+
+                StaffRangeIsMove = false;
+                MenuHandler.UnitMenuStaff(unit, targetId, targetLoc, warpLoc);
+            }
+        }
+        private void warpTargetMenu_Canceled(object sender, EventArgs e)
+        {
+            var targetMenu = (sender as UnitTargetMenu);
+            Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
+            var unitMenu = (Menus.ElementAt(3) as UnitCommandMenu);
+
+            var staffMenu = (Menus.ElementAt(2) as ItemMenu);
+
+            Global.game_map.range_start_timer = 0;
+            unitMenu.RefreshTempStaffRange(staffMenu.SelectedItem);
+
+            StaffRangeIsMove = false;
+            closeTargetMenu(sender, e, unit);
+
+            Global.player.facing = 4;
+            Global.player.update_cursor_frame();
+        }
+
+
         #endregion
 
         #region 2: Rescue/Drop
@@ -2137,6 +2208,7 @@ namespace Tactile.Menus.Map.Unit
                 return false;
             }
         }
+        
 
         public bool ShowTalkRange
         {
@@ -2161,6 +2233,7 @@ namespace Tactile.Menus.Map.Unit
     partial interface IUnitMenuHandler : IMenuHandler
     {
         void UnitMenuAttack(Game_Unit unit, int targetId);
+        void UnitMenuStaff(Game_Unit unit, int targetId, Vector2 targetLoc, Vector2 warpLoc);
         void UnitMenuStaff(Game_Unit unit, int targetId, Vector2 targetLoc);
         void UnitMenuRescue(Game_Unit unit, int targetId);
         void UnitMenuDrop(Game_Unit unit, Vector2 targetLoc);

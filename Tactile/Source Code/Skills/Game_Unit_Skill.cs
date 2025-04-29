@@ -2271,10 +2271,10 @@ namespace Tactile
         // Skills: Teleport
 
         internal bool HasTeleported;
-        public void teleport(int teleportTarget)
+        public void teleport(Vector2 teleportTarget)
         {
             HasTeleported = true;
-            force_loc(teleport_vector2_from_int(teleportTarget));
+            force_loc(teleportTarget);
             wait(true);
         }
 
@@ -2721,7 +2721,7 @@ namespace Tactile
                 if (!Global.game_map.is_off_map(Loc + dir.Value * 2) &&
                     Pathfind.passable(this, Loc + dir.Value * 1) && (Pathfind.passable(this, Loc + dir.Value * 2) &&
                     !Global.game_map.is_blocked(Loc + dir.Value * 2, Id, false)) &&
-                    (!Global.game_map.fow || Global.game_map.fow_visibility[Team].Contains(Loc + dir.Value * 2)))
+                    (!Global.game_map.fow || Global.game_map.fow_visibility[team].Contains(Loc + dir.Value * 2)))
                     range.Add(Loc + dir.Value * 1);
             }
             return range;
@@ -2742,7 +2742,7 @@ namespace Tactile
                 if (!Global.game_map.is_off_map(Loc + dir.Value * 2) &&
                     Pathfind.passable(this, Loc + dir.Value * 1) && (Pathfind.passable(this, Loc + dir.Value * 2) &&
                     !Global.game_map.is_blocked(Loc + dir.Value * 2, Id, false)) &&
-                    (!Global.game_map.fow || Global.game_map.fow_visibility[Team].Contains(Loc + dir.Value * 2)))
+                    (!Global.game_map.fow || Global.game_map.fow_visibility[team].Contains(Loc + dir.Value * 2)))
                     range.Add(Loc + dir.Value * 2);
             }
             return range;
@@ -3342,6 +3342,9 @@ namespace Tactile
             // Skills: Drunk
             if (actor.has_skill("DRUNK"))
                 return false;
+            // Skills: Bewitch
+            if (actor.has_skill("BEWITCH"))
+                return false;
             return true;
         }
 
@@ -3372,6 +3375,9 @@ namespace Tactile
             // Skills: Flight
             if (actor.has_skill("FLIGHT") && !is_weighted_by_ally)
                 n += 2;
+            // Skills: Gravity
+            if (actor.is_grounded)
+                n -= 2;
             // Skills: Celerity
             if (actor.has_skill("CELERITY"))
                 n += 2;

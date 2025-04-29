@@ -779,6 +779,20 @@ namespace Tactile
             result.wexp = battler_1.is_ally ? wexp : 0;
             return result;
         }
+        public static Attack_Result set_warp(Game_Unit battler_1, Game_Unit battler_2, TactileLibrary.Data_Weapon weapon)
+        {
+            Attack_Result result = new Attack_Result { state_change = new List<KeyValuePair<int, bool>>(), state_change_attacker = new List<KeyValuePair<int, bool>>() };
+
+            result.hit = true;
+            result.crt = false;
+            //battler_1.actor.backfire = false; //Debug
+            int wexp = staff_wexp(battler_1.actor, weapon);
+            result.dmg = 0;
+            result.actual_dmg = 0;
+
+            result.wexp = battler_1.is_ally ? wexp : 0;
+            return result;
+        }
 
         public static int staff_wexp(Game_Actor actor, TactileLibrary.Data_Weapon staff)
         {
