@@ -10,7 +10,7 @@ using TactileWeaponExtension;
 
 namespace Tactile.Windows.Target
 {
-    enum Staff_Target_Mode { Heal, Status_Inflict, Torch, Barrier }
+    enum Staff_Target_Mode { Heal, Status_Inflict, Torch, Barrier, Warp }
 
     class Window_Target_Staff : Window_Target_Unit
     {
@@ -75,6 +75,8 @@ namespace Tactile.Windows.Target
                 return Staff_Target_Mode.Heal;
             else if (staff.Barrier())
                 return Staff_Target_Mode.Barrier;
+            else if (staff.Warp())
+                return Staff_Target_Mode.Warp;
             else
                 return Staff_Target_Mode.Heal;
         }
@@ -86,6 +88,7 @@ namespace Tactile.Windows.Target
             {
                 case Staff_Target_Mode.Heal:
                 case Staff_Target_Mode.Barrier:
+                case Staff_Target_Mode.Warp:
                     return unit.allies_in_staff_range(new HashSet<Vector2> { unit.loc }, item_index)[0];
                 case Staff_Target_Mode.Status_Inflict:
                     return unit.enemies_in_staff_range(new HashSet<Vector2> { unit.loc }, item_index)[0];

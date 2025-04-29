@@ -1434,6 +1434,8 @@ namespace Tactile.State
             }
             if (weapon.Torch())
                 Global.game_map.add_torch_staff(Staff_Target_Loc);
+            if (weapon.Warp())
+                battler_2.force_loc(Staff_Target_Loc);
         }
         #endregion
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Tactile
 {
-    enum Staff_Modes { Heal, Status_Inflict, Torch, Other }
+    enum Staff_Modes { Heal, Status_Inflict, Torch, Warp, Other }
     class Staff_Data : Combat_Data
     {
         readonly static List<Staff_Modes> ATTACK_MODES = new List<Staff_Modes> { Staff_Modes.Status_Inflict };
@@ -64,6 +64,9 @@ namespace Tactile
             // Flare
             else if (weapon.Torch())
                 return Staff_Modes.Torch;
+            // Warp
+            else if (weapon.Warp())
+                return Staff_Modes.Warp;
             else
                 return Staff_Modes.Other;
         }

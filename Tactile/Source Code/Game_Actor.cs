@@ -3273,9 +3273,9 @@ namespace Tactile
                     // If the weapon is an attack staff return false
                     if (weapon.is_attack_staff())
                         return false;
-                    // Staff must heal, or heal statuses, or barrier, or apply statuses
+                    // Staff must heal, or heal statuses, or barrier, or apply statuses, or warp
                     return weapon.Heals() || weapon.Status_Remove.Count > 0 ||
-                        weapon.Barrier() || weapon.Status_Inflict.Count > 0;
+                        weapon.Barrier() || weapon.Status_Inflict.Count > 0 || weapon.Warp();
                 })
                 .ToList();
             /*List<int> result = useable_staves(items); //Debug
