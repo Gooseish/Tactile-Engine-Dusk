@@ -636,9 +636,11 @@ namespace Tactile.Menus.Map.Unit
             targetMenu.Accept();
 
             Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
-            int targetId = targetMenu.SelectedUnitId;
-            Vector2 targetLoc = new Vector2(1, 2);
-            MenuHandler.UnitMenuStaff(unit, targetId, targetLoc);
+            int targetId = (Menus.Skip(1).First() as UnitTargetMenu).SelectedUnitId;
+            Vector2 targetLoc = Global.game_map.attackable_map_object(targetId).loc;
+            int warpId = targetMenu.SelectedUnitId;
+            Vector2 warpLoc = new Vector2(warpId % Global.game_map.width, warpId / Global.game_map.width);
+            MenuHandler.UnitMenuStaff(unit, targetId, targetLoc, warpLoc);
         }
 
 
@@ -2187,6 +2189,7 @@ namespace Tactile.Menus.Map.Unit
     partial interface IUnitMenuHandler : IMenuHandler
     {
         void UnitMenuAttack(Game_Unit unit, int targetId);
+        void UnitMenuStaff(Game_Unit unit, int targetId, Vector2 targetLoc, Vector2 warpLoc);
         void UnitMenuStaff(Game_Unit unit, int targetId, Vector2 targetLoc);
         void UnitMenuRescue(Game_Unit unit, int targetId);
         void UnitMenuDrop(Game_Unit unit, Vector2 targetLoc);

@@ -31,6 +31,7 @@ namespace Tactile
         public int Staff_User_Id;
         public int Staff_Target_Id;
         public Vector2 Staff_Target_Loc;
+        public Vector2 Warp_Target_Loc;
         public int Rescuer_Id;
         public int Rescuee_Id;
         public int Item_User, Item_Used, Item_Inventory_Target, ItemPromotionId;
@@ -107,6 +108,7 @@ namespace Tactile
             writer.Write(Staff_User_Id);
             writer.Write(Staff_Target_Id);
             Staff_Target_Loc.write(writer);
+            Warp_Target_Loc.write(writer);
             writer.Write(Rescuer_Id);
             writer.Write(Rescuee_Id);
             writer.Write(Item_User);
@@ -192,6 +194,7 @@ namespace Tactile
             Staff_User_Id = reader.ReadInt32();
             Staff_Target_Id = reader.ReadInt32();
             Staff_Target_Loc = Staff_Target_Loc.read(reader);
+            Warp_Target_Loc = Warp_Target_Loc.read(reader);
             Rescuer_Id = reader.ReadInt32();
             Rescuee_Id = reader.ReadInt32();
             Item_User = reader.ReadInt32();
@@ -486,6 +489,7 @@ namespace Tactile
             Staff_User_Id = -1;
             Staff_Target_Id = -1;
             Staff_Target_Loc = new Vector2(-1, -1);
+            Warp_Target_Loc = new Vector2(-1, -1);
             Rescuer_Id = -1;
             Rescuee_Id = -1;
             Item_User = -1;

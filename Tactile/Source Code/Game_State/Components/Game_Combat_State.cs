@@ -31,6 +31,7 @@ namespace Tactile.State
         protected int Attack_Id = -1;
         protected int Battler_1_Id = -1, Battler_2_Id = -1;
         protected Vector2 Staff_Target_Loc;
+        protected Vector2 Warp_Target_Loc;
         protected bool Dying = false;
         protected Data_Weapon Weapon1 = null, Weapon2 = null;
 
@@ -297,6 +298,7 @@ namespace Tactile.State
                                     Battler_1_Id = Global.game_system.Battler_1_Id;
                                     Battler_2_Id = Global.game_system.Battler_2_Id;
                                     Staff_Target_Loc = Global.game_system.Staff_Target_Loc;
+                                    Warp_Target_Loc = Global.game_system.Warp_Target_Loc;
                                     Battler_1 = Units[Battler_1_Id];
                                     target = attackable_map_object(battler_2_id);
                                     if (target != null && target.is_unit())
@@ -310,6 +312,7 @@ namespace Tactile.State
                                     Global.game_system.Battler_1_Id = -1;
                                     Global.game_system.Battler_2_Id = -1;
                                     Global.game_system.Staff_Target_Loc = new Vector2(-1, -1);
+                                    Global.game_system.Warp_Target_Loc = new Vector2(-1, -1);
                                     // Turns map sprites toward each other
                                     if (In_Staff_Use)
                                     {
@@ -1435,7 +1438,7 @@ namespace Tactile.State
             if (weapon.Torch())
                 Global.game_map.add_torch_staff(Staff_Target_Loc);
             if (weapon.Warp())
-                battler_2.force_loc(Staff_Target_Loc);
+                battler_2.force_loc(Warp_Target_Loc);
         }
         #endregion
 
@@ -1807,6 +1810,7 @@ namespace Tactile.State
                                 Battler_1_Id = Global.game_system.Battler_1_Id;
                                 Battler_2_Id = Global.game_system.Battler_2_Id;
                                 Staff_Target_Loc = Global.game_system.Staff_Target_Loc;
+                                Warp_Target_Loc = Global.game_system.Warp_Target_Loc;
                                 Battler_1 = Units[Battler_1_Id];
                                 target = attackable_map_object(battler_2_id);
                                 if (target != null && target.is_unit())

@@ -298,7 +298,8 @@ namespace Tactile
         }
 
         internal void call_staff(int id1, int id2,
-            Maybe<Vector2> target_loc = default(Maybe<Vector2>))
+            Maybe<Vector2> target_loc = default(Maybe<Vector2>),
+            Maybe<Vector2> warp_loc = default(Maybe<Vector2>))
         {
             Game_Unit attacker = Global.game_map.units[id1];
             if (attacker.actor.weapon.Hits_All_in_Range())
@@ -314,10 +315,13 @@ namespace Tactile
                 Global.game_system.Staff_Target_Id = Global.game_system.Battler_2_Id = id2;
                 if (target_loc.IsSomething)
                     Global.game_system.Staff_Target_Loc = target_loc;
+                if (warp_loc.IsSomething)
+                    Global.game_system.Warp_Target_Loc = warp_loc;
             }
         }
         internal void call_staff(int id1, List<int> targets,
-            Maybe<Vector2> target_loc = default(Maybe<Vector2>))
+            Maybe<Vector2> target_loc = default(Maybe<Vector2>),
+            Maybe<Vector2> warp_loc = default(Maybe<Vector2>))
         {
             CombatState.aoe_calling = true;
 
@@ -327,6 +331,8 @@ namespace Tactile
             Global.game_system.Aoe_Targets = targets;
             if (target_loc.IsSomething)
                 Global.game_system.Staff_Target_Loc = target_loc;
+            if (warp_loc.IsSomething)
+                Global.game_system.Warp_Target_Loc = warp_loc;
         }
 
         internal void call_block(int Id)

@@ -419,13 +419,17 @@ namespace Tactile
 
         public void UnitMenuStaff(Game_Unit unit, int targetId, Vector2 targetLoc)
         {
+            UnitMenuStaff(unit, targetId, targetLoc, new Vector2(-1, -1));
+        }
+        public void UnitMenuStaff(Game_Unit unit, int targetId, Vector2 targetLoc, Vector2 warpLoc)
+        {
             Global.game_map.clear_move_range();
             // Lock in unit movement
             unit.moved();
 
             Global.game_state.call_staff(
                 unit.id, targetId,
-                targetLoc);
+                targetLoc, warpLoc);
 
             Global.game_state.call_battle(unit.id, targetId);
             if (unit.actor.weapon.Hits_All_in_Range())
