@@ -657,7 +657,11 @@ namespace Tactile.Menus.Map.Unit
 
             Global.game_map.range_start_timer = 0;
             unitMenu.RefreshTempStaffRange(staffMenu.SelectedItem);
+
             closeTargetMenu(sender, e, unit);
+
+            Global.player.facing = 4;
+            Global.player.update_cursor_frame();
         }
 
 
