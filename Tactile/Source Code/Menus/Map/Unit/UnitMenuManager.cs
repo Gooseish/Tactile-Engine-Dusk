@@ -619,7 +619,8 @@ namespace Tactile.Menus.Map.Unit
                         unit.id, new Vector2(0, 0));
                     var warpTargetMenu = new UnitTargetMenu(warpTargetWindow, attackMenu);
                     warpTargetMenu.Selected += warpTargetMenu_Selected;
-                    warpTargetMenu.Canceled += unitTargetMenu_Canceled;
+                    warpTargetMenu.Canceled += warpTargetMenu_Canceled;
+                    Global.game_temp.temp_staff_range = unit.teleport_tiles();
                     AddMenu(warpTargetMenu);
                 }
                 else
@@ -635,12 +636,28 @@ namespace Tactile.Menus.Map.Unit
             var targetMenu = (sender as UnitTargetMenu);
             targetMenu.Accept();
 
+            
+
             Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
+            
+
             int targetId = (Menus.Skip(1).First() as UnitTargetMenu).SelectedUnitId;
             Vector2 targetLoc = Global.game_map.attackable_map_object(targetId).loc;
             int warpId = targetMenu.SelectedUnitId;
             Vector2 warpLoc = new Vector2(warpId % Global.game_map.width, warpId / Global.game_map.width);
             MenuHandler.UnitMenuStaff(unit, targetId, targetLoc, warpLoc);
+        }
+        private void warpTargetMenu_Canceled(object sender, EventArgs e)
+        {
+            var targetMenu = (sender as UnitTargetMenu);
+            Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
+            var unitMenu = (Menus.ElementAt(3) as UnitCommandMenu);
+
+            var staffMenu = (Menus.ElementAt(2) as ItemMenu);
+
+            Global.game_map.range_start_timer = 0;
+            unitMenu.RefreshTempStaffRange(staffMenu.SelectedItem);
+            closeTargetMenu(sender, e, unit);
         }
 
 
