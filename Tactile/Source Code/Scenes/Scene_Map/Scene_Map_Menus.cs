@@ -346,9 +346,14 @@ namespace Tactile
                     sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
                     int opacity = 144;
                     Color color = new Color(opacity, opacity, opacity, opacity);
+                    Texture2D texture;
+                    if (UnitMenu.StaffRangeIsMove)
+                        texture = Move_Range_Texture;
+                    else
+                        texture = Staff_Range_Texture;
                     foreach (Vector2 loc in Global.game_temp.temp_staff_range)
                     {
-                        sprite_batch.Draw(Staff_Range_Texture,
+                        sprite_batch.Draw(texture,
                             loc * TILE_SIZE + move_range_draw_vector() - Global.game_map.display_loc + new Vector2(0, width - timer),
                             rect, color);
                     }

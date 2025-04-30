@@ -622,6 +622,7 @@ namespace Tactile.Menus.Map.Unit
                     warpTargetMenu.Canceled += warpTargetMenu_Canceled;
                     Global.game_temp.temp_staff_range = unit.teleport_tiles();
                     AddMenu(warpTargetMenu);
+                    StaffRangeIsMove = true;
                 }
                 else
                 {
@@ -630,6 +631,7 @@ namespace Tactile.Menus.Map.Unit
                 
             }
         }
+        public bool StaffRangeIsMove;
         private void warpTargetMenu_Selected(object sender, EventArgs e)
         {
             Global.game_system.play_se(System_Sounds.Confirm);
@@ -645,6 +647,7 @@ namespace Tactile.Menus.Map.Unit
             Vector2 targetLoc = Global.game_map.attackable_map_object(targetId).loc;
             int warpId = targetMenu.SelectedUnitId;
             Vector2 warpLoc = new Vector2(warpId % Global.game_map.width, warpId / Global.game_map.width);
+            StaffRangeIsMove = false;
             MenuHandler.UnitMenuStaff(unit, targetId, targetLoc, warpLoc);
         }
         private void warpTargetMenu_Canceled(object sender, EventArgs e)
@@ -658,6 +661,7 @@ namespace Tactile.Menus.Map.Unit
             Global.game_map.range_start_timer = 0;
             unitMenu.RefreshTempStaffRange(staffMenu.SelectedItem);
 
+            StaffRangeIsMove = false;
             closeTargetMenu(sender, e, unit);
 
             Global.player.facing = 4;
@@ -2186,6 +2190,7 @@ namespace Tactile.Menus.Map.Unit
                 return false;
             }
         }
+        
 
         public bool ShowTalkRange
         {
