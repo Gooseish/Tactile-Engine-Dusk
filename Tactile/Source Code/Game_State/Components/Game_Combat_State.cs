@@ -164,6 +164,11 @@ namespace Tactile.State
                 return filename;
             }
         }
+
+        private bool warping
+        {
+            get { return  !(Warp_Target_Loc == new Vector2(-1, -1)); }
+        }
         #endregion
 
         public Game_Unit enemy_of_dying_unit()
@@ -353,7 +358,7 @@ namespace Tactile.State
                                     Combat_Timer++;
                                 break;
                             case 16:
-                                if (target != null)
+                                if (target != null && !warping)
                                     scene_map.create_hud(Map_Combat_Data);
                                 update_hud_stats();
                                 Combat_Timer++;
