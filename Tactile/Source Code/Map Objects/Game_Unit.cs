@@ -293,7 +293,15 @@ namespace Tactile
             set { Cantoing = value; }
         }
 
-        public override int team { get { return Team; } }
+        public override int team { get 
+            {
+                // Skills: Bewitch
+                if (actor.has_skill("BEWITCH"))
+                    return (Team % 2) + 1;
+                else
+                    return Team; 
+            }
+        }
         public bool has_flipped_map_sprite
         {
             get { return Constants.Team.flipped_map_sprite(Team); }
@@ -416,6 +424,8 @@ namespace Tactile
         }
 
         internal bool is_evented_move { get { return Evented_Move; } }
+
+        public bool is_trade_blocked { get { return actor.is_trade_blocked; } }
         #endregion
 
         public override string ToString()
@@ -1079,7 +1089,7 @@ namespace Tactile
             if (Constants.Support.SAME_TARGET_SUPPORT_POINTS <= 0)
                 return;
 
-            var support_partners = Global.game_map.teams[Team]
+            var support_partners = Global.game_map.teams[team]
                 .Where(x => Global.game_map.units[x].Attack_Targets_This_Turn.Contains(id) &&
                     support_possible(Global.game_map.units[x]));
             display_support_gain(support_partners);
@@ -1090,7 +1100,7 @@ namespace Tactile
             if (Constants.Support.SAME_TARGET_SUPPORT_POINTS <= 0)
                 return;
 
-            var support_partners = Global.game_map.teams[Team]
+            var support_partners = Global.game_map.teams[team]
                 .Where(x => !Global.game_map.units[x].Attack_Targets_This_Turn.Intersect(ids).Any() &&
                     support_possible(Global.game_map.units[x]));
             display_support_gain(support_partners);
@@ -2110,7 +2120,7 @@ namespace Tactile
             for (int j = 0; j < Constants.Team.TEAM_GROUPS.Length; j++)
             {
                 group = Constants.Team.TEAM_GROUPS[j];
-                if (group.Contains(Team))
+                if (group.Contains(team))
                     break;
             }
 
@@ -2255,12 +2265,12 @@ namespace Tactile
         {
             if (!is_player_allied)
             {
-                if (!test_unit.visible_by(Team) && !Global.game_state.is_player_turn)
+                if (!test_unit.visible_by(team) && !Global.game_state.is_player_turn)
                     return true;
             }
             else
             {
-                if (!test_unit.visible_by(Team))
+                if (!test_unit.visible_by(team))
                     return true;
             }
             if (test_unit is Combat_Map_Object)
@@ -2283,7 +2293,7 @@ namespace Tactile
         {
             get
             {
-                if (is_summon)
+                if (is_trade_blocked)
                 {
                     return false;
                 }
@@ -2294,7 +2304,7 @@ namespace Tactile
                 if (is_rescuing)
                 {
                     Game_Unit rescued_unit = Global.game_map.units[Rescuing];
-                    if ((has_items || rescued_unit.actor.has_items) && same_team(rescued_unit) && !rescued_unit.is_summon)
+                    if ((has_items || rescued_unit.actor.has_items) && same_team(rescued_unit) && !rescued_unit.is_trade_blocked)
                         can_trade = true;
                 }
                 // If no rescued unit to trade with, check allies nearby
@@ -2305,13 +2315,13 @@ namespace Tactile
                         Game_Unit other_unit = Global.game_map.units[id];
                         if (different_team(other_unit))
                             continue;
-                        if ((other_unit.actor.has_no_items && !has_items) || other_unit.is_summon)
+                        if ((other_unit.actor.has_no_items && !has_items) || other_unit.is_trade_blocked)
                         {
                             // If target is rescuing, check their rescued unit for items too
                             if (other_unit.is_rescuing)
                             {
                                 Game_Unit rescued_unit = Global.game_map.units[other_unit.rescuing];
-                                if ((rescued_unit.actor.has_no_items && !has_items) || !same_team(rescued_unit) || rescued_unit.is_summon)
+                                if ((rescued_unit.actor.has_no_items && !has_items) || !same_team(rescued_unit) || rescued_unit.is_trade_blocked)
                                     continue;
                             }
                             else
@@ -2880,7 +2890,7 @@ namespace Tactile
         {
             if (!Evented_Move && other_unit != null)
             {
-                if (is_passable_team(other_unit) && !other_unit.visible_by(Team))
+                if (is_passable_team(other_unit) && !other_unit.visible_by(team))
                 {
                     Global.game_state.call_block(Id);
                     Blocked = true;
@@ -3352,13 +3362,13 @@ namespace Tactile
         public bool is_convoy()
         {
             if (Constants.Gameplay.TEAM_LEADER_CONVOY)
-                if (Global.game_map.team_leaders[Team] == Id)
+                if (Global.game_map.team_leaders[team] == Id)
                     return true;
             return Global.battalion.convoy_id == ActorId;
         }
         public bool can_supply()
         {
-            if (is_summon)
+            if (is_trade_blocked)
                 return false;
             if (is_convoy())
                 return true;
@@ -3760,6 +3770,9 @@ namespace Tactile
 
         public bool can_rescue(Game_Unit target)
         {
+            // Skills: Bewitch
+            if (target.actor.has_skill("BEWITCH"))
+                return false;
             // If already rescuing/being rescued, lol no
             if (is_rescuing || is_rescued)
                 return false;
@@ -4212,7 +4225,7 @@ namespace Tactile
         public void start_wait(bool update_move_ranges = true, bool ignore_wait_inactive_team = true)
         {
             Global.game_map.add_unit_wait(Id, update_move_ranges);
-            if (ignore_wait_inactive_team && Team != Global.game_state.team_turn)
+            if (ignore_wait_inactive_team && team != Global.game_state.team_turn)
                 Global.game_map.add_unit_wait_skip(Id);
         }
         public void wait(bool update_move_ranges)
@@ -4270,7 +4283,7 @@ namespace Tactile
             // shouldn't call this function
             if (!Constants.Support.PLAYER_SUPPORT_ONLY || is_player_team)
                 // This inherently only allows gaining support points with members of the same team for efficiency
-                foreach (int unit_id in Global.game_map.teams[Team])
+                foreach (int unit_id in Global.game_map.teams[team])
                 {
                     int actor_id = Global.game_map.units[unit_id].actor.id;
                     {
@@ -4357,7 +4370,7 @@ namespace Tactile
             Ai_Wants_Rescue = false;
             if (!Constants.Support.PLAYER_SUPPORT_ONLY || is_player_team)
                 // This inherently only allows gaining support points with members of the same team for efficiency
-                foreach (int unit_id in Global.game_map.teams[Team]
+                foreach (int unit_id in Global.game_map.teams[team]
                     .Where(x => Global.game_map.units[x].ActorId != ActorId))
                 {
                     int actor_id = Global.game_map.units[unit_id].actor.id;
@@ -4375,7 +4388,7 @@ namespace Tactile
 
         public void status()
         {
-            Global.game_temp.status_team = Team;
+            Global.game_temp.status_team = team;
             Global.game_temp.status_unit_id = Id;
             Global.game_temp.status_menu_call = true;
         }
@@ -5008,7 +5021,7 @@ namespace Tactile
                 // If the unit is not this unit, and the unit can be attacked/can be healed
                 if (!(id == Id || (healing ? unit_here.actor.is_full_hp() : unit_here.is_dead)))
                     if (berserk ? attackable : !(attackable ^ is_attackable_team(unit_here)))
-                        if (unit_here.visible_by(Team))
+                        if (unit_here.visible_by(team))
                             units.Add(id);
             }
             if (objects && attackable && !healing)
@@ -5039,14 +5052,14 @@ namespace Tactile
         public override bool is_attackable_team(int other_team)
         {
             foreach (int[] group in Constants.Team.TEAM_GROUPS)
-                if (group.Contains(Team))
+                if (group.Contains(team))
                     if (group.Contains(other_team))
                         return false;
             return true;
 
             //Debug
             foreach (int[] group in Constants.Team.TEAM_GROUPS)
-                if (group.Contains(Team))
+                if (group.Contains(team))
                     return !group.Contains(other_team);
             return false;
         }
@@ -5060,7 +5073,7 @@ namespace Tactile
             //Debug
             HashSet<int> teams = new HashSet<int>();
             foreach (int[] group in Constants.Team.TEAM_GROUPS)
-                if (!group.Contains(Team))
+                if (!group.Contains(team))
                     foreach (int team in group)
                         teams.Add(team);
             return teams.Distinct().ToList(); // Can probably change everything that uses this to use hashsets //Debug
@@ -5069,7 +5082,7 @@ namespace Tactile
         public int[] friendly_teams()
         {
             foreach (int[] group in Constants.Team.TEAM_GROUPS)
-                if (group.Contains(Team))
+                if (group.Contains(team))
                     return group;
             return new int[0];
         }

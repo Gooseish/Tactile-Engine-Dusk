@@ -596,6 +596,10 @@ namespace Tactile
         {
             get { return name == "Summon"; }
         }
+        public bool is_trade_blocked
+        {
+            get { return is_summon || has_skill("BEWITCH"); }
+        }
 
         // Skills: Gravity
         public bool is_grounded

@@ -55,7 +55,7 @@ namespace Tactile.Windows.Target
             if (unit.is_rescuing)
             {
                 Game_Unit rescued_unit = Global.game_map.units[unit.rescuing];
-                if ((has_items || rescued_unit.actor.has_items) && unit.same_team(rescued_unit) &&!rescued_unit.is_summon)
+                if ((has_items || rescued_unit.actor.has_items) && unit.same_team(rescued_unit) &&!rescued_unit.is_trade_blocked)
                     targets.Add(unit.rescuing);
             }
             foreach (int id in temp_targets)
@@ -64,12 +64,12 @@ namespace Tactile.Windows.Target
                 if (unit.different_team(other_unit))
                     continue;
 
-                if ((has_items || other_unit.actor.has_items) && !other_unit.is_summon)
+                if ((has_items || other_unit.actor.has_items) && !other_unit.is_trade_blocked)
                     targets.Add(id);
                 if (other_unit.is_rescuing)
                 {
                 Game_Unit rescued_unit = Global.game_map.units[other_unit.rescuing];
-                if ((has_items || rescued_unit.actor.has_items) && unit.same_team(rescued_unit) && !rescued_unit.is_summon)
+                if ((has_items || rescued_unit.actor.has_items) && unit.same_team(rescued_unit) && !rescued_unit.is_trade_blocked)
                     targets.Add(other_unit.rescuing);
                 }
             }

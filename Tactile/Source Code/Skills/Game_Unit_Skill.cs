@@ -2721,7 +2721,7 @@ namespace Tactile
                 if (!Global.game_map.is_off_map(Loc + dir.Value * 2) &&
                     Pathfind.passable(this, Loc + dir.Value * 1) && (Pathfind.passable(this, Loc + dir.Value * 2) &&
                     !Global.game_map.is_blocked(Loc + dir.Value * 2, Id, false)) &&
-                    (!Global.game_map.fow || Global.game_map.fow_visibility[Team].Contains(Loc + dir.Value * 2)))
+                    (!Global.game_map.fow || Global.game_map.fow_visibility[team].Contains(Loc + dir.Value * 2)))
                     range.Add(Loc + dir.Value * 1);
             }
             return range;
@@ -2742,7 +2742,7 @@ namespace Tactile
                 if (!Global.game_map.is_off_map(Loc + dir.Value * 2) &&
                     Pathfind.passable(this, Loc + dir.Value * 1) && (Pathfind.passable(this, Loc + dir.Value * 2) &&
                     !Global.game_map.is_blocked(Loc + dir.Value * 2, Id, false)) &&
-                    (!Global.game_map.fow || Global.game_map.fow_visibility[Team].Contains(Loc + dir.Value * 2)))
+                    (!Global.game_map.fow || Global.game_map.fow_visibility[team].Contains(Loc + dir.Value * 2)))
                     range.Add(Loc + dir.Value * 2);
             }
             return range;
@@ -3341,6 +3341,9 @@ namespace Tactile
         {
             // Skills: Drunk
             if (actor.has_skill("DRUNK"))
+                return false;
+            // Skills: Bewitch
+            if (actor.has_skill("BEWITCH"))
                 return false;
             return true;
         }
