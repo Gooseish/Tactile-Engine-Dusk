@@ -4388,7 +4388,7 @@ namespace Tactile
 
         public void status()
         {
-            Global.game_temp.status_team = team;
+            Global.game_temp.status_team = Team;
             Global.game_temp.status_unit_id = Id;
             Global.game_temp.status_menu_call = true;
         }
