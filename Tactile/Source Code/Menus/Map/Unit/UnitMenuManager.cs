@@ -620,7 +620,7 @@ namespace Tactile.Menus.Map.Unit
                     var warpTargetMenu = new UnitTargetMenu(warpTargetWindow, attackMenu);
                     warpTargetMenu.Selected += warpTargetMenu_Selected;
                     warpTargetMenu.Canceled += warpTargetMenu_Canceled;
-                    Global.game_temp.temp_staff_range = unit.teleport_tiles();
+                    Global.game_temp.temp_staff_range = unit.warp_staff_tiles();
                     AddMenu(warpTargetMenu);
                     StaffRangeIsMove = true;
                 }

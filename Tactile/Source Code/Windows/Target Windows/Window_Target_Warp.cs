@@ -74,7 +74,7 @@ namespace Tactile.Windows.Target
             Game_Unit unit = get_unit();
             List<int> temp_targets = new List<int>();
             // Looking for drop locations
-            foreach (Vector2 loc in unit.teleport_tiles())
+            foreach (Vector2 loc in unit.warp_staff_tiles())
                 temp_targets.Add((int)(loc.X + loc.Y * Global.game_map.width));
             return temp_targets;
         }

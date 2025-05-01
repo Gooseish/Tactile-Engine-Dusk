@@ -5073,6 +5073,20 @@ namespace Tactile
                     return group;
             return new int[0];
         }
+
+        public HashSet<Vector2> warp_staff_tiles()
+        {
+            int warp_range = Math.Max(actor.stat(Stat_Labels.Pow) / 2, 5);
+            HashSet<Vector2> candidate_tiles = Global.game_map.tiles_in_range_of_location(loc, warp_range);
+            HashSet<Vector2> result = new HashSet<Vector2> { };
+            foreach (Vector2 tile in candidate_tiles)
+            {
+                if (Pathfind.passable(this, tile) && !Global.game_map.is_off_map(tile) && !Global.game_map.is_blocked(tile, id))
+                    result.Add(tile);
+            }
+
+            return result;
+        }
         #endregion
 
         #region Battle Animations
