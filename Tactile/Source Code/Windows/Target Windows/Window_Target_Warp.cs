@@ -38,7 +38,7 @@ namespace Tactile.Windows.Target
             this.index = 0;
             Temp_Index = this.index;
             cursor_move_to(this.target);
-            //Manual_Targeting = true;
+            Manual_Targeting = true;
 
             Global.player.instant_move = true;
             Global.player.update_movement();

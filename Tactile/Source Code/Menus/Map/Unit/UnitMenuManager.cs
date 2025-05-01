@@ -634,21 +634,25 @@ namespace Tactile.Menus.Map.Unit
         public bool StaffRangeIsMove;
         private void warpTargetMenu_Selected(object sender, EventArgs e)
         {
-            Global.game_system.play_se(System_Sounds.Confirm);
-            var targetMenu = (sender as UnitTargetMenu);
-            targetMenu.Accept();
+            if (!Global.game_temp.temp_staff_range.Contains(Global.player.loc))
+                Global.game_system.play_se(System_Sounds.Buzzer);
+            else
+            {
+                Global.game_system.play_se(System_Sounds.Confirm);
+                var targetMenu = (sender as UnitTargetMenu);
+                targetMenu.Accept();
 
-            
 
-            Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
-            
 
-            int targetId = (Menus.Skip(1).First() as UnitTargetMenu).SelectedUnitId;
-            Vector2 targetLoc = Global.game_map.attackable_map_object(targetId).loc;
-            int warpId = targetMenu.SelectedUnitId;
-            Vector2 warpLoc = new Vector2(warpId % Global.game_map.width, warpId / Global.game_map.width);
-            StaffRangeIsMove = false;
-            MenuHandler.UnitMenuStaff(unit, targetId, targetLoc, warpLoc);
+                Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
+
+
+                int targetId = (Menus.Skip(1).First() as UnitTargetMenu).SelectedUnitId;
+                Vector2 targetLoc = Global.game_map.attackable_map_object(targetId).loc;
+                Vector2 warpLoc = Global.player.loc;
+                StaffRangeIsMove = false;
+                MenuHandler.UnitMenuStaff(unit, targetId, targetLoc, warpLoc);
+            }
         }
         private void warpTargetMenu_Canceled(object sender, EventArgs e)
         {
