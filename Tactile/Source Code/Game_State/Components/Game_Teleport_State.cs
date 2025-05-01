@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
 using System.Collections;
+using TactileVector2Extension;
 
 namespace Tactile.State
 {
@@ -16,7 +17,7 @@ namespace Tactile.State
 
         protected int Teleporter_Id = -1;
 
-        protected int Teleport_Destination = -1;
+        protected Vector2 Teleport_Destination = new Vector2(-1, -1);
 
 
 
@@ -29,7 +30,7 @@ namespace Tactile.State
             writer.Write(Teleport_Phase);
             writer.Write(Teleport_Timer);
             writer.Write(Teleporter_Id);
-            writer.Write(Teleport_Destination);
+            Teleport_Destination.write(writer);
 
         }
 
@@ -40,7 +41,7 @@ namespace Tactile.State
             Teleport_Phase = reader.ReadInt32();
             Teleport_Timer = reader.ReadInt32();
             Teleporter_Id = reader.ReadInt32();
-            Teleport_Destination = reader.ReadInt32();
+            Teleport_Destination = Teleport_Destination.read(reader);
         }
         #endregion
 
@@ -55,7 +56,7 @@ namespace Tactile.State
         public bool in_teleport { get { return In_Teleport; } }
 
         public int teleporter_id { get { return Teleporter_Id; } set { Teleporter_Id = value; } }
-        public int teleport_destination { get { return Teleport_Destination; } set { Teleport_Destination = value; } }
+        public Vector2 teleport_destination { get { return Teleport_Destination; } set { Teleport_Destination = value; } }
 
 
         protected Game_Unit teleporter { get { return Teleporter_Id == -1 ? null : Units[Teleporter_Id]; } }
@@ -141,7 +142,7 @@ namespace Tactile.State
             {
                 case 0:
                     scene_map.set_map_effect(teleporter.loc + new Vector2(0, -1), 2, 1);
-                    scene_map.set_map_effect_2(teleporter.teleport_vector2_from_int(teleport_destination) + new Vector2(0, -1), 2, 1);
+                    scene_map.set_map_effect_2(teleport_destination + new Vector2(0, -1), 2, 1);
                     Teleport_Timer++;
                     break;
                 default:
@@ -180,7 +181,7 @@ namespace Tactile.State
                     Teleport_Phase = 0;
                     Teleport_Timer = 0;
                     Teleporter_Id = -1;
-                    Teleport_Destination = -1;
+                    Teleport_Destination = new Vector2(-1, -1);
                     Teleport_Calling = false;
                     In_Teleport = false;
                     Global.game_map.move_range_visible = true;

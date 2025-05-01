@@ -840,7 +840,7 @@ namespace Tactile
         }
 
         // Skills: Teleport
-        public void UnitMenuTeleport(Game_Unit unit, int targetId)
+        public void UnitMenuTeleport(Game_Unit unit, Vector2 targetId)
         {
             Global.game_map.clear_move_range();
             // Lock in unit movement

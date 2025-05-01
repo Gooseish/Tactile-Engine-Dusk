@@ -400,12 +400,18 @@ namespace Tactile.Menus.Map.Unit
 
         private void teleportTargetMenu_Selected(object sender, EventArgs e)
         {
-            Global.game_system.play_se(System_Sounds.Confirm);
-            var targetMenu = (sender as UnitTargetMenu);
-            targetMenu.Accept();
+            if (!Global.game_temp.temp_skill_ranges["TELEPORT"].Contains(Global.player.loc))
+                Global.game_system.play_se(System_Sounds.Buzzer);
+            else
+            {
+                Global.game_system.play_se(System_Sounds.Confirm);
+                var targetMenu = (sender as UnitTargetMenu);
+                targetMenu.Accept();
 
-            Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
-            MenuHandler.UnitMenuTeleport(unit, targetMenu.SelectedUnitId);
+                Game_Unit unit = Global.game_map.units[targetMenu.UnitId];
+                Vector2 teleport_destination = Global.player.loc;
+                MenuHandler.UnitMenuTeleport(unit, teleport_destination);
+            }
         }
 
         #endregion
@@ -654,7 +660,7 @@ namespace Tactile.Menus.Map.Unit
         void UnitMenuRefuge(Game_Unit unit, int targetId);
         void UnitMenuSacrifice(Game_Unit unit, int targetId);
         void UnitMenuSwap(Game_Unit unit, int targetId);
-        void UnitMenuTeleport(Game_Unit unit, int targetId);
+        void UnitMenuTeleport(Game_Unit unit, Vector2 targetId);
         void UnitMenuMassSlow(Game_Unit unit, int targetId);
     }
 }

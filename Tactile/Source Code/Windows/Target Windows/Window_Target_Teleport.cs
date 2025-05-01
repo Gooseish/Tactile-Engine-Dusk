@@ -27,6 +27,7 @@ namespace Tactile.Windows.Target
 
         public Window_Target_Teleport(int unit_id, Vector2 loc)
         {
+            Manual_Targeting = true;
             initialize(loc);
             Right_X = Config.WINDOW_WIDTH - this.window_width;
             Unit_Id = unit_id;

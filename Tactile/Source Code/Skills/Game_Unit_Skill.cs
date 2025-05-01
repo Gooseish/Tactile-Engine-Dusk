@@ -2271,10 +2271,10 @@ namespace Tactile
         // Skills: Teleport
 
         internal bool HasTeleported;
-        public void teleport(int teleportTarget)
+        public void teleport(Vector2 teleportTarget)
         {
             HasTeleported = true;
-            force_loc(teleport_vector2_from_int(teleportTarget));
+            force_loc(teleportTarget);
             wait(true);
         }
 

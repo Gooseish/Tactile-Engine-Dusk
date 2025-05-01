@@ -405,7 +405,7 @@ namespace Tactile
             SkillsState.Swap_State.swapper_id = id1;
             SkillsState.Swap_State.swap_target_id = id2;
         }
-        internal void call_teleport(int id1, int id2)
+        internal void call_teleport(int id1, Vector2 id2)
         {
             SkillsState.Teleport_State.teleport_calling = true;
             SkillsState.Teleport_State.teleporter_id = id1;
