@@ -3372,6 +3372,9 @@ namespace Tactile
             // Skills: Flight
             if (actor.has_skill("FLIGHT") && !is_weighted_by_ally)
                 n += 2;
+            // Skills: Gravity
+            if (actor.is_grounded)
+                n -= 2;
             // Skills: Celerity
             if (actor.has_skill("CELERITY"))
                 n += 2;

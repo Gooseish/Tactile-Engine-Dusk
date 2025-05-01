@@ -596,5 +596,11 @@ namespace Tactile
         {
             get { return name == "Summon"; }
         }
+
+        // Skills: Gravity
+        public bool is_grounded
+        {
+            get { return ((MovementTypes)class_move_type == MovementTypes.Flying) && has_skill("GRAVITY"); }
+        }
     }
 }

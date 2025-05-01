@@ -526,7 +526,7 @@ namespace Tactile
             get
             {
                 int n = 0;
-                // Hp +X
+                // Skills: Hp +X
                 foreach (int skill_id in all_skills)
                 {
                     double str_test;
@@ -536,9 +536,15 @@ namespace Tactile
                 }
                 // Skills: Fire Stone
                 // Skills: Transform
-                if (has_skill("FIRESTONE"))
+                if (has_skill("FIRESTONE") && DTransformActive)
                 {
                     n += dtransform_stat_bonus(Stat_Labels.Hp);
+                }
+                // Skills: Hex
+                if (has_skill("HEX"))
+                {
+                    n = n / 2;
+                    n -= stat(Stat_Labels.Hp) / 2;
                 }
                 return n;
             }
@@ -583,7 +589,19 @@ namespace Tactile
         public List<Item_Data> items { get { return Items.GetRange(0, Global.ActorConfig.NumItems); } }
         public List<Item_Data> whole_inventory { get { return Items; } }
 
-        public List<ClassTypes> class_types { get { return actor_class.Class_Types; } }
+        public List<ClassTypes> class_types { get 
+            {
+                // Skills: Gravity
+                if (is_grounded)
+                {
+                    List<ClassTypes> result = actor_class.Class_Types;
+                    result.Remove(ClassTypes.Flier);
+                    return result;
+                }
+                else
+                    return actor_class.Class_Types; 
+            }
+        }
 
         public int con_plus { get { return Stats[(int)Stat_Labels.Con]; } }
 
@@ -591,7 +609,16 @@ namespace Tactile
 
         public int mov_plus { get { return Stats[(int)Stat_Labels.Mov]; } }
 
-        public int move_type { get { return (int)actor_class.Movement_Type; } }
+        public int class_move_type { get { return (int)actor_class.Movement_Type; } }
+        public int move_type { get 
+            {
+                // Skills: Gravity
+                if (is_grounded)
+                    return (int)MovementTypes.Mounted;
+                else
+                    return class_move_type; 
+            } 
+        }
 
         public int mov_cap { get { return (int)actor_class.Mov_Cap; } }
 
