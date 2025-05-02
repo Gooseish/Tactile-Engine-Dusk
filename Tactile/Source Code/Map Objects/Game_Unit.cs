@@ -3955,6 +3955,17 @@ namespace Tactile
             // Barrier
             if (staff.Barrier())
                 set_stat_bonus(Buffs.Res, Constants.Combat.BARRIER_BONUS);
+            // Enfeeble
+            if (staff.Id == 176)
+            {
+                set_stat_bonus(Buffs.Spd, -4);
+                set_stat_bonus(Buffs.Def, -4);
+                set_stat_bonus(Buffs.Pow, -4);
+                set_stat_bonus(Buffs.Res, -4);
+                set_stat_bonus(Buffs.Skl, -4);
+                set_stat_bonus(Buffs.Lck, -4);
+            }
+
         }
 
         private void set_stat_bonus(Buffs stat, int value)
