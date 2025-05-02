@@ -1442,7 +1442,7 @@ namespace Tactile.State
             }
             if (weapon.Torch())
                 Global.game_map.add_torch_staff(Staff_Target_Loc);
-            if (weapon.Warp())
+            if (warping)
                 battler_2.force_loc(Warp_Target_Loc);
         }
         #endregion
@@ -2190,7 +2190,7 @@ namespace Tactile.State
                     Map_Combat_Data = new Combat_Data(
                         battler_1_id, battler_2_id, combat_distance(battler_1_id, battler_2_id));
                 }
-            }
+                }
         }
 
         public void to_arena()

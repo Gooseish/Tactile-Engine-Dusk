@@ -65,7 +65,7 @@ namespace Tactile
             else if (weapon.Torch())
                 return Staff_Modes.Torch;
             // Warp
-            else if (weapon.Warp())
+            else if (weapon.Warp() || weapon.Rescue())
                 return Staff_Modes.Warp;
             else
                 return Staff_Modes.Other;

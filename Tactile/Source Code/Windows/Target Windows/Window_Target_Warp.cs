@@ -19,6 +19,8 @@ namespace Tactile.Windows.Target
         Hand_Cursor Hand;
         Sprite Rescue_Icon;
 
+        private int Target_Id;
+
         #region Accessors
 
         protected override int window_width
@@ -27,18 +29,20 @@ namespace Tactile.Windows.Target
         }
         #endregion
 
-        public Window_Target_Warp(int unit_id, Vector2 loc)
+        public Window_Target_Warp(int unit_id, int target_id, Vector2 loc)
         {
             initialize(loc);
             Right_X = Config.WINDOW_WIDTH - this.window_width;
             Unit_Id = unit_id;
+            Target_Id = target_id;
             List<int> targets = get_targets();
             //Targets = sort_targets(targets);
             Targets = targets;
             this.index = 0;
             Temp_Index = this.index;
             cursor_move_to(this.target);
-            Manual_Targeting = true;
+            if(Global.game_map.units[unit_id].items[0].to_weapon.Warp())
+                Manual_Targeting = true;
 
             Global.player.instant_move = true;
             Global.player.update_movement();
@@ -74,7 +78,7 @@ namespace Tactile.Windows.Target
             Game_Unit unit = get_unit();
             List<int> temp_targets = new List<int>();
             // Looking for drop locations
-            foreach (Vector2 loc in unit.warp_staff_tiles())
+            foreach (Vector2 loc in unit.warp_staff_tiles(Global.game_map.units[Target_Id]))
                 temp_targets.Add((int)(loc.X + loc.Y * Global.game_map.width));
             return temp_targets;
         }

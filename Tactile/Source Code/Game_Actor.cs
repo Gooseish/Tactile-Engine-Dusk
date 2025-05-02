@@ -3304,7 +3304,7 @@ namespace Tactile
                         return false;
                     // Staff must heal, or heal statuses, or barrier, or apply statuses, or warp
                     return weapon.Heals() || weapon.Status_Remove.Count > 0 ||
-                        weapon.Barrier() || weapon.Status_Inflict.Count > 0 || weapon.Warp();
+                        weapon.Barrier() || weapon.Status_Inflict.Count > 0 || weapon.Warp() || weapon.Rescue();
                 })
                 .ToList();
             /*List<int> result = useable_staves(items); //Debug
