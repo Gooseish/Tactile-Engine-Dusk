@@ -52,6 +52,9 @@ namespace Tactile
             // Status healing
             else if (!weapon.is_attack_staff() && weapon.Status_Remove.Count > 0)
                 return Staff_Modes.Heal;
+            // Warp
+            else if (weapon.Warp() || weapon.Rescue())
+                return Staff_Modes.Warp;
             // Status infliction
             else if (weapon.is_attack_staff())
                 return Staff_Modes.Status_Inflict;
@@ -64,9 +67,6 @@ namespace Tactile
             // Flare
             else if (weapon.Torch())
                 return Staff_Modes.Torch;
-            // Warp
-            else if (weapon.Warp() || weapon.Rescue())
-                return Staff_Modes.Warp;
             else
                 return Staff_Modes.Other;
         }
