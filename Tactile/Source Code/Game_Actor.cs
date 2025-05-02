@@ -2523,6 +2523,8 @@ namespace Tactile
         /// <param name="index">Index of the item to test</param>
         public bool CanDiscard(int index)
         {
+            if (has_skill("BEWITCH"))
+                return false;
             return CanDiscard(Items[index]);
         }
         /// <summary>
