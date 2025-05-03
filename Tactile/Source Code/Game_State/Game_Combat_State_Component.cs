@@ -97,6 +97,7 @@ namespace Tactile.State
             // If map animation forced, for various reasons
             else if ((In_Staff_Use && ((Staff_Data)data).mode == Staff_Modes.Torch) ||
                     (In_Staff_Use && ((Staff_Data)data).mode == Staff_Modes.Warp) ||
+                    (In_Staff_Use && ((Staff_Data)data).mode == Staff_Modes.Resurrect) ||
                     Units[id1].trample_activated) // make this not hardcoded //Debug
                 return false;
             // If either battler is a boss, or it's a scripted battle with animations forced, always go to the full battle scene

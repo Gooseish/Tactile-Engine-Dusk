@@ -44,6 +44,9 @@ namespace Tactile
             // Warp
             else if (StaffMode == Staff_Modes.Warp)
                 return Combat.set_warp(this.AttackerUnit, this.TargetUnit, weapon);
+            // Resurrect
+            else if (StaffMode == Staff_Modes.Resurrect)
+                return Combat.set_resurrect(this.AttackerUnit, this.TargetUnit, weapon);
             else
                 return new Attack_Result { state_change = new List<KeyValuePair<int, bool>>() }; // Additional results add on after here //Yeti
         }

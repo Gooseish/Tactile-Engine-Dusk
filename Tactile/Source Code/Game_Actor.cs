@@ -3302,6 +3302,8 @@ namespace Tactile
                     // If the weapon is an attack staff return false
                     if (weapon.is_attack_staff())
                         return false;
+                    if (weapon.Resurrect() && Global.game_map.defeated_ally_count() > 0)
+                        return true;
                     // Staff must heal, or heal statuses, or barrier, or apply statuses, or warp
                     return weapon.Heals() || weapon.Status_Remove.Count > 0 ||
                         weapon.Barrier() || weapon.Status_Inflict.Count > 0 || weapon.Warp() || weapon.Rescue();
@@ -3343,6 +3345,8 @@ namespace Tactile
                 if (!weapon.is_attack_staff() &&
                         (weapon.Torch() || (weapon.Hits_All_in_Range() &&
                         !(weapon.Heals() || weapon.Status_Remove.Count > 0))))
+                    i++;
+                else if (weapon.Resurrect())
                     i++;
                 else
                     result.RemoveAt(i);

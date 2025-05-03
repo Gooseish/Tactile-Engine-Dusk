@@ -31,7 +31,7 @@ namespace Tactile.State
         protected int Attack_Id = -1;
         protected int Battler_1_Id = -1, Battler_2_Id = -1;
         protected Vector2 Staff_Target_Loc;
-        protected Vector2 Warp_Target_Loc;
+        protected Vector2 Warp_Target_Loc = new Vector2(-1, -1);
         protected bool Dying = false;
         protected Data_Weapon Weapon1 = null, Weapon2 = null;
 

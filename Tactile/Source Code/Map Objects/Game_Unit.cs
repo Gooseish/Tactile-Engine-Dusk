@@ -4876,6 +4876,25 @@ namespace Tactile
                 weapons.Add(items[index].Id);
             return new List<int>[] { targets, weapons };
         }
+        public List<int> resurrect_locations()
+        {
+            List<int> result = new List<int> { };
+            int staff = -1;
+            foreach (int index in actor.useable_healing_staves())
+            {
+                if (items[index].to_weapon.Resurrect())
+                    staff = index;
+            }
+            int max_range = this.max_range(staff);
+            Game_Unit resurrecting_unit = Global.game_map.units[Global.game_map.last_defeated_ally()];
+            HashSet<Vector2> candidate_tiles = Global.game_map.tiles_in_range_of_location(loc, max_range);
+            foreach (Vector2 tile in candidate_tiles)
+            {
+                if (Pathfind.passable(resurrecting_unit, tile) && !Global.game_map.is_off_map(tile) && !Global.game_map.is_blocked(tile, resurrecting_unit.id))
+                    result.Add((int)tile.Y * Global.game_map.width + (int)tile.X);
+            }
+            return result;
+        }
 
         public List<int>[] untargeted_staff_range()
         {
@@ -4966,6 +4985,7 @@ namespace Tactile
                 case Windows.Target.Staff_Target_Mode.Status_Inflict:
                     return check_range(min, max, move_range, true, staff, skill);
                 case Windows.Target.Staff_Target_Mode.Torch:
+                case Windows.Target.Staff_Target_Mode.Resurrect:
                     return new List<int>();
             }
 

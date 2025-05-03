@@ -10,7 +10,7 @@ using TactileWeaponExtension;
 
 namespace Tactile.Windows.Target
 {
-    enum Staff_Target_Mode { Heal, Status_Inflict, Torch, Barrier, Warp }
+    enum Staff_Target_Mode { Heal, Status_Inflict, Torch, Barrier, Warp, Resurrect }
 
     class Window_Target_Staff : Window_Target_Unit
     {
@@ -77,6 +77,8 @@ namespace Tactile.Windows.Target
                 return Staff_Target_Mode.Barrier;
             else if (staff.Warp())
                 return Staff_Target_Mode.Warp;
+            else if (staff.Resurrect())
+                return Staff_Target_Mode.Resurrect;
             else
                 return Staff_Target_Mode.Heal;
         }
@@ -94,6 +96,9 @@ namespace Tactile.Windows.Target
                     return unit.enemies_in_staff_range(new HashSet<Vector2> { unit.loc }, item_index)[0];
                 case Staff_Target_Mode.Torch:
                     return new List<int>();
+                case Staff_Target_Mode.Resurrect:
+                    return unit.resurrect_locations();
+
             }
             return new List<int>(); // other things not yet coded, oops //Yeti
         }
@@ -187,7 +192,7 @@ namespace Tactile.Windows.Target
 
         protected override void set_images()
         {
-            if (Mode != Staff_Target_Mode.Torch)
+            if (Mode != Staff_Target_Mode.Torch && Mode != Staff_Target_Mode.Resurrect)
             {
                 Game_Unit unit = get_unit();
                 Game_Actor actor1 = unit.actor;
@@ -293,7 +298,7 @@ namespace Tactile.Windows.Target
 
         protected override void refresh()
         {
-            if (Mode != Staff_Target_Mode.Torch)
+            if (Mode != Staff_Target_Mode.Torch && Mode != Staff_Target_Mode.Resurrect)
             {
                 Window.loc = Loc;
                 Target_Sprite.loc = Loc;
@@ -340,7 +345,7 @@ namespace Tactile.Windows.Target
 
         public override void draw(SpriteBatch sprite_batch)
         {
-            if (Mode == Staff_Target_Mode.Torch)
+            if (Mode == Staff_Target_Mode.Torch || Mode == Staff_Target_Mode.Resurrect)
                 return;
 
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
