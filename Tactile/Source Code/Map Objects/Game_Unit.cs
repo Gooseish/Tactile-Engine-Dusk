@@ -4886,7 +4886,7 @@ namespace Tactile
                     staff = index;
             }
             int max_range = this.max_range(staff);
-            Game_Unit resurrecting_unit = Global.game_map.units[Global.game_map.last_defeated_ally()];
+            Game_Unit resurrecting_unit = Global.game_map.Last_Defeated_Ally;
             HashSet<Vector2> candidate_tiles = Global.game_map.tiles_in_range_of_location(loc, max_range);
             foreach (Vector2 tile in candidate_tiles)
             {

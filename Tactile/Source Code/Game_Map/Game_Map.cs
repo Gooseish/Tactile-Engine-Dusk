@@ -99,6 +99,8 @@ namespace Tactile
         protected int TILE_SIZE { get { return Constants.Map.TILE_SIZE; } }
         protected int UNIT_TILE_SIZE { get { return Constants.Map.UNIT_TILE_SIZE; } }
 
+        public Game_Unit Last_Defeated_Ally = null;
+
         #region Serialization
         public void write(BinaryWriter writer)
         {
@@ -1649,7 +1651,9 @@ namespace Tactile
                 Defeated_Units[unit.id] = unit.actor.id;
                 //@Debug: there should probably be a version of this for PCs
                 if (unit.is_player_allied)
+                {
                     DefeatedAlliedUnits.Add(unit.id);
+                }
             }
             Removed_Units[unit.id] = unit.actor.id;
             Teams[unit.team].Remove(unit.id);
