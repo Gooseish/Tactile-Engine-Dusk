@@ -2067,6 +2067,7 @@ namespace Tactile
             {
                 case SummonId.Bael:
                     result[0] = 202;
+                    result[1] = 205;
                     break;
                 case SummonId.Bonewalker:
                     result[0] = 3;
@@ -2084,20 +2085,21 @@ namespace Tactile
                     result[0] = 33;
                     break;
                 case SummonId.Mogall:
-                    result[0] = 141;
+                    result[0] = 209;
                     break;
                 case SummonId.Revenant:
-                    result[0] = 202;
+                    result[0] = 203;
                     break;
                 case SummonId.Tarvos:
                     result[0] = 59;
                     result[1] = 83;
                     break;
                 case SummonId.Wolf:
-                    result[0] = 202;
+                    result[0] = 207;
                     break;
                 case SummonId.Elder_Bael:
                     result[0] = 202;
+                    result[1] = 206;
                     break;
                 case SummonId.Wight:
                     result[0] = 16;
@@ -2117,15 +2119,18 @@ namespace Tactile
                     result[3] = 87;
                     break;
                 case SummonId.Arch_Mogall:
-                    result[0] = 141;
+                    result[0] = 210;
+                    result[1] = 212;
                     break;
                 case SummonId.Entombed:
-                    result[0] = 202;
+                    result[0] = 204;
                     break;
                 case SummonId.Gwyllgi:
-                    result[0] = 202;
+                    result[0] = 208;
                     break;
                 case SummonId.Gorgon:
+                    result[0] = 213;
+                    result[1] = 211;
                     break;
 
 
