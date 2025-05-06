@@ -456,6 +456,16 @@ namespace Tactile
                     return offset.list_add(new List<int>() { (distance == 1 ? 319 : 315), 316, 317 }); //Yeti
                 case 170: // Renewal
                     return offset.list_add(new List<int>() { 301 }); //Yeti
+                case 209: // Evil Eye
+                    return offset.list_add(distance == 1 ? new List<int>() { 229 } : new List<int>() { 230 });
+                case 213: // Demon Surge
+                case 210: // Crimson Eye
+                    return offset.list_add(distance == 1 ? new List<int>() { 233 } : new List<int>() { 234 });
+                case 211: // Stone
+                    return offset.list_add(distance == 1 ? new List<int>() { 223 } : new List<int>() { 224 });
+                case 212: // Shadowshot
+                    return offset.list_add(new List<int>() { 237 });
+
             }
             return new List<int>();
         }
@@ -585,6 +595,15 @@ namespace Tactile
                     return offset.list_add(new List<int>() { 318 });
                 case 169: // Slow
                     return offset.list_add(new List<int>() { 318 }); //Yeti
+                case 209: // Evil Eye
+                    return offset.list_add(new List<int>() { 231 });
+                case 213: // Demon Surge
+                case 210: // Crimson Eye
+                    return offset.list_add(new List<int>() { 235 });
+                case 211: // Stone
+                    return offset.list_add(hit ? new List<int>() { 225 } : new List<int>() { 226 });
+                case 212: // Shadowshot
+                    return offset.list_add(new List<int>() { 238 });
             }
             return new List<int>();
         }
