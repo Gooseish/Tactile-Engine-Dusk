@@ -452,6 +452,11 @@ namespace Tactile
                     return offset.list_add(new List<int>() { (distance == 1 ? 319 : (distance == 2 ? 320 : 315)), 316, 317 });
                 case 167: // Fix
                     return offset.list_add(distance == 1 ? new List<int>() { 309, 308 } : new List<int>() { 307, 308 });
+                case 175: // Freeze
+                case 176: // Enfeeble
+                case 177: // Hexing Rod
+                case 178: // Bewitch
+                case 179: // Gravity
                 case 169: // Slow
                     return offset.list_add(new List<int>() { (distance == 1 ? 319 : 315), 316, 317 }); //Yeti
                 case 170: // Renewal
@@ -593,6 +598,11 @@ namespace Tactile
                     return offset.list_add(new List<int>() { 312 });
                 case 162: // Sleep
                     return offset.list_add(new List<int>() { 318 });
+                case 175: // Freeze
+                case 176: // Enfeeble
+                case 177: // Hexing Rod
+                case 178: // Bewitch
+                case 179: // Gravity
                 case 169: // Slow
                     return offset.list_add(new List<int>() { 318 }); //Yeti
                 case 209: // Evil Eye
