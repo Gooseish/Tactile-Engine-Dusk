@@ -336,6 +336,8 @@ namespace Tactile
             { 158, 4 }, // Restore
             { 160, 7 }, // Barrier
             { 162, 5 }, // Sleep
+            { 164, 8 }, // Rescue
+            { 165, 8 }, // Warp
             { 169, 5 }, // Slow //Yeti
         };
 
@@ -708,7 +710,45 @@ namespace Tactile
                     }
             }},
             #endregion
-        };
+            #region 8: Warp / Rescue
+            { 8, new Map_Effect_Data { image = new KeyValuePair<string, int>("Warp", 48),
+                animation_data = new List<KeyValuePair<int[], int>>
+                    {
+                        new KeyValuePair<int[], int>(new int[]{ 0, 0, 255 }, 8),
+                        new KeyValuePair<int[], int>(new int[]{ 0, 80, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 1, 140, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 2, 200, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 3, 255, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 4, 255, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 5, 255, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 6, 255, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 7, 255, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 8, 255, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 9, 255, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 10, 255, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 11, 255, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 12, 255, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 13, 255, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 14, 200, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 15, 140, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 16, 90, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 17, 50, 255 }, 4),
+                        new KeyValuePair<int[], int>(new int[]{ 0, 0, 255 }, 8),
+                        new KeyValuePair<int[], int>(new int[]{ 9, 250, 0 }, 120),
+
+                    },
+                    processing_data = new List<KeyValuePair<int,string[]>>
+                    {
+                        new KeyValuePair<int, string[]>(1, new string[]{ "d" }),
+                        new KeyValuePair<int, string[]>(9, new string[]{ "s", "Warp" }),
+                        new KeyValuePair<int, string[]>(59, new string[]{ "s", "Warp" }),
+                        new KeyValuePair<int, string[]>(109, new string[]{ "s", "Warp" }),
+                        new KeyValuePair<int, string[]>(192, new string[]{ "b" })
+                    }
+            }},
+            #endregion
+
+            };
         #endregion
 
         #region Skill Data
