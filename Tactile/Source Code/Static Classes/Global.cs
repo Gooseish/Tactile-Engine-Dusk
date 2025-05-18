@@ -753,6 +753,7 @@ namespace Tactile
 
             Global.reset_game_state();
             Global.game_map = new Game_Map();
+            Global.turnwheel = new Turnwheel();
             Global.player = new Player();
 
             // Trying to start this after everything else, instead of in the middle

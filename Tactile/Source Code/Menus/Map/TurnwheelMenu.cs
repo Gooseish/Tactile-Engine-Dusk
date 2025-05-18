@@ -17,8 +17,9 @@ namespace Tactile.Menus.Map.Turnwheel
 
         private static Window_Command new_map_window(int width)
         {
-            List<string> commands =
-                new List<string> { "foo", "bar", "foo", "bar", "foo", "bar", "foo", "bar", "foo", "bar", "foo", "bar", "foo", "bar" };
+            List<string> commands = new List<string> { };
+            foreach (Turnwheel_Snapshot snapshot in Global.turnwheel.snapshots)
+                commands.Add("foo");
             var window = new Window_Command(
                 new Vector2(8 + (show_menu_on_right ?
                     (Config.WINDOW_WIDTH - (width + 16)) : 0), 24),

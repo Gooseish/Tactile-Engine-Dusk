@@ -10,8 +10,8 @@ namespace Tactile
     class Turnwheel
     {
         List<Turnwheel_Snapshot> Snapshots = new List<Turnwheel_Snapshot> { };
+        public List<Turnwheel_Snapshot> snapshots { get { return Snapshots; } }
         public Turnwheel_Snapshot current_snapshot { get { return Snapshots.Last(); } }
-
         #region: Serialization
         public void write(BinaryWriter writer)
         {
