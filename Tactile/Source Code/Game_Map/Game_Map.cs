@@ -2480,6 +2480,14 @@ namespace Tactile
                 Global.game_temp.menu_call = true;
             }
         }
+        internal void open_turnwheel_menu()
+        {
+            if (!Scrolling)
+            {
+                Global.game_temp.turnwheel_menu_call = true;
+                Global.game_temp.menu_call = true;
+            }
+        }
 
         // Start
         internal void open_minimap(Game_Unit highlighted_unit)

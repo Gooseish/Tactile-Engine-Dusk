@@ -458,6 +458,11 @@ namespace Tactile
                 }
             }
 
+            // Select button
+            if (Global.Input.triggered(Inputs.Select))
+            {
+                Global.game_map.open_turnwheel_menu();
+            }
             // Start button
             if (Global.Input.triggered(Inputs.Start))
             {

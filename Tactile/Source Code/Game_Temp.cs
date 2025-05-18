@@ -18,6 +18,7 @@ namespace Tactile
         public bool prompt_menuing = false;
         public bool menu_call = false;
         public bool map_menu_call = false;
+        public bool turnwheel_menu_call = false;
         public bool end_turn_highlit = false;
         public bool unit_menu_call = false;
         public bool status_menu_call = false;
