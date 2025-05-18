@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using System.Collections.Generic;
 #if DEBUG
 using System.Diagnostics;
@@ -1049,14 +1051,47 @@ namespace Tactile
         public static void rewind_turnwheel(int index)
         {
             Turnwheel_Snapshot snapshot = turnwheel.rewind(index);
+            Clone_Turnwheel_Data(snapshot);
+            Global.scene_change("Rewind_Turnwheel");
+            ((Scene_Map)scene).re_add_map_sprites();
+        }
+        private static void Clone_Turnwheel_Data(Turnwheel_Snapshot snapshot)
+        {
+            string temp_filename = System.IO.Path.GetTempFileName();
 
-            Game_Battalions = snapshot.game_battalions;
-            Game_Actors = snapshot.game_actors;
-            Game_System = snapshot.game_system;
-            Player = snapshot.player;
-            Game_State = snapshot.game_state;
-            Game_Map = snapshot.game_map;
-    }
+            // Write temp data
+            using (var stream = File.Open(temp_filename, FileMode.Create))
+            {
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8))
+                    snapshot.write(writer);
+            }
+
+            // Copy from temp data
+            using (var stream = File.Open(temp_filename, FileMode.Open))
+            {
+                using (var reader = new BinaryReader(stream, Encoding.UTF8))
+                {
+                    Game_Battalions = new Game_Battalions();
+                    Game_Battalions.read(reader);
+                    Game_Actors = new Game_Actors();
+                    Game_Actors.read(reader);
+                    Game_System = new Game_System();
+                    Game_System.read(reader);
+                    Player = new Player();
+                    Player.read(reader);
+                    Game_State = new Game_State();
+                    Game_State.read(reader);
+                    Game_Map = new Game_Map();
+                    Game_Map.read(reader);
+                }
+            }
+
+            // Delete temp data
+            if (File.Exists(temp_filename))
+            {
+                File.Delete(temp_filename);
+            }
+        }
         // Game Actors
         static Game_Actors @Game_Actors;
 

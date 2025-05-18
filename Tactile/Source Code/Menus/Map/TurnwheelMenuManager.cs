@@ -35,7 +35,6 @@ namespace Tactile.Menus.Map.Turnwheel
 
             int index = turnwheelMenu.Index;
             Global.rewind_turnwheel(index);
-            Global.scene_change("Rewind_Turnwheel");
 
             Menus.Clear();
             Global.game_temp.menuing = false;
