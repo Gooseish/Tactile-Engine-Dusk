@@ -1037,7 +1037,13 @@ namespace Tactile
             get { return @Save_File; }
             set { @Save_File = value; }
         }
-
+        // Turnwheel Snapshots
+        static Turnwheel @Turnwheel;
+        internal static Turnwheel turnwheel
+        {
+            get { return @Turnwheel; }
+            set { Turnwheel = value; }
+        }
         // Game Actors
         static Game_Actors @Game_Actors;
 

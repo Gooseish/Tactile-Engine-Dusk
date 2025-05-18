@@ -350,6 +350,8 @@
     <Compile Include="Source Code\Sprites\Status Components\Page 3\Status_Support_List.cs" />
     <Compile Include="Source Code\Sprites\Text\Battle_Hit_Number.cs" />
     <Compile Include="Source Code\Sprites\Text\Quick_Stat_Up_Num.cs" />
+    <Compile Include="Source Code\Turnwheel.cs" />
+    <Compile Include="Source Code\Turnwheel_Snapshot.cs" />
     <Compile Include="Source Code\Windows\Command Windows\WindowCommandSupportViewerActor.cs" />
     <Compile Include="Source Code\Windows\IndexScrollComponent.cs" />
     <Compile Include="Source Code\Windows\Map Menus\UnitScreenHeader.cs" />
