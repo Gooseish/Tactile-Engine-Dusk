@@ -429,12 +429,13 @@ namespace Tactile
                     return;
                 }
                 // Open the map menu
+                /*
                 else if (Global.Input.triggered(Inputs.Select) ||
                     Global.game_temp.MapHelpInput.HasFlag(MapHelpButtonInputs.Menu))
                 {
                     Global.game_map.open_map_menu(highlighted_unit);
                     return;
-                }
+                }*/
                 // Close enemy range
                 else if (Global.Input.triggered(Inputs.B))
                 {
@@ -447,7 +448,7 @@ namespace Tactile
             {
                 // A button
                 // Select button
-                if (Global.Input.triggered(Inputs.A) || Global.Input.triggered(Inputs.Select) ||
+                if (Global.Input.triggered(Inputs.A) /*|| Global.Input.triggered(Inputs.Select)*/ ||
                     (Global.Input.mouse_click(MouseButtons.Left) &&
                         Global.player.at_mouse_loc) ||
                     Global.game_temp.MapHelpInput.HasFlag(MapHelpButtonInputs.Menu))
