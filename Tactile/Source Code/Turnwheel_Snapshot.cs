@@ -15,6 +15,13 @@ namespace Tactile
         private Game_State @Game_State = new Game_State();
         private Game_Map @Game_Map = new Game_Map();
 
+        public Game_Battalions game_battalions { get { return Game_Battalions; } }
+        public Game_Actors game_actors { get { return Game_Actors; } }
+        public Game_System game_system { get { return Game_System; } }
+        public Player player { get { return Player; } }
+        public Game_State game_state { get { return Game_State; } }
+        public Game_Map game_map { get { return Game_Map; } }
+
         public void write(BinaryWriter writer)
         {
             Game_Battalions.write(writer);

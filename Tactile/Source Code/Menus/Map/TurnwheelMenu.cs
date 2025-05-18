@@ -18,7 +18,8 @@ namespace Tactile.Menus.Map.Turnwheel
         private static Window_Command new_map_window(int width)
         {
             List<string> commands = new List<string> { };
-            foreach (Turnwheel_Snapshot snapshot in Global.turnwheel.snapshots)
+            List<Turnwheel_Snapshot> excluded_snapshots = new List<Turnwheel_Snapshot> { Global.turnwheel.current_snapshot }; // Can't rewind time to the present
+            foreach (Turnwheel_Snapshot snapshot in Global.turnwheel.snapshots.Except(excluded_snapshots))
                 commands.Add("foo");
             var window = new Window_Command(
                 new Vector2(8 + (show_menu_on_right ?

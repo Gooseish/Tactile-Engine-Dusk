@@ -793,6 +793,9 @@ namespace Tactile
                         StartMoveRangeThread();
                     }
                     break;
+                case "Rewind_Turnwheel":
+                    StartMoveRangeThread();
+                    break;
                 case "Scene_Map":
                     Global.change_to_new_scene("Scene_Map");
                     Global.init_map();

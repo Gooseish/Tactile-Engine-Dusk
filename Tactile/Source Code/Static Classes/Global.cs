@@ -1045,6 +1045,18 @@ namespace Tactile
             get { return @Turnwheel; }
             set { Turnwheel = value; }
         }
+
+        public static void rewind_turnwheel(int index)
+        {
+            Turnwheel_Snapshot snapshot = turnwheel.rewind(index);
+
+            Game_Battalions = snapshot.game_battalions;
+            Game_Actors = snapshot.game_actors;
+            Game_System = snapshot.game_system;
+            Player = snapshot.player;
+            Game_State = snapshot.game_state;
+            Game_Map = snapshot.game_map;
+    }
         // Game Actors
         static Game_Actors @Game_Actors;
 

@@ -29,7 +29,17 @@ namespace Tactile.Menus.Map.Turnwheel
         // Selected an item in the turnwheel menu
         private void turnwheelMenu_Selected(object sender, EventArgs e)
         {
-            Global.game_system.play_se(System_Sounds.Open);
+            Global.game_system.play_se(System_Sounds.Confirm);
+
+            var turnwheelMenu = (sender as TurnwheelMenu);
+
+            int index = turnwheelMenu.Index;
+            Global.rewind_turnwheel(index);
+            Global.scene_change("Rewind_Turnwheel");
+
+            Menus.Clear();
+            Global.game_temp.menuing = false;
+            Global.game_map.highlight_test();
         }
     }
 }

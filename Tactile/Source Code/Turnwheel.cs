@@ -60,5 +60,12 @@ namespace Tactile
                 File.Delete(temp_filename);
             }
         }
+        public Turnwheel_Snapshot rewind(int index)
+        {
+            Turnwheel_Snapshot rewound_snapshot = Snapshots[index];
+            int number_of_snapshots_to_remove = Snapshots.Count - (index + 1);
+            Snapshots.RemoveRange(index + 1, number_of_snapshots_to_remove); // Discard snapshots that take place after the point we're rewinding to
+            return rewound_snapshot;
+        }
     }
 }
