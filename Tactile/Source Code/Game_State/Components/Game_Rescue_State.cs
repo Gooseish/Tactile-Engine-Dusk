@@ -225,7 +225,7 @@ namespace Tactile.State
             if (rescue_mode == Rescue_Modes.Drop)
             {
                 if (rescuee.is_active_team)
-                    rescuee.start_wait();
+                    rescuee.wait(true);
                 rescuer.rescuing = 0;
                 rescuee.rescued = 0;
                 rescuee.fix_unit_location();
