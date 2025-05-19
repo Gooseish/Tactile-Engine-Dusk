@@ -1047,7 +1047,8 @@ namespace Tactile
             get { return @Turnwheel; }
             set { Turnwheel = value; }
         }
-
+        
+        //Should these turnwheel methods be handled somewhere else?
         public static void rewind_turnwheel(int index)
         {
             Turnwheel_Snapshot snapshot = turnwheel.rewind(index);
@@ -1064,7 +1065,7 @@ namespace Tactile
             using (var stream = File.Open(temp_filename, FileMode.Create))
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8))
-                    snapshot.write(writer);
+                    snapshot.write_data(writer);
             }
 
             // Copy from temp data

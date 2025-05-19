@@ -23,9 +23,14 @@ namespace Tactile
         public Game_State game_state { get { return Game_State; } }
         public Game_Map game_map { get { return Game_Map; } }
         public string name { get { return Name; } }
-        
 
+        #region Serialization
         public void write(BinaryWriter writer)
+        {
+            write_data(writer);
+            write_metadata(writer);
+        }
+        public void write_data(BinaryWriter writer)
         {
             Game_Battalions.write(writer);
             Game_Actors.write(writer);
@@ -35,10 +40,17 @@ namespace Tactile
             Game_State.write(writer);
             Game_Map.write(writer);
             Game_System.write_events(writer);
-
+        }
+        public void write_metadata(BinaryWriter writer)
+        {
             writer.Write(Name);
         }
         public void read(BinaryReader reader)
+        {
+            read_data(reader);
+            read_metadata(reader);
+        }
+        public void read_data(BinaryReader reader)
         {
             Game_Battalions.read(reader);
             Game_Actors.read(reader);
@@ -48,9 +60,12 @@ namespace Tactile
             Game_State.read(reader);
             Game_Map.read(reader);
             Game_System.read_events(reader);
-
+        }
+        public void read_metadata(BinaryReader reader)
+        {
             Name = reader.ReadString();
         }
+        #endregion
         public Turnwheel_Snapshot(string name) { Name = name; }
         public Turnwheel_Snapshot() { Name = "Unnamed"; }
         public void Get_Global_Variables()
