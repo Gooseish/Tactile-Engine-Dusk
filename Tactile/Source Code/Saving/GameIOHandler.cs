@@ -76,7 +76,7 @@ namespace Tactile.IO
                     if (Global.savestate_ready)
                     {
                         Global.play_se(System_Sounds.Confirm);
-                        Global.scene.suspend(false);
+                        Global.scene.suspend();
                         Global.savestate = true;
                     }
                     else

@@ -185,7 +185,7 @@ namespace Tactile
         public void SetupSave()
         {
             Suspend_Filename = Config.MAP_SAVE_FILENAME;
-            suspend(false);
+            suspend();
         }
 
         #region IPreparationsMenuHandler

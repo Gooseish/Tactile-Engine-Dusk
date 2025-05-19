@@ -902,7 +902,7 @@ namespace Tactile
         {
             MapMenu = null;
             Global.game_temp.menuing = false;
-            suspend(false);
+            suspend();
 #if DEBUG
             // Don't reset while playtesting, the user probably doesn't want to go back to the editor
             if (!Global.UnitEditorActive)
@@ -919,7 +919,7 @@ namespace Tactile
             MapMenu = null;
             Global.game_state.end_turn();
             Global.game_temp.menuing = false;
-            suspend(false);
+            suspend();
         }
         #endregion
 
@@ -1151,7 +1151,7 @@ namespace Tactile
                 Map_Save_Confirm_Window.size = new Vector2(112, 32);
 
                 Suspend_Filename = Config.MAP_SAVE_FILENAME;
-                suspend(false);
+                suspend();
             }
             Map_Save_Confirm_Window.loc = new Vector2(Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT) / 2 - Map_Save_Confirm_Window.size / 2;
         }
@@ -1192,7 +1192,7 @@ namespace Tactile
                             // Yes
                             case 0:
                                 Suspend_Filename = Config.MAP_SAVE_FILENAME;
-                                suspend(false);
+                                suspend();
                                 break;
                             // No
                             case 1:

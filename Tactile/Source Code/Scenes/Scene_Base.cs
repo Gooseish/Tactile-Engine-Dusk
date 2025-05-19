@@ -149,12 +149,6 @@ namespace Tactile
 
         public virtual void suspend()
         {
-            suspend(true);
-        }
-        public virtual void suspend(bool take_turnwheel_snapshot)
-        {
-            if (take_turnwheel_snapshot)
-                Global.turnwheel.Take_Snapshot();
             Suspend_Calling = true;
         }
         public virtual void reset_suspend_calling()

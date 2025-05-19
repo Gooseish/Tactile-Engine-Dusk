@@ -2139,6 +2139,8 @@ namespace Tactile
                     // This was getting called before the move range update loop could fire //Debug
                     // Which updated one unit early and also before fow updated
                     //highlight_test();
+
+                    Global.turnwheel.Take_Snapshot();
                 }
                 else
                 {
