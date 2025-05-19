@@ -2015,12 +2015,21 @@ namespace Tactile
                         else if (unit.dead)
                             dead_units.Add(unit.id);
                     }
+                    bool take_turnwheel_snapshot = false;
+                    foreach (int id in dead_units)
+                    {
+                        if (DefeatedAlliedUnits.Contains(id))
+                            take_turnwheel_snapshot = true;
+                    }
                     foreach (int id in dead_units)
                         remove_unit(id);
                     // Moved down from above
                     //Pathfinding.reset();
                     Run_Move_Update = true;
                     refresh_alpha(30);
+
+                    if (take_turnwheel_snapshot)
+                        Global.turnwheel.Take_Snapshot("Ally died");
                 }
             }
         }
