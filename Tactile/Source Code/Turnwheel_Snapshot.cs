@@ -14,6 +14,7 @@ namespace Tactile
         private Player @Player = new Player();
         private Game_State @Game_State = new Game_State();
         private Game_Map @Game_Map = new Game_Map();
+        private string Name;
 
         public Game_Battalions game_battalions { get { return Game_Battalions; } }
         public Game_Actors game_actors { get { return Game_Actors; } }
@@ -21,6 +22,8 @@ namespace Tactile
         public Player player { get { return Player; } }
         public Game_State game_state { get { return Game_State; } }
         public Game_Map game_map { get { return Game_Map; } }
+        public string name { get { return Name; } }
+        
 
         public void write(BinaryWriter writer)
         {
@@ -32,6 +35,8 @@ namespace Tactile
             Game_State.write(writer);
             Game_Map.write(writer);
             Game_System.write_events(writer);
+
+            writer.Write(Name);
         }
         public void read(BinaryReader reader)
         {
@@ -43,8 +48,11 @@ namespace Tactile
             Game_State.read(reader);
             Game_Map.read(reader);
             Game_System.read_events(reader);
+
+            Name = reader.ReadString();
         }
-        public Turnwheel_Snapshot() { }
+        public Turnwheel_Snapshot(string name) { Name = name; }
+        public Turnwheel_Snapshot() { Name = "Unnamed"; }
         public void Get_Global_Variables()
         {
             Game_Battalions = Global.game_battalions;

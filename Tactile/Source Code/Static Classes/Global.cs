@@ -1054,6 +1054,7 @@ namespace Tactile
             Clone_Turnwheel_Data(snapshot);
             Global.scene_change("Rewind_Turnwheel");
             init_map();
+            //((Scene_Map)scene).update_sprites();
         }
         private static void Clone_Turnwheel_Data(Turnwheel_Snapshot snapshot)
         {

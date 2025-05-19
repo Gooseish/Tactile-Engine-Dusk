@@ -24,16 +24,16 @@ namespace Tactile
         #endregion
 
         public Turnwheel() { }
-        public void Take_Snapshot()
+        public void Take_Snapshot(string snapshot_name)
         {
             string temp_filename = System.IO.Path.GetTempFileName();
-            Create_Snapshot(temp_filename);
+            Create_Snapshot(temp_filename, snapshot_name);
             Save_Snapshot(temp_filename);
             Delete_Temp_File(temp_filename);
         }
-        private void Create_Snapshot(string temp_filename)
+        private void Create_Snapshot(string temp_filename, string snapshot_name)
         {
-            Turnwheel_Snapshot snapshot = new Turnwheel_Snapshot();
+            Turnwheel_Snapshot snapshot = new Turnwheel_Snapshot(snapshot_name);
             snapshot.Get_Global_Variables();
             using (var stream = File.Open(temp_filename, FileMode.Create))
             {

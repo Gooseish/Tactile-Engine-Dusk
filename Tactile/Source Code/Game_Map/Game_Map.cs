@@ -2134,13 +2134,17 @@ namespace Tactile
                     }
                     foreach (Tuple<int, bool> pair in Waiting_Units)
                         this.units[pair.Item1].wait(pair.Item2);
+
+                    string turnwheel_snapshot_name = this.units[Waiting_Units[0].Item1].name + " acted";
                     Waiting_Units.Clear();
                     Waiting_Unit_Skip.Clear();
+
+                    Global.turnwheel.Take_Snapshot(turnwheel_snapshot_name);
                     // This was getting called before the move range update loop could fire //Debug
                     // Which updated one unit early and also before fow updated
                     //highlight_test();
 
-                    Global.turnwheel.Take_Snapshot();
+
                 }
                 else
                 {

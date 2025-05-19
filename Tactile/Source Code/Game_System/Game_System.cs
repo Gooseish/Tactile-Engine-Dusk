@@ -683,7 +683,7 @@ namespace Tactile
 
         public void set_gameplay_start()
         {
-            Global.turnwheel.Take_Snapshot();
+            Global.turnwheel.Take_Snapshot("Start");
             // Don't allow setting the start time more than once per chapter
             if (GameplayStartTime == Chapter_Start_Time)
                 GameplayStartTime = DateTime.UtcNow;
