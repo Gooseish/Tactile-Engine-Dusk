@@ -35,6 +35,7 @@ namespace Tactile
         {
             Turnwheel_Snapshot snapshot = new Turnwheel_Snapshot(snapshot_name);
             snapshot.Get_Global_Variables();
+            snapshot.index = snapshots.Count();
             using (var stream = File.Open(temp_filename, FileMode.Create))
             {
                 using (var writer = new BinaryWriter(stream, Encoding.UTF8))

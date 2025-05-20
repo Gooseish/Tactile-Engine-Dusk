@@ -29,16 +29,25 @@ namespace Tactile.Menus.Map.Turnwheel
         // Selected an item in the turnwheel menu
         private void turnwheelMenu_Selected(object sender, EventArgs e)
         {
-            Global.game_system.play_se(System_Sounds.Confirm);
-
             var turnwheelMenu = (sender as TurnwheelMenu);
-
             int index = turnwheelMenu.Index;
-            Global.rewind_turnwheel(index);
 
-            Menus.Clear();
-            Global.game_temp.menuing = false;
-            Global.game_map.highlight_test();
+            Turnwheel_Snapshot snapshot = TurnwheelMenu.snapshots[index];
+            if (snapshot.index == Global.turnwheel.current_snapshot.index)
+            {
+                Global.game_system.play_se(System_Sounds.Buzzer); // Can't rewind time to the present
+            }
+            else
+            {
+                Global.game_system.play_se(System_Sounds.Confirm);
+                Global.rewind_turnwheel(snapshot.index);
+                Menus.Clear();
+                Global.game_temp.menuing = false;
+                Global.game_map.highlight_test();
+            }
+
+
+
         }
     }
 }

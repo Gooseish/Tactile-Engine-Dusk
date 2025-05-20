@@ -10,6 +10,7 @@ namespace Tactile.Menus.Map.Turnwheel
 {
     class TurnwheelMenu : CommandMenu
     {
+        public static List<Turnwheel_Snapshot> snapshots { get { return Enumerable.Reverse(Global.turnwheel.snapshots).ToList<Turnwheel_Snapshot>(); } }
         public TurnwheelMenu() : base(new_map_window(56))
         {
 
@@ -18,8 +19,7 @@ namespace Tactile.Menus.Map.Turnwheel
         private static Window_Command new_map_window(int width)
         {
             List<string> commands = new List<string> { };
-            List<Turnwheel_Snapshot> excluded_snapshots = new List<Turnwheel_Snapshot> { Global.turnwheel.current_snapshot }; // Can't rewind time to the present
-            foreach (Turnwheel_Snapshot snapshot in Global.turnwheel.snapshots.Except(excluded_snapshots))
+            foreach (Turnwheel_Snapshot snapshot in snapshots)
                 commands.Add(snapshot.name);
             var window = new Window_Command(
                 new Vector2(8 + (show_menu_on_right ?

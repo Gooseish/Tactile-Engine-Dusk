@@ -15,6 +15,7 @@ namespace Tactile
         private Game_State @Game_State = new Game_State();
         private Game_Map @Game_Map = new Game_Map();
         private string Name;
+        private int Index;
 
         public Game_Battalions game_battalions { get { return Game_Battalions; } }
         public Game_Actors game_actors { get { return Game_Actors; } }
@@ -23,6 +24,8 @@ namespace Tactile
         public Game_State game_state { get { return Game_State; } }
         public Game_Map game_map { get { return Game_Map; } }
         public string name { get { return Name; } }
+        public int index { get { return Index; } set { Index = value; } }
+        public bool is_player_turn_snapshot { get { return game_state.is_player_turn; } }
 
         #region Serialization
         public void write(BinaryWriter writer)
@@ -44,6 +47,7 @@ namespace Tactile
         public void write_metadata(BinaryWriter writer)
         {
             writer.Write(Name);
+            writer.Write(index);
         }
         public void read(BinaryReader reader)
         {
@@ -64,6 +68,7 @@ namespace Tactile
         public void read_metadata(BinaryReader reader)
         {
             Name = reader.ReadString();
+            Index = reader.ReadInt32();
         }
         #endregion
         public Turnwheel_Snapshot(string name) { Name = name; }
