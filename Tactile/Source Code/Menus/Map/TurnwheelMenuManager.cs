@@ -45,9 +45,6 @@ namespace Tactile.Menus.Map.Turnwheel
                 Global.game_temp.menuing = false;
                 Global.game_map.highlight_test();
             }
-
-
-
         }
     }
 }
