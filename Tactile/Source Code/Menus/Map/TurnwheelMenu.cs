@@ -55,7 +55,8 @@ namespace Tactile.Menus.Map.Turnwheel
         }
         private void update_turn_display()
         {
-            Turn_Display.turn_number = Math.Max(snapshots[Index].game_system.chapter_turn-1, 1);
+            if (snapshots.Count > Index)
+                Turn_Display.turn_number = snapshots[Index].game_system.chapter_turn;
         }
         public override void Draw(SpriteBatch spriteBatch)
         {
