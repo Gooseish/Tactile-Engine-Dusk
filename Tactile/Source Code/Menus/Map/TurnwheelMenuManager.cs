@@ -16,6 +16,7 @@ namespace Tactile.Menus.Map.Turnwheel
             var turnwheelMenu = new TurnwheelMenu();
             turnwheelMenu.Selected += turnwheelMenu_Selected;
             turnwheelMenu.Canceled += menu_ClosedCanceled;
+            turnwheelMenu.IndexChanged += turnwheelMenu_IndexChanged;
             AddMenu(turnwheelMenu);
         }
 
@@ -24,6 +25,7 @@ namespace Tactile.Menus.Map.Turnwheel
             Menus.Clear();
             Global.game_temp.menuing = false;
             Global.game_map.highlight_test();
+            Global.game_temp.clear_turnwheel_preview();
         }
 
         // Selected an item in the turnwheel menu
@@ -44,7 +46,16 @@ namespace Tactile.Menus.Map.Turnwheel
                 Menus.Clear();
                 Global.game_temp.menuing = false;
                 Global.game_map.highlight_test();
+                Global.game_temp.clear_turnwheel_preview();
             }
+        }
+        private void turnwheelMenu_IndexChanged(object sender, EventArgs e)
+        {
+            var turnwheelMenu = (sender as TurnwheelMenu);
+            int index = turnwheelMenu.Index;
+
+            Turnwheel_Snapshot snapshot = TurnwheelMenu.snapshots[index];
+            Global.game_temp.turnwheel_preview = snapshot;
         }
     }
 }

@@ -1276,7 +1276,10 @@ namespace Tactile
             DrawTileOutlines(sprite_batch, device, render_targets);
 
             // Idle units (that aren't under a roof)
-            draw_units(sprite_batch, device, render_targets, false, roof_tiles);
+            if (Global.game_temp.turnwheel_preview == null)
+                draw_units(sprite_batch, device, render_targets, false, roof_tiles);
+            else
+                draw_preview_units(sprite_batch, device, render_targets, false, roof_tiles);
             #endregion
 
             draw_arrow(sprite_batch);
@@ -1833,6 +1836,27 @@ namespace Tactile
         }
 
         #region Draw Units
+        protected virtual void draw_preview_units(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets,
+            bool roof, HashSet<Vector2> roof_tiles)
+        {
+            // Draw units on render target 1, then copy them with tone on render target 0
+            device.SetRenderTarget(render_targets[1]);
+            device.Clear(Color.Transparent);
+            draw_previewed_units(sprite_batch, roof: roof, roof_tiles: roof_tiles);
+
+            // Unit tone
+            device.SetRenderTarget(render_targets[0]);
+            Effect map_shader = Global.effect_shader();
+            if (map_shader != null)
+            {
+                map_shader.CurrentTechnique = map_shader.Techniques["Tone"];
+                map_shader.Parameters["tone"].SetValue(Global.game_state.screen_tone.to_vector_4(Config.UNIT_TONE_PERCENT));
+            }
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
+            sprite_batch.Draw(render_targets[1], Vector2.Zero, Color.White);
+            sprite_batch.End();
+        }
+
         /// <summary>
         /// Draws inactive units onto render_targets[1], then copies them to render_targets[0] with tone.
         /// </summary>
@@ -1863,6 +1887,24 @@ namespace Tactile
             sprite_batch.Draw(render_targets[1], Vector2.Zero, Color.White);
             sprite_batch.End();
         }
+        protected virtual void draw_previewed_units(SpriteBatch sprite_batch, bool rotated = false, bool roof = false, HashSet<Vector2> roof_tiles = null)
+        {
+            // Units hidden
+            if (Global.game_map.UnitsHidden)
+                return;
+
+            // Units to skip and draw at the end
+            //get_deferred_unit_ids();
+            List<int> units = previewed_units_to_draw(rotated);
+            if (roof_tiles != null && roof_tiles.Count > 0)
+                units = units.Where(x => roof_tiles.Contains(Global.game_map.units[x].loc) == roof).ToList();
+
+            draw_map_objects(sprite_batch, false, roof, roof_tiles);
+            draw_map_objects(sprite_batch, true, roof, roof_tiles);
+            preview_idle_units(sprite_batch, units);
+            //draw_unit_status(sprite_batch, units);
+            //draw_unit_icons(sprite_batch, units);
+        }
 
         protected virtual void draw_units(SpriteBatch sprite_batch, bool rotated = false, bool roof = false, HashSet<Vector2> roof_tiles = null)
         {
@@ -1883,6 +1925,27 @@ namespace Tactile
             //draw_unit_icons(sprite_batch, units);
         }
 
+        protected List<int> previewed_units_to_draw(
+            bool rotated, bool ignoreBounds = false)
+        {
+            // Units to skip and draw at the end
+            List<int> units = new List<int>(Global.game_temp.turnwheel_preview.game_map.units.Count);
+            Rectangle area = Tilemap.view_area(rotated);
+            area.X = area.X - 1;
+            area.Y = area.Y - 1;
+            area.Width = area.Width + 2;
+            area.Height = area.Height + 2;
+            foreach (Game_Unit unit in Global.game_temp.turnwheel_preview.game_map.units.Values)
+            {
+
+                if (ignoreBounds || area.Contains((int)unit.loc.X, (int)unit.loc.Y))
+                {
+                    units.Add(unit.id);
+                }
+            }
+            return units;
+            //return sort_units(units);
+        }
         protected List<int> units_to_draw(
             List<int> deferredUnits, bool rotated, bool ignoreBounds = false)
         {
@@ -1959,6 +2022,61 @@ namespace Tactile
             }
         }
 
+        protected void preview_idle_units(SpriteBatch sprite_batch, List<int> units)
+        {
+            // Begin map sprite batch
+            sprite_batch.GraphicsDevice.ScissorRectangle = battle_transition_rect();
+            // This wasn't working for some reason, 0 width and height made it ignore the scissor
+            if (sprite_batch.GraphicsDevice.ScissorRectangle.Width > 0 && sprite_batch.GraphicsDevice.ScissorRectangle.Width > 0)
+            {
+                Effect map_shader = Global.effect_shader();
+                foreach (int id in units)
+                {
+                    if (!Global.game_temp.turnwheel_preview.game_map.units[id].visible_by())
+                        continue;
+                    // Adjusts unit brightness by map alpha
+                    Map_Sprites[id].tint = get_unit_tint(Global.game_temp.turnwheel_preview.game_map.units[id].loc);
+                    // Tints the unit red if it has its attack range marked
+                    if (Global.game_temp.turnwheel_preview.game_map.range_enemies.Contains(id) &&
+                        Constants.Team.PLAYABLE_TEAMS.Contains(Global.game_state.team_turn))
+                    {
+                        enemy_range_unit_tint(id);
+                    }
+
+                    Effect unit_shader = null;
+                    // Blinks the unit outline if their mastery is ready
+                    if (Global.game_temp.turnwheel_preview.game_system.unit_blink &&
+                        Global.game_temp.turnwheel_preview.game_map.units[id].is_blinking &&
+                        !Global.game_temp.turnwheel_preview.game_map.is_off_map(Global.game_temp.turnwheel_preview.game_map.units[id].loc) &&
+                        Global.Map_Sprite_Colors.data.ContainsKey(new Color(64, 56, 56, 255)))
+                    {
+                        unit_shader = map_shader;
+                        if (unit_shader != null)
+                        {
+                            unit_shader.CurrentTechnique = unit_shader.Techniques["Outline_Glow"];
+                            unit_shader.Parameters["tone"].SetValue(
+                                Global.Map_Sprite_Colors.data[
+                                new Color(64, 56, 56, 255)][Global.game_temp.turnwheel_preview.game_map.units[id].ready ? Global.game_temp.turnwheel_preview.game_map.units[id].team : 0].ToVector4());
+                            unit_shader.Parameters["color_shift"].SetValue(Global.game_temp.turnwheel_preview.game_map.units[id].blink_color.ToVector4());
+                        }
+                    }
+                    sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, Unit_Transition_State, unit_shader);
+                    Map_Sprites[id].draw(sprite_batch, Global.game_temp.turnwheel_preview.game_map.display_loc, camera.matrix);
+                    sprite_batch.End();
+                }
+                // Draws hp gauges
+                sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, Unit_Transition_State);
+                if (Global.game_temp.turnwheel_preview.game_state.hp_gauges_visible && !Global.game_system.is_interpreter_running)
+                    foreach (int id in units)
+                    {
+                        if (!Global.game_temp.turnwheel_preview.game_map.units[id].visible_by() || Global.game_temp.turnwheel_preview.game_map.is_off_map(Global.game_temp.turnwheel_preview.game_map.units[id].loc))
+                            continue;
+                        Map_Sprites[id].draw_hp(sprite_batch, Global.game_temp.turnwheel_preview.game_map.display_loc - hp_gauge_draw_vector(), camera.matrix);
+                    }
+                // End sprite batch
+                sprite_batch.End();
+            }
+        }
         protected void draw_idle_units(SpriteBatch sprite_batch, List<int> units)
         {
             // Begin map sprite batch
@@ -2431,7 +2549,6 @@ namespace Tactile
                 }
             }
         }
-
         protected void get_deferred_unit_ids()
         {
             DeferredUnitIds.Clear();
