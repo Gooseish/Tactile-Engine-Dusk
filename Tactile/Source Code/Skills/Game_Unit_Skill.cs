@@ -119,94 +119,96 @@ namespace Tactile
                 if (mastery_called(MASTERIES[i]))
                     Mastery_Gauges[MASTERIES[i]] = 0;
             }
-            // Skills: Volley
-            if (actor.has_skill("VOLLEY"))
-            {
-                if (is_active_team && actor.weapon != null && actor.weapon.main_type().Name == "Bow" && is_attackable_team(target))
+            if (target != null)
+            { 
+                // Skills: Volley
+                if (actor.has_skill("VOLLEY"))
                 {
-                    HashSet<Game_Unit> foes_in_volley_aoe = new HashSet<Game_Unit>();
-                    foreach (int id in target.units_in_range(1))
+                    if (is_active_team && actor.weapon != null && actor.weapon.main_type().Name == "Bow" && is_attackable_team(target))
                     {
-                        Game_Unit unit = Global.game_map.units[id];
-                        if (is_attackable_team(unit))
+                        HashSet<Game_Unit> foes_in_volley_aoe = new HashSet<Game_Unit>();
+                        foreach (int id in target.units_in_range(1))
                         {
-                            foes_in_volley_aoe.Add(unit);
+                            Game_Unit unit = Global.game_map.units[id];
+                            if (is_attackable_team(unit))
+                            {
+                                foes_in_volley_aoe.Add(unit);
+                            }
+                        }
+                        if (!target.dead || foes_in_volley_aoe.Count > 0)
+                            Global.game_state.call_skill_flash(id, target.id, "VOLLEY");
+                    }
+                }
+                // Skills: Disarm
+                if (actor.has_skill("DISARM"))
+                {
+                    if (is_active_team && is_attackable_team(target) && !target.is_dead && target.actor.weapon != null)
+                    {
+                        int rate = skill_rate("DISARM");
+                        if (Global.game_system.roll_rng(rate))
+                        {
+                            Global.game_state.call_skill_flash(id, target.id, "DISARM");
                         }
                     }
-                    if (!target.dead || foes_in_volley_aoe.Count > 0)
-                        Global.game_state.call_skill_flash(id, target.id, "VOLLEY");
                 }
-            }
-            // Skills: Disarm
-            if (actor.has_skill("DISARM"))
-            {
-                if (is_active_team && is_attackable_team(target) && !target.is_dead && target.actor.weapon != null)
+                // Skills: Indict
+                if (actor.has_skill("INDICT") && !target.dead)
                 {
-                    int rate = skill_rate("DISARM");
-                    if (Global.game_system.roll_rng(rate))
-                    {
-                        Global.game_state.call_skill_flash(id, target.id, "DISARM");
-                    }
-                }
-            }
-            // Skills: Indict
-            if (actor.has_skill("INDICT") && !target.dead)
-            {
-                if (!is_active_team)
-                {
-                    if (is_attackable_team(target))
-                        Global.game_state.call_skill_flash(id, target.id, "INDICT");
-                }
-            }
-            // Skills: Dreadful Aura
-            if (actor.has_skill("DREADFUL_AURA"))
-            {
-                if (is_active_team && (target.is_dead || is_attackable_team(target)))
-                {
-                    HashSet<Game_Unit> foes_in_aoe = new HashSet<Game_Unit>();
-                    foreach (int id in target.units_in_range(1))
-                    {
-                        Game_Unit unit = Global.game_map.units[id];
-                        if (is_attackable_team(unit))
-                        {
-                            foes_in_aoe.Add(unit);
-                        }
-                    }
-                    if (!target.dead || foes_in_aoe.Count > 0)
-                        Global.game_state.call_skill_flash(id, target.id, "DREADFUL_AURA");
-                }
-            }
-            // Skills: Shatter Defense
-            if (target != null && target.is_unit() && is_attackable_team(target) && !is_dead)
-                if (target.actor.has_skill("SHATTER_DEFENSE"))
                     if (!is_active_team)
-                        Global.game_state.call_skill_flash(target.id, id, "SHATTER_DEFENSE");
+                    {
+                        if (is_attackable_team(target))
+                            Global.game_state.call_skill_flash(id, target.id, "INDICT");
+                    }
+                }
+                // Skills: Dreadful Aura
+                if (actor.has_skill("DREADFUL_AURA"))
+                {
+                    if (is_active_team && (target.is_dead || is_attackable_team(target)))
+                    {
+                        HashSet<Game_Unit> foes_in_aoe = new HashSet<Game_Unit>();
+                        foreach (int id in target.units_in_range(1))
+                        {
+                            Game_Unit unit = Global.game_map.units[id];
+                            if (is_attackable_team(unit))
+                            {
+                                foes_in_aoe.Add(unit);
+                            }
+                        }
+                        if (!target.dead || foes_in_aoe.Count > 0)
+                            Global.game_state.call_skill_flash(id, target.id, "DREADFUL_AURA");
+                    }
+                }
+                // Skills: Shatter Defense
+                if (target.is_unit() && is_attackable_team(target) && !is_dead)
+                    if (target.actor.has_skill("SHATTER_DEFENSE"))
+                        if (!is_active_team)
+                            Global.game_state.call_skill_flash(target.id, id, "SHATTER_DEFENSE");
 
-            // Skills: Draconic Hex
-            if (target != null && target.is_unit() && is_attackable_team(target) && !is_dead)
-                if (target.actor.has_skill("DRACONIC_HEX"))
-                    Global.game_state.call_skill_flash(target.id, id, "DRACONIC_HEX");
+                // Skills: Draconic Hex
+                if (target.is_unit() && is_attackable_team(target) && !is_dead)
+                    if (target.actor.has_skill("DRACONIC_HEX"))
+                        Global.game_state.call_skill_flash(target.id, id, "DRACONIC_HEX");
 
 
-            // Skills: Grisly Wound
-            if (actor.has_skill("GRISLY_WOUND") && is_attackable_team(target) && !target.is_dead)
-                Global.game_state.call_skill_flash(id, target.id, "GRISLY_WOUND");
-            // Skills: Poison Knife
-            if (actor.has_skill("POISON_KNIFE"))
-                if (is_active_team && is_attackable_team(target) && !target.is_dead)
-                    Global.game_state.call_skill_flash(id, target.id, "POISON_KNIFE");
+                // Skills: Grisly Wound
+                if (actor.has_skill("GRISLY_WOUND") && is_attackable_team(target) && !target.is_dead)
+                    Global.game_state.call_skill_flash(id, target.id, "GRISLY_WOUND");
+                // Skills: Poison Knife
+                if (actor.has_skill("POISON_KNIFE"))
+                    if (is_active_team && is_attackable_team(target) && !target.is_dead)
+                        Global.game_state.call_skill_flash(id, target.id, "POISON_KNIFE");
 
 
-            // Skills: Lifetaker
-            if (actor.has_skill("LIFETAKER"))
-                if (target.is_dead && is_active_team && !is_full_hp)
-                    Global.game_state.call_skill_flash(id, -1, "LIFETAKER");
+                // Skills: Lifetaker
+                if (actor.has_skill("LIFETAKER"))
+                    if (target != null && target.is_dead && is_active_team && !is_full_hp)
+                        Global.game_state.call_skill_flash(id, -1, "LIFETAKER");
 
-            // Skills: Galeforce
-            if (actor.has_skill("GALEFORCE"))
-                if (target.is_dead && is_active_team && !galeforce_used_this_turn)
-                    Global.game_state.call_skill_flash(id, -1, "GALEFORCE");
-
+                // Skills: Galeforce
+                if (actor.has_skill("GALEFORCE"))
+                    if (target != null && target.is_dead && is_active_team && !galeforce_used_this_turn)
+                        Global.game_state.call_skill_flash(id, -1, "GALEFORCE");
+            }
             reset_masteries();
 
             //
