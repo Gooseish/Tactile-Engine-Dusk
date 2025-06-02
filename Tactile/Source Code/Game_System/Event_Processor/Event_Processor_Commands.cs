@@ -2808,6 +2808,29 @@ namespace Tactile
                     }
                     break;
                 #endregion
+                case "Team Mission Change":
+                    #region Team Mission Change; changes the AI for an entire team
+                    // Value[1] = Team Id
+                    // Value[2] = Mission Id
+                    List<int> units = Global.game_map.units
+                        .Where(x => x.Value.team == process_number(command.Value[1]))
+                        .Select(x => x.Key)
+                        .ToList();
+                    foreach (int id in units)
+                    {
+                        Game_Unit unit = null;
+                        unit = Global.game_map.units[id];
+                        if (unit != null)
+                        {
+                            if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
+                                Unit_Moved = true;
+                            unit.full_ai_mission = process_number(command.Value[2]);
+                            if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
+                                Unit_Moved = true;
+                        }
+                    }
+                    break;
+                #endregion
 #if DEBUG
                 default:
                     throw event_case_missing_exception(command.Value[0], command.Key);
