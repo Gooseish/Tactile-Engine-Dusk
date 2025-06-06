@@ -2266,7 +2266,15 @@ namespace Tactile
         }
         public List<int> swap_targets()
         {
-            return allies_in_range(5);
+            List<int> result = new List<int> { };
+            foreach (int id in allies_in_range(5))
+            {
+                Game_Unit unit = Global.game_map.units[id];
+                Vector2 tile = unit.loc;
+                if (Pathfind.passable(this, tile) && !Global.game_map.is_off_map(tile) && !Global.game_map.is_blocked(tile, id))
+                    result.Add(id);
+            }
+            return result;
         }
 
         public HashSet<Vector2> swap_range()
