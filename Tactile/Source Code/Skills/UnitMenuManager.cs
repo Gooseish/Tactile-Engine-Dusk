@@ -158,6 +158,7 @@ namespace Tactile.Menus.Map.Unit
         {
             Global.game_system.play_se(System_Sounds.Confirm);
             Global.game_temp.menuing = false;
+            Global.game_map.clear_move_range();
             CloseCommandMenu(true);
             Global.game_state.call_transform(unit.id);
         }
@@ -167,8 +168,10 @@ namespace Tactile.Menus.Map.Unit
         {
             Global.game_system.play_se(System_Sounds.Confirm);
             Global.game_temp.menuing = false;
+            Global.game_map.clear_move_range();
             CloseCommandMenu(true);
             Global.game_state.call_skill_flash(unit.id, -1, unit.decide_rally_skill_flash_icon());
+            
 
         }
 
