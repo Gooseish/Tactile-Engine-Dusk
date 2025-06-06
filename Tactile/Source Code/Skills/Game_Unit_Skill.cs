@@ -2479,8 +2479,6 @@ namespace Tactile
 
         public void revert_dtransform()
         {
-
-
             actor.DTransformActive = false;
             refresh_sprite();
             if (hp > maxhp)
@@ -2499,8 +2497,15 @@ namespace Tactile
                 actor.DTransformActive = false;
                 HasTransformed = false;
             }
-            
+        }
 
+        public bool is_dtransform_blocked()
+        {
+            bool result;
+            Global.game_map.add_temp_unit(team, loc, 110, 0, "manakete_d_temp");
+            result = !Pathfind.passable(Global.game_map.last_added_unit, loc);
+            Global.game_map.completely_remove_unit(Global.game_map.last_added_unit.id);
+            return result;
         }
 
         #endregion

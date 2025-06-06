@@ -156,11 +156,16 @@ namespace Tactile.Menus.Map.Unit
         // Skills: Transform
         private void DTransform(Game_Unit unit)
         {
-            Global.game_system.play_se(System_Sounds.Confirm);
-            Global.game_temp.menuing = false;
-            Global.game_map.clear_move_range();
-            CloseCommandMenu(true);
-            Global.game_state.call_transform(unit.id);
+            if (unit.is_dtransform_blocked())
+                Global.game_system.play_se(System_Sounds.Buzzer);
+            else
+            {
+                Global.game_system.play_se(System_Sounds.Confirm);
+                Global.game_temp.menuing = false;
+                Global.game_map.clear_move_range();
+                CloseCommandMenu(true);
+                Global.game_state.call_transform(unit.id);
+            }
         }
 
         // Skills: Rally
