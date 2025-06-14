@@ -56,6 +56,11 @@ namespace Tactile.Menus.Map.Turnwheel
 
             Turnwheel_Snapshot snapshot = TurnwheelMenu.snapshots[index];
             Global.game_temp.turnwheel_preview = snapshot;
+
+            Global.scene_change("Rewind_Turnwheel");
+            //Global.game_map.highlight_test();
+            Global.init_map();
+            Global.game_map.refresh_alpha();
         }
     }
 }

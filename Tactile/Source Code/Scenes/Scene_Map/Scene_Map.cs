@@ -894,8 +894,15 @@ namespace Tactile
 
         public void re_add_map_sprites()
         {
+            re_add_map_sprites(false);
+        }
+        public void re_add_map_sprites(bool turnwheel_preview)
+        {
             Map_Sprites.Clear();
-            Global.game_map.init_sprites();
+            if (turnwheel_preview)
+                Global.game_temp.turnwheel_preview.game_map.init_sprites();
+            else
+                Global.game_map.init_sprites();
         }
 
         public Character_Sprite add_map_sprite(int id)
@@ -1276,10 +1283,8 @@ namespace Tactile
             DrawTileOutlines(sprite_batch, device, render_targets);
 
             // Idle units (that aren't under a roof)
-            if (Global.game_temp.turnwheel_preview == null)
-                draw_units(sprite_batch, device, render_targets, false, roof_tiles);
-            else
-                draw_preview_units(sprite_batch, device, render_targets, false, roof_tiles);
+            draw_units(sprite_batch, device, render_targets, false, roof_tiles);
+
             #endregion
 
             draw_arrow(sprite_batch);

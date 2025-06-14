@@ -56,6 +56,9 @@ namespace Tactile
         public void clear_turnwheel_preview()
         {
             turnwheel_preview = null;
+
+            Global.init_map();
+            Global.game_map.refresh_alpha();
         }
         public void clear_temp_range()
         {

@@ -1135,7 +1135,12 @@ namespace Tactile
 
         internal static Game_Map game_map
         {
-            get { return @Game_Map; }
+            get {
+                if (game_temp.turnwheel_preview == null)
+                    return @Game_Map;
+                else
+                    return game_temp.turnwheel_preview.game_map;
+            }
             set { @Game_Map = value; }
         }
 
