@@ -1164,7 +1164,13 @@ namespace Tactile
 
         internal static Game_State game_state
         {
-            get { return @Game_State; }
+            get
+            {
+                if (game_temp.turnwheel_preview == null)
+                    return @Game_State;
+                else
+                    return game_temp.turnwheel_preview.game_state;
+            }
             set { @Game_State = value; }
         }
 
