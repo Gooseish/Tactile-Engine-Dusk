@@ -2016,10 +2016,19 @@ namespace Tactile
                             dead_units.Add(unit.id);
                     }
                     bool take_turnwheel_snapshot = false;
+                    string turnwheel_snapshot_name = "";
                     foreach (int id in dead_units)
                     {
-                        if (DefeatedAlliedUnits.Contains(id))
+                        if (DefeatedAlliedUnits.Contains(id) && Global.game_state.is_player_turn)
+                        {
                             take_turnwheel_snapshot = true;
+                            turnwheel_snapshot_name = "Ally fell";
+                        }
+                        if (!DefeatedAlliedUnits.Contains(id) && !Global.game_state.is_player_turn)
+                        {
+                            take_turnwheel_snapshot = true;
+                            turnwheel_snapshot_name = "Enemy fell";
+                        }
                     }
                     foreach (int id in dead_units)
                         remove_unit(id);
@@ -2029,7 +2038,7 @@ namespace Tactile
                     refresh_alpha(30);
 
                     if (take_turnwheel_snapshot)
-                        Global.turnwheel.Take_Snapshot("Ally died");
+                        Global.turnwheel.Take_Snapshot(turnwheel_snapshot_name);
                 }
             }
         }
