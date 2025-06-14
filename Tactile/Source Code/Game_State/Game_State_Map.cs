@@ -1804,7 +1804,7 @@ namespace Tactile
         {
             get
             {
-                if (!is_map_ready() || Global.game_temp.menu_call || is_menuing) return false;
+                if (!is_map_ready() || Global.game_temp.menu_call/* || is_menuing*/) return false;
                 if (is_changing_turns) return false;
                 if (get_scene_map() == null) return false;
                 return true;
