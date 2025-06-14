@@ -1099,7 +1099,13 @@ namespace Tactile
 
         internal static Game_Actors game_actors
         {
-            get { return @Game_Actors; }
+            get
+            {
+                if (game_temp.turnwheel_preview == null)
+                    return @Game_Actors;
+                else
+                    return game_temp.turnwheel_preview.game_actors;
+            }
             set { @Game_Actors = value; }
         }
 
