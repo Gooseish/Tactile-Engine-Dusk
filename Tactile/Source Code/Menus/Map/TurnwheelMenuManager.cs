@@ -62,8 +62,6 @@ namespace Tactile.Menus.Map.Turnwheel
             Global.init_map();
             Global.game_map.refresh_alpha();
             Global.game_temp.menuing = true;
-            Global.game_system.Instant_Move = true;
-            Global.game_map.update_scroll_position();
         }
     }
 }

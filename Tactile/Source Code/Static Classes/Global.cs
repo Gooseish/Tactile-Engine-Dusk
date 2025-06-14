@@ -1235,7 +1235,13 @@ namespace Tactile
 
         internal static Player player
         {
-            get { return @Player; }
+            get
+            {
+                if (game_temp.turnwheel_preview == null)
+                    return @Player;
+                else
+                    return game_temp.turnwheel_preview.player;
+            }
             set { @Player = value; }
         }
         #endregion
