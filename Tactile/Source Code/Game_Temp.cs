@@ -59,6 +59,7 @@ namespace Tactile
 
             Global.init_map();
             Global.game_map.refresh_alpha();
+            Global.scene_change("Rewind_Turnwheel");
         }
         public void clear_temp_range()
         {
