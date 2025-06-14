@@ -1003,6 +1003,8 @@ namespace Tactile
 
         protected void update_main_turn_change()
         {
+            if (Global.game_temp.turnwheel_preview != null)
+                return;
             // This needs to not stop on non-player turns on turn 0??? //@Yeti
             if (Changing_Turn)
             {
