@@ -26,6 +26,7 @@ namespace Tactile
         public string name { get { return Name; } }
         public int index { get { return Index; } set { Index = value; } }
         public bool is_player_turn_snapshot { get { return game_state.is_player_turn; } }
+        public int snapshot_phase { get { return game_state.team_turn; } }
 
         #region Serialization
         public void write(BinaryWriter writer)

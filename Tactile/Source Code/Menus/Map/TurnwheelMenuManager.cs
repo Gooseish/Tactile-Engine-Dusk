@@ -62,6 +62,7 @@ namespace Tactile.Menus.Map.Turnwheel
             Global.init_map();
             Global.game_map.refresh_alpha();
             Global.game_temp.menuing = true;
+            turnwheelMenu.color_override = snapshot.snapshot_phase-1;
         }
     }
 }

@@ -16,11 +16,19 @@ namespace Tactile.Windows
         {
             Turn_Number = new TextSprite();
             Turn_Number.SetFont(Config.UI_FONT, Global.Content, "White");
-            Window_Img = new WindowPanel(Global.Content.Load<Texture2D>(System_Color_Window.FILENAME));
+            Window_Img = new System_Color_Window();
             Window_Img.width = 55;
             Window_Img.height = 32;
+            
         }
 
+        public int color_override
+        {
+            set 
+            {
+                (Window_Img as System_Color_Window).color_override = value;
+            }
+        }
         public void draw(SpriteBatch sprite_batch)
         {
             draw(sprite_batch, Vector2.Zero);

@@ -18,6 +18,7 @@ namespace Tactile.Menus.Map.Turnwheel
         {
             create_cancel_button();
             create_turn_display();
+            color_override = snapshots[index_of_current_snapshot].snapshot_phase - 1;
         }
 
         private static Window_Command_Scrollbar new_map_window(int width)
@@ -39,6 +40,14 @@ namespace Tactile.Menus.Map.Turnwheel
             get
             {
                 return true;
+            }
+        }
+        public int color_override
+        {
+            set
+            {
+                base.Window.color_override = value;
+                Turn_Display.color_override = value;
             }
         }
         private void create_cancel_button()
