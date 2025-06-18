@@ -12,18 +12,31 @@ namespace Tactile
         private List<Turnwheel_Snapshot> Snapshots = new List<Turnwheel_Snapshot> { };
         public List<Turnwheel_Snapshot> snapshots { get { return Snapshots; } }
         public Turnwheel_Snapshot current_snapshot { get { return Snapshots.Last(); } }
+        private bool Active;
+        private int Charges;
+        public bool active { get { return Active; } set { Active = value; } }
+        public int charges { get { return Charges; } set { Charges = value; } }
+        public bool can_rewind { get { return charges > 0 && active; } }
         #region: Serialization
         public void write(BinaryWriter writer)
         {
             Snapshots.write(writer);
+            writer.Write(Active);
+            writer.Write(Charges);
         }
         public void read(BinaryReader reader)
         {
             Snapshots.read(reader);
+            Active = reader.ReadBoolean();
+            Charges = reader.ReadInt32();
         }
         #endregion
 
-        public Turnwheel() { }
+        public Turnwheel() 
+        {
+            Active = false;
+            Charges = 0;
+        }
         public void Take_Snapshot(string snapshot_name)
         {
             string temp_filename = System.IO.Path.GetTempFileName();
@@ -63,6 +76,7 @@ namespace Tactile
         }
         public Turnwheel_Snapshot rewind(int index)
         {
+            Charges -= 1;
             Turnwheel_Snapshot rewound_snapshot = Snapshots[index];
             int number_of_snapshots_to_remove = Snapshots.Count - (index + 1);
             Snapshots.RemoveRange(index + 1, number_of_snapshots_to_remove); // Discard snapshots that take place after the point we're rewinding to

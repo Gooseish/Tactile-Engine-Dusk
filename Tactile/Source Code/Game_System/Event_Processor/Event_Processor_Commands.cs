@@ -2783,6 +2783,18 @@ namespace Tactile
                     }
                     break;
                 #endregion
+                case "Allow Turnwheel":
+                    #region Allow Turnwheel; activates/deactivates the turnwheel
+                    // Value[1] = bool
+                    Global.turnwheel.active = process_bool(command.Value[1]);
+                    break;
+                #endregion
+                case "Turnwheel Charges":
+                    #region Turnwheel Charges; set number of charges for turnwheel
+                    // Value[1] = number of charges
+                    Global.turnwheel.charges = process_number(command.Value[1]);
+                    break;
+                #endregion
 #if DEBUG
                 default:
                     throw event_case_missing_exception(command.Value[0], command.Key);

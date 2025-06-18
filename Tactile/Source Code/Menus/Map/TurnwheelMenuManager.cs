@@ -35,7 +35,11 @@ namespace Tactile.Menus.Map.Turnwheel
             int index = turnwheelMenu.Index;
 
             Turnwheel_Snapshot snapshot = TurnwheelMenu.snapshots[index];
-            if (snapshot.index == Global.turnwheel.current_snapshot.index)
+            if (!Global.turnwheel.can_rewind)
+            {
+                Global.game_system.play_se(System_Sounds.Buzzer);
+            }
+            else if (snapshot.index == Global.turnwheel.current_snapshot.index)
             {
                 Global.game_system.play_se(System_Sounds.Buzzer); // Can't rewind time to the present
             }
