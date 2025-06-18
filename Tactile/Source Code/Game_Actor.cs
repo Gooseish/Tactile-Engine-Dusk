@@ -2411,7 +2411,7 @@ namespace Tactile
         /// <param name="item_data">Item data to add</param>
         public void gain_item(Item_Data item_data)
         {
-            if(is_trade_blocked) //items acquired by summons go straight to the convoy
+            if(is_trade_blocked && Global.battalion.has_convoy) //items acquired by summons go straight to the convoy, if possible
             {
                 Global.game_battalions.add_item_to_convoy(item_data);
             }
