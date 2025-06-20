@@ -10,16 +10,17 @@ namespace Tactile.Windows
     {
         protected WindowPanel Window_Img;
         protected TextSprite Turn_Number;
-        public int turn_number { set { Turn_Number.text = "Turn: " + value.ToString(); } }
+        protected string Text;
+        public int turn_number { set { Turn_Number.text = Text + value.ToString(); } }
 
-        public Window_Turnwheel()
+        public Window_Turnwheel(string text)
         {
             Turn_Number = new TextSprite();
             Turn_Number.SetFont(Config.UI_FONT, Global.Content, "White");
             Window_Img = new System_Color_Window();
-            Window_Img.width = 55;
+            Window_Img.width = 70;
             Window_Img.height = 32;
-            
+            Text = text;
         }
 
         public int color_override
