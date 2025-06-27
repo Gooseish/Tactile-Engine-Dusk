@@ -1659,7 +1659,9 @@ namespace Tactile
                 map_shader = Global.effect_shader();
             if (map_shader != null)
             {
+                (Global.scene as Scene_Map).ripple_timer++;
                 map_shader.CurrentTechnique = map_shader.Techniques["Ripple"];
+                map_shader.Parameters["timer"].SetValue((Global.scene as Scene_Map).ripple_timer);
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, map_shader);

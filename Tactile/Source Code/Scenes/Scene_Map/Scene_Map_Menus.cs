@@ -48,6 +48,8 @@ namespace Tactile
 
         protected bool Overwriting_Checkpoint = false;
 
+        public int ripple_timer = 0;
+
         #region Accessors
         public bool manual_targeting
         {

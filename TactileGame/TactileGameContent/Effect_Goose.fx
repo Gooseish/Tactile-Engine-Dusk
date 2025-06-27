@@ -624,8 +624,7 @@ float4 ripple(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
 {
 	float2 new_uv = uv;
 	float2 from_center = uv-0.5;
-	//new_uv += normalize(from_center)*sin(length(from_center)*20 - timer/20)*0.015*length(from_center);
-	new_uv += normalize(from_center)*sin(length(from_center)*20)*0.15*length(from_center);
+	new_uv += normalize(from_center)*sin(length(from_center)*20 - timer/20)*0.015*length(from_center);
 	float4 sample = tex2D(TextureSampler, new_uv);
 	return sample;
 }
