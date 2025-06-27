@@ -4,6 +4,7 @@ ehthumbs.db
 
 # Ignore Content folder
 *Content/*
+!*Content/Effect_Goose.fx
 
 # Folder config file
 Desktop.ini
