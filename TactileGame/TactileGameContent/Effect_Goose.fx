@@ -19,6 +19,8 @@ uniform float2 alpha_offset;
 uniform float2 map_size;
 uniform float2 game_size;
 
+float timer;
+
 //--------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------
@@ -610,5 +612,29 @@ technique Coverage_Shader
 	{
 		VertexShader = compile vs_2_0 original_vs();
 		PixelShader = compile ps_2_0 coverage_shader();
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+// Ripple
+//-----------------------------------------------------------------------------
+
+float4 ripple(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
+{
+	float2 new_uv = uv;
+	float2 from_center = uv-0.5;
+	//new_uv += normalize(from_center)*sin(length(from_center)*20 - timer/20)*0.015*length(from_center);
+	new_uv += normalize(from_center)*sin(length(from_center)*20)*0.15*length(from_center);
+	float4 sample = tex2D(TextureSampler, new_uv);
+	return sample;
+}
+
+technique Ripple
+{
+	pass Pass1
+	{
+		VertexShader = compile vs_2_0 original_vs();
+		PixelShader = compile ps_2_0 ripple();
 	}
 }

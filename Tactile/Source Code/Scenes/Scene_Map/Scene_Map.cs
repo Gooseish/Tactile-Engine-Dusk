@@ -1578,12 +1578,12 @@ namespace Tactile
         protected void draw_map(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets, bool roof = false)
         {
             // Draw fog tiles to render target 1
-            device.SetRenderTarget(render_targets[1]);
+            device.SetRenderTarget(render_targets[0]);
             device.Clear(Color.Transparent);
             draw_raw_map(sprite_batch, false, fog: true, roof: roof);
 
             // Copy fog tiles with the fog effect to render target 0
-            device.SetRenderTarget(render_targets[0]);
+            device.SetRenderTarget(render_targets[1]);
             device.Clear(Color.Transparent);
 
             Color fog_color;
@@ -1592,14 +1592,14 @@ namespace Tactile
 
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[1], Vector2.Zero, fog_color);
+            sprite_batch.Draw(render_targets[0], Vector2.Zero, fog_color);
             sprite_batch.End();
 
             // Draw regular tiles on top of fog tiles
             draw_raw_map(sprite_batch, false, fog: false, roof: roof);
 
             // Draw map to render target 1 with map alpha effects applied
-            device.SetRenderTarget(render_targets[1]);
+            device.SetRenderTarget(render_targets[0]);
             device.Clear(Color.Transparent);
 
             Effect alpha_shader = Global.effect_shader();
@@ -1620,7 +1620,7 @@ namespace Tactile
             // Darken screen for spells if needed
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, alpha_shader);
-            sprite_batch.Draw(render_targets[0], Vector2.Zero,
+            sprite_batch.Draw(render_targets[1], Vector2.Zero,
                 new Color(Map_Spell_Darken, Map_Spell_Darken, Map_Spell_Darken, 255));
             sprite_batch.End();
 #if __ANDROID__
@@ -1632,7 +1632,7 @@ namespace Tactile
 #endif
 
             // Draw map to render target 0 with map tone applied
-            device.SetRenderTarget(render_targets[0]);
+            device.SetRenderTarget(render_targets[1]);
             device.Clear(roof ? Color.Transparent : Color.Black);
             if (Global.game_map.width <= 0)
                 return;
@@ -1645,8 +1645,25 @@ namespace Tactile
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, map_shader);
+            sprite_batch.Draw(render_targets[0], Vector2.Zero, Color.White);
+            sprite_batch.End();
+
+
+            // Apply ripple effect
+            device.SetRenderTarget(render_targets[0]);
+            device.Clear(roof ? Color.Transparent : Color.Black);
+
+            map_shader = Global.effect_shader();
+            if (map_shader != null)
+            {
+                map_shader.CurrentTechnique = map_shader.Techniques["Ripple"];
+            }
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.PointClamp, null, null, map_shader);
             sprite_batch.Draw(render_targets[1], Vector2.Zero, Color.White);
             sprite_batch.End();
+
+
         }
 
         private void fog_effects(out Color fog_color, out Effect map_shader)
