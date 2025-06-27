@@ -18,6 +18,10 @@ namespace Tactile.Menus.Map.Turnwheel
             turnwheelMenu.Canceled += menu_ClosedCanceled;
             turnwheelMenu.IndexChanged += turnwheelMenu_IndexChanged;
             AddMenu(turnwheelMenu);
+
+            Turnwheel_Snapshot snapshot = TurnwheelMenu.snapshots.First();
+            preview(snapshot);
+            turnwheelMenu.color_override = snapshot.snapshot_phase - 1;
         }
 
         void menu_ClosedCanceled(object sender, EventArgs e)
@@ -59,6 +63,11 @@ namespace Tactile.Menus.Map.Turnwheel
             int index = turnwheelMenu.Index;
 
             Turnwheel_Snapshot snapshot = TurnwheelMenu.snapshots[index];
+            preview(snapshot);
+            turnwheelMenu.color_override = snapshot.snapshot_phase - 1;
+        }
+        private void preview(Turnwheel_Snapshot snapshot)
+        {
             Global.game_temp.turnwheel_preview = snapshot;
 
             Global.scene_change("Rewind_Turnwheel");
@@ -66,7 +75,6 @@ namespace Tactile.Menus.Map.Turnwheel
             Global.init_map();
             Global.game_map.refresh_alpha();
             Global.game_temp.menuing = true;
-            turnwheelMenu.color_override = snapshot.snapshot_phase-1;
         }
     }
 }

@@ -1653,7 +1653,10 @@ namespace Tactile
             device.SetRenderTarget(render_targets[0]);
             device.Clear(roof ? Color.Transparent : Color.Black);
 
-            map_shader = Global.effect_shader();
+            if (Global.game_temp.turnwheel_preview == null)
+                map_shader = null;
+            else
+                map_shader = Global.effect_shader();
             if (map_shader != null)
             {
                 map_shader.CurrentTechnique = map_shader.Techniques["Ripple"];
