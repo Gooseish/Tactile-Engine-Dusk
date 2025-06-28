@@ -115,6 +115,7 @@
     <Compile Include="Source Code\Menus\Map\ConfirmationPromptMenu.cs" />
     <Compile Include="Source Code\Menus\Map\DialoguePromptMenu.cs" />
     <Compile Include="Source Code\Menus\Map\TurnwheelMenu.cs" />
+    <Compile Include="Source Code\Menus\Map\TurnwheelMenuEffect.cs" />
     <Compile Include="Source Code\Menus\Options\TitleSettingsTopMenu.cs" />
     <Compile Include="Source Code\Menus\SpriteMenu.cs" />
     <Compile Include="Source Code\Menus\Options\GameplaySettingsTopMenu.cs" />
