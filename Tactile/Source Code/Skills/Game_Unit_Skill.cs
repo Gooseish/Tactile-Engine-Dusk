@@ -3395,9 +3395,6 @@ namespace Tactile
             // Skills: Flight
             if (actor.has_skill("FLIGHT") && !is_weighted_by_ally)
                 n += 2;
-            // Skills: Canto
-            if (actor.has_skill("CANTO"))
-                n += 2;
             // Skills: Strafing
             if (actor.has_skill("STRAFING"))
                 n += 1;
