@@ -15,12 +15,15 @@ namespace Tactile.Menus.Map.Turnwheel
         public static int index_of_current_snapshot { get { return snapshots.IndexOf(Global.turnwheel.current_snapshot); } }
         private Window_Turnwheel Turn_Display;
         private Window_Turnwheel Charge_Display;
+        private TurnwheelMenuEffect Sparkle_Effect;
         public TurnwheelMenu() : base(new_map_window(100))
         {
             create_cancel_button();
             create_turn_display();
             create_charge_display();
             color_override = snapshots[index_of_current_snapshot].snapshot_phase - 1;
+
+            Sparkle_Effect = new TurnwheelMenuEffect();
         }
 
         private static Window_Command_Scrollbar new_map_window(int width)
@@ -83,6 +86,7 @@ namespace Tactile.Menus.Map.Turnwheel
         }
         public override void Draw(SpriteBatch spriteBatch)
         {
+            Sparkle_Effect.draw(spriteBatch);
             base.Draw(spriteBatch);
             Turn_Display.draw(spriteBatch);
             Charge_Display.draw(spriteBatch);
@@ -92,6 +96,7 @@ namespace Tactile.Menus.Map.Turnwheel
             base.UpdateMenu(active);
             update_turn_display();
             update_charge_display();
+            Sparkle_Effect.update();
         }
     }
 }

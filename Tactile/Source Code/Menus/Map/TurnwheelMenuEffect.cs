@@ -29,20 +29,23 @@ namespace Tactile.Menus.Map.Turnwheel
             //Ripple.Parameters["timer"].SetValue(Timer);
         }
 
-        public void draw(GraphicsDevice graphicsDevice)
+        public void draw(SpriteBatch spriteBatch)
         {
-            RenderTarget2D renderTarget = new RenderTarget2D(graphicsDevice, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
-            graphicsDevice.Clear(Color.CornflowerBlue);
-            graphicsDevice.SetRenderTarget(renderTarget);
-            SpriteBatch spriteBatch = new SpriteBatch(graphicsDevice);
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
+            //RenderTarget2D renderTarget = new RenderTarget2D(graphicsDevice, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
+            //graphicsDevice.Clear(Color.CornflowerBlue);
+            //graphicsDevice.SetRenderTarget(renderTarget);
+            //SpriteBatch spriteBatch = new SpriteBatch(graphicsDevice);
+
+            Ripple.CurrentTechnique = Ripple.Techniques["Ripple"];
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, Ripple);
             spriteBatch.Draw(Texture, new Rectangle(0, 0, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT), new Rectangle(0, 0, Config.WINDOW_WIDTH / Scale, Config.WINDOW_HEIGHT / Scale), Color.White);
             spriteBatch.End();
-
+            /*
             graphicsDevice.SetRenderTarget(null);
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, Ripple);
             spriteBatch.Draw(renderTarget, new Rectangle(0, 0, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT), Color.White);
-            spriteBatch.End();
+            spriteBatch.End();*/
         }
         public void set_pixels()
         {
@@ -114,9 +117,9 @@ namespace Tactile.Menus.Map.Turnwheel
         {
             get
             {
-                Vector3 values = new Vector3(0.9f, 0.1f, 0.9f);
-                Vector3 base_color = new Vector3(0.1f, 0.01f, 0.1f);
-                Vector3 result = Vector3.Lerp(base_color, values, Temperature);
+                Vector4 values = new Vector4(0.55f, 0.1f, 0.55f, 0.1f);
+                Vector4 base_color = new Vector4(0.08f, 0.01f, 0.08f, 0.1f);
+                Vector4 result = Vector4.Lerp(base_color, values, Temperature);
                 return new Color(result);
             }
         }
