@@ -582,6 +582,9 @@ namespace Tactile
                 case Stat_Labels.Res:
                     result = 10 + level * 30 / 100;
                     break;
+                case Stat_Labels.Con:
+                    result = 30;
+                    break;
 
             }
 

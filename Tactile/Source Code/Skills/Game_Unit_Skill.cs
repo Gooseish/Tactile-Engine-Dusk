@@ -3200,6 +3200,9 @@ namespace Tactile
                     if (double.TryParse(name.substring(4, name.Length - 4), out str_test))
                         n += Convert.ToInt32(name.Substring(4, name.Length - 4));
                 }
+                // Skills: Fire Stone
+                if (actor.has_skill("FIRESTONE"))
+                    n += actor.dtransform_stat_bonus(Stat_Labels.Con);
                 // Skills: Affinity+
                 // Con doesn't have a growth rate so is this necessary //Yeti
                 affinity_stat_boost(ref n, Stat_Labels.Con);
