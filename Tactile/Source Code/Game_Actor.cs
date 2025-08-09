@@ -21,6 +21,10 @@ namespace Tactile
     {
         internal const int LEVEL_UP_VIABLE_STATS = (int)Stat_Labels.Con; // Stats preceding this can go up on level
         readonly static int STATS = Enum_Values.GetEnumCount(typeof(Stat_Labels));
+        static readonly int[] HIDDEN_SKILLS = {
+            20, // Siege Training
+            23, // Steal
+        };
 
         private Data_Actor Data;
         private int Id;
@@ -1953,6 +1957,19 @@ namespace Tactile
                     if (!skills.Contains(skill_id))
                         skills.Add(skill_id);
                 return skills;
+            }
+        }
+        public List<int> visible_skills
+        {
+            get
+            {
+                List<int> visible_skills = new List<int> { };
+                foreach(int skill in skills)
+                {
+                    if (!HIDDEN_SKILLS.Contains(skill))
+                        visible_skills.Add(skill);
+                }
+                return visible_skills;
             }
         }
         public List<int> item_skills

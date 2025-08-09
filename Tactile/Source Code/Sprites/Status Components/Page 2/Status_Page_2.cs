@@ -71,9 +71,9 @@ namespace Tactile
                     string.Format("Skill{0}", i + 1),
                     (Game_Unit unit) =>
                     {
-                        if (unit.actor.skills.Count <= j)
+                        if (unit.actor.visible_skills.Count <= j)
                             return new SkillState();
-                        var skill = Global.data_skills[unit.actor.skills[j]];
+                        var skill = Global.data_skills[unit.actor.visible_skills[j]];
 
                         float charge = -1f;
                         if (Game_Unit.MASTERIES.Contains(skill.Abstract))
@@ -92,9 +92,9 @@ namespace Tactile
                 // Charges skill gauges
                 Func<Game_Unit, DirectionFlags, bool> skill_cheat = (unit, dir) =>
                 {
-                    if (unit.actor.skills.Count > j)
+                    if (unit.actor.visible_skills.Count > j)
                     {
-                        var skill = Global.data_skills[unit.actor.skills[j]];
+                        var skill = Global.data_skills[unit.actor.visible_skills[j]];
                         if (Game_Unit.MASTERIES.Contains(skill.Abstract))
                         {
                             int charge = 0;

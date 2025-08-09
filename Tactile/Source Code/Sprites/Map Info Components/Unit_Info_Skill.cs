@@ -24,7 +24,7 @@ namespace Tactile.Source_Code.Sprites
             if (unit != null)
             {
                 int counter = 0;
-                foreach (int skillid in unit.actor.skills)
+                foreach (int skillid in unit.actor.visible_skills)
                 {
                     Data_Skill data = Global.data_skills[skillid];
                     refresh_skill(data, counter);
