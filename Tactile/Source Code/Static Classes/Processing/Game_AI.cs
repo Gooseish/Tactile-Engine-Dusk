@@ -1019,23 +1019,27 @@ namespace Tactile
                     // Ignore immobile non-combat units
                     if (target.actor.mov == 0 && target.actor.is_non_combat()) //not 100% sure about how this handles //Yeti
                         continue;
-                    // If there are no states to remove
-                    if (!staff.Status_Remove.Except(actor2.states).Any())
+                    bool worth_casting = false;
+                    // If there are states to remove
+                    if (staff.Status_Remove.Except(actor2.states).Any())
                     {
-                        // And there are no states worth adding
-                        bool not_worth_casting = true;
-                        for (int i = 0; i < staff.Status_Inflict.Count; i++)
-                        {
-                            if (actor2.state_turns_left(staff.Status_Inflict[i]) <= 1)
-                                if (Global.data_statuses[staff.Status_Inflict[i]].No_Magic ? target.has_magic() : true)
-                                {
-                                    not_worth_casting = false;
-                                    break;
-                                }
-                        }
-                        if (not_worth_casting)
-                            continue;
+                        worth_casting = true;
                     }
+                    // If there are states worth adding
+                    bool not_worth_casting = true;
+                    for (int i = 0; i < staff.Status_Inflict.Count; i++)
+                    {
+                        if (actor2.state_turns_left(staff.Status_Inflict[i]) <= 1)
+                            if (Global.data_statuses[staff.Status_Inflict[i]].No_Magic ? target.has_magic() : true)
+                            {
+                                not_worth_casting = false;
+                                break;
+                            }
+                    }
+                    if (not_worth_casting)
+                        continue;
+                    if (!worth_casting)
+                        continue;
                     // Gets attack range
                     List<int> atk_distance = new List<int>();
                     int min_range = staff_user.min_range(staff_index);
