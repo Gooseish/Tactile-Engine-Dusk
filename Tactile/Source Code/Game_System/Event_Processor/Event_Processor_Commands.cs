@@ -2856,6 +2856,7 @@ namespace Tactile
             }
             switch (command.Value[1])
             {
+                case "set":
                 case "Set":
                     // Value[2] = new value
                     SWITCHES[id] = process_bool(command.Value[2]);
