@@ -1011,7 +1011,6 @@ namespace Tactile
                 Game_Unit target = Global.game_map.units[id];
                 if (Global.game_map.is_off_map(target.loc))
                     continue;
-                Game_Actor actor2 = target.actor;
                 int distance = Global.game_map.unit_distance(staff_user.id, id);
                 foreach (int staff_index in staves)
                 {
@@ -1019,26 +1018,7 @@ namespace Tactile
                     // Ignore immobile non-combat units
                     if (target.actor.mov == 0 && target.actor.is_non_combat()) //not 100% sure about how this handles //Yeti
                         continue;
-                    bool worth_casting = false;
-                    // If there are states to remove
-                    if (staff.Status_Remove.Except(actor2.states).Any())
-                    {
-                        worth_casting = true;
-                    }
-                    // If there are states worth adding
-                    bool not_worth_casting = true;
-                    for (int i = 0; i < staff.Status_Inflict.Count; i++)
-                    {
-                        if (actor2.state_turns_left(staff.Status_Inflict[i]) <= 1)
-                            if (Global.data_statuses[staff.Status_Inflict[i]].No_Magic ? target.has_magic() : true)
-                            {
-                                not_worth_casting = false;
-                                break;
-                            }
-                    }
-                    if (not_worth_casting)
-                        continue;
-                    if (!worth_casting)
+                    if (!worth_casting(staff, target))
                         continue;
                     // Gets attack range
                     List<int> atk_distance = new List<int>();
@@ -1109,6 +1089,24 @@ namespace Tactile
             if (target_ary.Count == 0) return null;
             sort_use(ref target_ary);
             return target_ary[0];
+        }
+        public static bool worth_casting(Data_Weapon staff, Game_Unit target)
+        {
+            // If there are states to remove
+            if (staff.Status_Remove.Except(target.actor.states).Any())
+            {
+                return true;
+            }
+            // If there are states worth adding
+            for (int i = 0; i < staff.Status_Inflict.Count; i++)
+            {
+                if (target.actor.state_turns_left(staff.Status_Inflict[i]) <= 1)
+                    if (Global.data_statuses[staff.Status_Inflict[i]].No_Magic ? target.has_magic() : true)
+                    {
+                        return true;
+                    }
+            }
+            return false;
         }
 
         public static int[] get_untargeted_staff_target(Game_Unit staff_user, List<int> staves, bool can_move)
