@@ -39,7 +39,7 @@ namespace Tactile
             Staff_Range = new HashSet<Vector2>(), Talk_Range = new HashSet<Vector2>();
         protected List<Vector2> Move_Route = new List<Vector2>();
         protected Missions Mission = (Missions)0;
-        protected Ai_Missions Ai_Mission = (Ai_Missions)2;
+        protected Missions Ai_Mission = (Missions)2;
         protected bool Dead = false;
         protected bool Boss = false, Drops_Item = false;
         protected int Priority = 0;
@@ -157,7 +157,7 @@ namespace Tactile
             Talk_Range.read(reader);
             Move_Route.read(reader);
             Mission = (Missions)reader.ReadInt32();
-            Ai_Mission = (Ai_Missions)reader.ReadInt32();
+            Ai_Mission = (Missions)reader.ReadInt32();
             Dead = reader.ReadBoolean();
             Boss = reader.ReadBoolean();
             Drops_Item = reader.ReadBoolean();
@@ -365,14 +365,14 @@ namespace Tactile
             get { return Mission; }
             set { Mission = value; }
         }
-        public Ai_Missions full_ai_mission
+        public Missions full_ai_mission
         {
             get { return Ai_Mission; }
             set { Ai_Mission = value; }
         }
-        public Ai_Missions ai_mission
+        public Missions ai_mission
         {
-            get { return (Ai_Missions)((int)Ai_Mission % Game_AI.MISSION_COUNT); }
+            get { return (Missions)((int)Ai_Mission % Game_AI.MISSION_COUNT); }
         }
         public int ai_priority
         {

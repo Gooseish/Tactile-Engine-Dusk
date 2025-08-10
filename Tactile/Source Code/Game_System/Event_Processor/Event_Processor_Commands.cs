@@ -1016,7 +1016,7 @@ namespace Tactile
                     {
                         if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
                             Unit_Moved = true;
-                        unit.full_ai_mission = process_number(command.Value[1]);
+                        unit.full_ai_mission = (Missions)process_number(command.Value[1]);
                         if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
                             Unit_Moved = true;
                     }
@@ -1035,7 +1035,7 @@ namespace Tactile
                 {
                     if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
                         Unit_Moved = true;
-                    unit.full_ai_mission = process_number(command.Value[1]);
+                    unit.full_ai_mission = (Missions)process_number(command.Value[1]);
                     if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
                         Unit_Moved = true;
                 }
@@ -2824,7 +2824,7 @@ namespace Tactile
                         {
                             if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
                                 Unit_Moved = true;
-                            unit.full_ai_mission = process_number(command.Value[2]);
+                            unit.full_ai_mission = (Missions)process_number(command.Value[2]);
                             if (Game_AI.IMMOBILE_MISSIONS.Contains(unit.ai_mission))
                                 Unit_Moved = true;
                         }
@@ -4012,7 +4012,7 @@ namespace Tactile
                         if (Global.game_map.last_added_unit != null)
                             unit = Global.game_map.last_added_unit;
                     if (Global.game_map.units.ContainsKey(id))
-                        result = (Global.game_map.units[id].ai_mission) == process_number(command.Value[2]);
+                        result = (Global.game_map.units[id].ai_mission) == (Missions)process_number(command.Value[2]);
                     break;
                 case "Unit Gender":
                     // Value[1] = unit id

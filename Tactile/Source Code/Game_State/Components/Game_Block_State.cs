@@ -73,7 +73,7 @@ namespace Tactile.State
                                 Global.game_temp.ResetContextSensitiveUnitControl();
 
                                 blocked_unit.start_wait();
-                                blocked_unit.mission = -1;
+                                blocked_unit.mission = Missions.NA;
                                 Blocked_Id = -1;
                                 In_Block = false;
                                 Block_Timer = 0;

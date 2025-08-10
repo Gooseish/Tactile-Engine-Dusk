@@ -138,7 +138,7 @@ namespace Tactile.Map
             if (identifier != "")
                 UnitIdentifiers[identifier] = unit.id;
             if (mission.IsSomething)
-                unit.full_ai_mission = mission;
+                unit.full_ai_mission = (Missions)mission.ValueOrDefault;
             return unit;
         }
 

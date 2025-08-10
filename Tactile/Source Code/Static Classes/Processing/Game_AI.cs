@@ -43,7 +43,6 @@ namespace Tactile
         Safe_attack = 32,
         Attack_in_range_self_heal = 33,
     }
-    enum Ai_Missions { }
     class Game_AI
     {
 #if DEBUG
@@ -1376,12 +1375,12 @@ namespace Tactile
         {
             switch (unit.ai_mission)
             {
-                case 4: // Pillage
+                case Missions.Pillage: // Pillage
                     // Valid villages
                     return new HashSet<Vector2>(
                         pillage_targets(unit)
                          .Select(x => x.loc));
-                case 5: // Thief
+                case Missions.Thief: // Thief
                     // Chest Locations
                     if (Global.game_map.chest_locations.Any())
                         return new HashSet<Vector2>(
@@ -1392,7 +1391,7 @@ namespace Tactile
                         return new HashSet<Vector2>(
                             Global.game_map.thief_escape_points
                                 .Select(x => x.Key));
-                case 6: // Defend Area
+                case Missions.Defend_area: // Defend Area
                     var defend_area = new HashSet<Vector2>(
                         State.Game_Ai_State.defend_area(unit, unit.team));
                     // Enemies in the defend area
@@ -1408,12 +1407,12 @@ namespace Tactile
                     // Any part of the defend area
                     else
                         return defend_area;
-                case 8: // Talk
+                case Missions.Seek_unit_to_talk: // Talk
                     var potential_talkers = Global.game_state.talk_targets(unit.id);
                     return new HashSet<Vector2>(
                         potential_talkers
                         .Select(x => Global.game_map.units[x].loc));
-                case 9: // Seek tile
+                case Missions.Seek_tile: // Seek tile
                     // Look for places this specific unit wants to move to
                     if (Global.game_map.unit_seek_locs.ContainsKey(unit.id))
                         return new HashSet<Vector2> {
@@ -1424,30 +1423,30 @@ namespace Tactile
                         return new HashSet<Vector2> {
                             Global.game_map.team_seek_locs[unit.team][unit.group] };
                     break;
-                case 10: // Do nothing
+                case Missions.Do_nothing: // Do nothing
                     break;
-                case 13: // FoW Sentry
+                case Missions.FoW_sentry: // FoW Sentry
                     return  new HashSet<Vector2>(
                         Enumerable.Range(0, Global.game_map.width)
                             .SelectMany(x => Enumerable.Range(0, Global.game_map.height)
                                 .Select(y => new Vector2(x, y)))
                             .Where(loc => !Global.game_state
                                 .ai_enemy_attack_range.Contains(loc)));
-                case 15: // Escape
+                case Missions.Escape: // Escape
                     return Global.game_map.escape_point_locations(unit.team, unit.group);
-                case 7: // Staff user
-                case 14: // Savior
-                case 16: // Dancer
+                case Missions.Staff_user: // Staff user
+                case Missions.Savior: // Savior
+                case Missions.Dancer: // Dancer
                     // Allies
                     return  new HashSet<Vector2>(
                         Global.game_map.units
                             .Where(x => !unit.is_attackable_team(x.Value))
                             .Select(x => x.Value.loc));
                 default:
-                case 0: // Still
-                case 1: // Attack in range
-                case 2: // Seek and attack any
-                case 3: // Seek and attack
+                case Missions.Still: // Still
+                case Missions.Attack_in_range: // Attack in range
+                case Missions.Seek_and_attack_any: // Seek and attack any
+                case Missions.Seek_and_attack_weakest: // Seek and attack
                     // Enemies
                     return  new HashSet<Vector2>(
                         Global.game_map.units

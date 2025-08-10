@@ -391,7 +391,7 @@ namespace Tactile.State
                         case Ai_Actions.Idle:
                             unit.actor.sort_items();
                             if (unit.actor.staff_fix() || unit.actor.weapon == null)
-                                unit.mission = 10;
+                                unit.mission = Missions.Do_nothing;
                             else
                             {
                                 useable_weapons = new List<int>();
@@ -489,8 +489,8 @@ namespace Tactile.State
                 #endregion
 
                 #region 1/32: Attack in range (normal/stay out of enemy range)
-                case 1:
-                case 32:
+                case Missions.Attack_in_range:
+                case Missions.Safe_attack:
                     switch (Ai_Action)
                     {
                         // Look for things to hit
@@ -621,7 +621,7 @@ namespace Tactile.State
                                             if (door_target != null)
                                             {
                                                 Temp_Ai_Loc = (Vector2)door_target;
-                                                unit.mission = 22;
+                                                unit.mission = Missions.Door_open;
                                                 Ai_Action = Ai_Actions.Idle;
                                                 Ai_Timer = 0;
                                                 cont = false;
@@ -680,9 +680,9 @@ namespace Tactile.State
                 #endregion
 
                 #region 2/3/31: Seek and Attack (any/weakest/while retreating)
-                case 2:
-                case 3:
-                case 31:
+                case Missions.Seek_and_attack_any:
+                case Missions.Seek_and_attack_weakest:
+                case Missions.Seek_and_attack_while_retreating:
                     switch (Ai_Action)
                     {
                         #region Look for things to hit
@@ -761,7 +761,7 @@ namespace Tactile.State
                                         bool can_kill = false;
                                         if (Useable_Weapons.Count > 0)
                                         {
-                                            if (unit.mission == 2)
+                                            if (unit.mission == Missions.Seek_and_attack_any)
                                                 can_kill = true;
                                             else
                                                 can_kill = Game_AI.can_kill_target(unit, Enemy_Target_Ary[0], Useable_Weapons, true);
@@ -850,7 +850,7 @@ namespace Tactile.State
                                 //bool only_check_without_moving = !unit.move_range.Except(Ai_Enemy_Attack_Range).Any();
                                 Temp_Ai_Target = Game_AI.get_retreating_atk_target(unit, Enemy_Target_Ary[0], Useable_Weapons, true);
                             }
-                            else if (unit.mission == 2)
+                            else if (unit.mission == Missions.Seek_and_attack_any)
                                 Temp_Ai_Target = Game_AI.get_atk_target(unit, Enemy_Target_Ary[0], Useable_Weapons, true, false);
                             else
                                 Temp_Ai_Target = Game_AI.get_atk_target(unit, Enemy_Target_Ary[0], Useable_Weapons, true);
@@ -910,7 +910,7 @@ namespace Tactile.State
                                             if (door_target != null)
                                             {
                                                 Temp_Ai_Loc = (Vector2)door_target;
-                                                unit.mission = 22;
+                                                unit.mission = Missions.Door_open;
                                                 Ai_Action = Ai_Actions.Idle;
                                                 Ai_Timer = 0;
                                                 cont = false;
@@ -1008,7 +1008,7 @@ namespace Tactile.State
                                     if (door_target != null)
                                     {
                                         Temp_Ai_Loc = (Vector2)door_target;
-                                        unit.mission = 22;
+                                        unit.mission = Missions.Door_open;
                                         Ai_Action = Ai_Actions.Idle;
                                         Ai_Timer = 0;
                                         cont = false;
@@ -1032,7 +1032,7 @@ namespace Tactile.State
                             {
                                 if (Defending_Area)
                                     search_loc = Game_AI.search_for_enemy(unit, Ai_Defend_Area);
-                                else if (unit.mission == 2)
+                                else if (unit.mission == Missions.Seek_and_attack_any)
                                     search_loc = Game_AI.search_for_enemy(unit, 0, false);
                                 else
                                     search_loc = Game_AI.search_for_enemy(unit);
@@ -1089,7 +1089,7 @@ namespace Tactile.State
                                     if (door_target != null)
                                     {
                                         Temp_Ai_Loc = (Vector2)door_target;
-                                        unit.mission = 22;
+                                        unit.mission = Missions.Door_open;
                                         Ai_Action = Ai_Actions.Idle;
                                         Ai_Timer = 0;
                                         cont = false;
@@ -1097,7 +1097,7 @@ namespace Tactile.State
                                     }
                                 }
                                 // Rescuing~
-                                if (!unit.berserk && unit.mission == 3)
+                                if (!unit.berserk && unit.mission == Missions.Seek_and_attack_weakest)
                                     // And also we're not on an escape mission, don't drop your friend/rescue people
                                     if (unit.ai_mission != Game_AI.ESCAPE_MISSION)
                                     {
@@ -1180,7 +1180,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 4: Pillage
-                case 4:
+                case Missions.Pillage:
                     switch (Ai_Action)
                     {
                         // Look for houses to burn
@@ -1223,7 +1223,7 @@ namespace Tactile.State
                                             if (door_target != null)
                                             {
                                                 Temp_Ai_Loc = (Vector2)door_target;
-                                                unit.mission = 22;
+                                                unit.mission = Missions.Door_open;
                                                 Ai_Action = Ai_Actions.Idle;
                                                 Ai_Timer = 0;
                                                 cont = false;
@@ -1242,14 +1242,14 @@ namespace Tactile.State
                                         target_sort(pillage_targets);
                                         Temp_Ai_Loc = pillage_targets[0].loc;
                                         Temp_Ai_Locs = new HashSet<Vector2>(pillage_targets.Select(x => x.loc));
-                                        unit.mission = 23;
+                                        unit.mission = Missions.Move_to_target;
                                         Limited_Access_En_Route = true;
                                         Ai_Action = Ai_Actions.Idle;
                                     }
                                 }
                                 else
                                 {
-                                    unit.mission = 2;
+                                    unit.mission = Missions.Seek_and_attack_any;
                                     Ai_Action = Ai_Actions.Idle;
                                     cont = false;
                                 }
@@ -1300,7 +1300,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 5: Thief routine
-                case 5:
+                case Missions.Thief:
                     switch (Ai_Action)
                     {
                         // Look for chests
@@ -1309,7 +1309,7 @@ namespace Tactile.State
                             if (!Global.game_map.chest_locations.Any() || !unit.can_open_chest() || unit.actor.is_full_items)
                             {
                                 Ai_Timer = 0;
-                                unit.mission = 21;
+                                unit.mission = Missions.Thief_escape;
                                 cont = false;
                             }
                             else
@@ -1331,7 +1331,7 @@ namespace Tactile.State
                                         {
                                             Temp_Ai_Loc = chest_targets[0].loc;
                                             Temp_Ai_Locs = new HashSet<Vector2>(chest_targets.Select(x => x.loc));
-                                            unit.mission = 23;
+                                            unit.mission = Missions.Move_to_target;
                                             Limited_Access_En_Route = true;
                                             Ai_Action = Ai_Actions.Idle;
                                             return cont;
@@ -1355,7 +1355,7 @@ namespace Tactile.State
                                             if (door_target != null)
                                             {
                                                 Temp_Ai_Loc = (Vector2)door_target;
-                                                unit.mission = 22;
+                                                unit.mission = Missions.Door_open;
                                                 Ai_Action = Ai_Actions.Idle;
                                                 Ai_Timer = 0;
                                                 cont = false;
@@ -1432,7 +1432,7 @@ namespace Tactile.State
                                 {
                                     Ai_Timer = 0;
                                     Ai_Action = Ai_Actions.Idle;
-                                    unit.mission = 21;
+                                    unit.mission = Missions.Thief_escape;
                                     cont = false;
                                 }
                                 else
@@ -1459,7 +1459,7 @@ namespace Tactile.State
                                             if (door_target != null)
                                             {
                                                 Temp_Ai_Loc = (Vector2)door_target;
-                                                unit.mission = 22;
+                                                unit.mission = Missions.Door_open;
                                                 Ai_Action = Ai_Actions.Idle;
                                                 Ai_Timer = 0;
                                                 cont = false;
@@ -1516,7 +1516,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 6: Defend Area
-                case 6:
+                case Missions.Defend_area:
                     switch (Ai_Action)
                     {
                         // Look for enemies in the defended area
@@ -1545,7 +1545,7 @@ namespace Tactile.State
                             if (enemy_found)
                             {
                                 Defending_Area = true;
-                                unit.mission = 3;
+                                unit.mission = Missions.Seek_and_attack_weakest;
                             }
                             else
                             {
@@ -1558,7 +1558,7 @@ namespace Tactile.State
                                 {
                                     Temp_Ai_Loc = defend_targets[0].loc;
                                     Temp_Ai_Locs = new HashSet<Vector2>(Ai_Defend_Area);
-                                    unit.mission = 23;
+                                    unit.mission = Missions.Move_to_target;
                                 }
                                 // Else no enemies to attack so stay out of the way
                                 else
@@ -1574,7 +1574,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 7: Staff User
-                case 7:
+                case Missions.Staff_user:
                     switch (Ai_Action)
                     {
                         // Look for things to heal
@@ -1697,7 +1697,7 @@ namespace Tactile.State
                                             if (door_target != null)
                                             {
                                                 Temp_Ai_Loc = (Vector2)door_target;
-                                                unit.mission = 22;
+                                                unit.mission = Missions.Door_open;
                                                 Ai_Action = Ai_Actions.Idle;
                                                 Ai_Timer = 0;
                                                 cont = false;
@@ -1822,7 +1822,7 @@ namespace Tactile.State
                                         if (door_target != null)
                                         {
                                             Temp_Ai_Loc = (Vector2)door_target;
-                                            unit.mission = 22;
+                                            unit.mission = Missions.Door_open;
                                             Ai_Action = Ai_Actions.Idle;
                                             Ai_Timer = 0;
                                             cont = false;
@@ -1875,7 +1875,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 8: Seek unit to talk
-                case 8:
+                case Missions.Seek_unit_to_talk:
                     switch (Ai_Action)
                     {
                         // Looks for someone to talk to
@@ -2018,7 +2018,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 9: Seek tile
-                case 9:
+                case Missions.Seek_tile:
                     switch (Ai_Action)
                     {
                         // Looks for tiles to move to
@@ -2085,13 +2085,13 @@ namespace Tactile.State
                 #endregion
 
                 #region 10: Do nothing
-                case 10:
+                case Missions.Do_nothing:
                     Ai_Phase = 3;
                     break;
                 #endregion
 
                 #region 13: FoW Sentry
-                case 13:
+                case Missions.FoW_sentry:
                     switch (Ai_Action)
                     {
                         case Ai_Actions.Idle:
@@ -2112,7 +2112,7 @@ namespace Tactile.State
                             {
                                 // If can heal self and has canto, heal now, move later
                                 if (unit.has_canto() && !unit.cantoing)
-                                    unit.mission = 26;
+                                    unit.mission = Missions.Use_healing_item;
                                 else
                                     unit.mission = Game_AI.RETREAT_MISSION;
                             }
@@ -2135,7 +2135,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 14: Savior
-                case 14:
+                case Missions.Savior:
                     switch (Ai_Action)
                     {
                         // Looks for someone to cover
@@ -2276,7 +2276,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 15: Escape
-                case 15:
+                case Missions.Escape:
                     switch (Ai_Action)
                     {
                         // Look for somewhere to escape
@@ -2312,7 +2312,7 @@ namespace Tactile.State
                                         accessibleEscapeTargets[0].dist > unit.mov)
                                     {
                                         Temp_Ai_Locs = new HashSet<Vector2>(escape_targets.Select(x => x.loc));
-                                        unit.mission = 23;
+                                        unit.mission = Missions.Move_to_target;
                                         Ai_Action = Ai_Actions.Idle;
                                     }
                                     else
@@ -2322,7 +2322,7 @@ namespace Tactile.State
                                         bool assist_others = false;
                                         // Check if other units are retreating and whether to assist them instead of leaving now
                                         if (Units.Values.Where(other_unit => other_unit != unit &&
-                                            other_unit.ai_mission == 15).Any())
+                                            other_unit.ai_mission == Missions.Escape).Any())
                                         {
                                             List<int> enemies_en_route = Game_AI.get_enemies_toward_target(
                                                 unit, Temp_Ai_Locs, unit.get_attackable_units());
@@ -2333,7 +2333,7 @@ namespace Tactile.State
 
                                         if (assist_others)
                                         {
-                                            unit.mission = 23;
+                                            unit.mission = Missions.Move_to_target;
                                             Ai_Action = Ai_Actions.Idle;
                                         }
                                         else
@@ -2347,7 +2347,7 @@ namespace Tactile.State
                                                 if (door_target != null)
                                                 {
                                                     Temp_Ai_Loc = (Vector2)door_target;
-                                                    unit.mission = 22;
+                                                    unit.mission = Missions.Door_open;
                                                     Ai_Action = Ai_Actions.Idle;
                                                     Ai_Timer = 0;
                                                     cont = false;
@@ -2363,7 +2363,7 @@ namespace Tactile.State
                                 }
                                 else
                                 {
-                                    unit.mission = 3;
+                                    unit.mission = Missions.Seek_and_attack_weakest;
                                     Ai_Action = Ai_Actions.Idle;
                                     cont = false;
                                 }
@@ -2438,7 +2438,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 16: Dancer
-                case 16:
+                case Missions.Dancer:
                     switch (Ai_Action)
                     {
                         // Look for things to heal
@@ -2446,7 +2446,7 @@ namespace Tactile.State
                             // If this unit can't actually dance
                             if (!unit.can_dance())
                             {
-                                unit.mission = 3;
+                                unit.mission = Missions.Seek_and_attack_weakest;
                                 cont = false;
                             }
                             else
@@ -2500,7 +2500,7 @@ namespace Tactile.State
                                         if (door_target != null)
                                         {
                                             Temp_Ai_Loc = (Vector2)door_target;
-                                            unit.mission = 22;
+                                            unit.mission = Missions.Door_open;
                                             Ai_Action = Ai_Actions.Idle;
                                             Ai_Timer = 0;
                                             cont = false;
@@ -2610,7 +2610,7 @@ namespace Tactile.State
                                         if (door_target != null)
                                         {
                                             Temp_Ai_Loc = (Vector2)door_target;
-                                            unit.mission = 22;
+                                            unit.mission = Missions.Door_open;
                                             Ai_Action = Ai_Actions.Idle;
                                             Ai_Timer = 0;
                                             cont = false;
@@ -2664,7 +2664,7 @@ namespace Tactile.State
 
                 // Sub-missions (called from other missions) //
                 #region 21: Thief escape
-                case 21:
+                case Missions.Thief_escape:
                     switch (Ai_Action)
                     {
                         // Look for somewhere to escape
@@ -2672,7 +2672,7 @@ namespace Tactile.State
                             // No place to escape, switch to stealing?
                             if (Global.game_map.thief_escape_points.Count == 0)
                             {
-                                unit.mission = 24;
+                                unit.mission = Missions.Thief_steal;
                                 cont = false;
                             }
                             else
@@ -2710,7 +2710,7 @@ namespace Tactile.State
                                             if (door_target != null)
                                             {
                                                 Temp_Ai_Loc = (Vector2)door_target;
-                                                unit.mission = 22;
+                                                unit.mission = Missions.Door_open;
                                                 Ai_Action = Ai_Actions.Idle;
                                                 Ai_Timer = 0;
                                                 cont = false;
@@ -2726,7 +2726,7 @@ namespace Tactile.State
                                 // Escape point is blocked off, ruin somebody's day
                                 else
                                 {
-                                    unit.mission = 24;
+                                    unit.mission = Missions.Thief_steal;
                                     Ai_Action = Ai_Actions.Idle;
                                     cont = false;
                                 }
@@ -2814,7 +2814,7 @@ namespace Tactile.State
                                     // isn't this an infinite loop //Yeti
                                     Ai_Timer = 0;
                                     Ai_Action = Ai_Actions.Idle;
-                                    unit.mission = 21;
+                                    unit.mission = Missions.Thief_escape;
                                     cont = false;
                                 }
                                 else
@@ -2841,7 +2841,7 @@ namespace Tactile.State
                                             if (door_target != null)
                                             {
                                                 Temp_Ai_Loc = (Vector2)door_target;
-                                                unit.mission = 22;
+                                                unit.mission = Missions.Door_open;
                                                 Ai_Action = Ai_Actions.Idle;
                                                 Ai_Timer = 0;
                                                 cont = false;
@@ -2898,7 +2898,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 22: Door open
-                case 22:
+                case Missions.Door_open:
                     switch (Ai_Action)
                     {
                         // Look for chests
@@ -2966,7 +2966,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 23: Move to target - moving closer/attacking
-                case 23:
+                case Missions.Move_to_target:
                     switch (Ai_Action)
                     {
                         // Look for things to hit
@@ -2989,7 +2989,7 @@ namespace Tactile.State
                                             dance_targets.Add(id);
                                     if (dance_targets.Count > 0)
                                     {
-                                        unit.mission = 16;
+                                        unit.mission = Missions.Dancer;
                                         return cont;
                                     }
                                 }
@@ -3116,7 +3116,7 @@ namespace Tactile.State
                                             if (door_target != null)
                                             {
                                                 Temp_Ai_Loc = (Vector2)door_target;
-                                                unit.mission = 22;
+                                                unit.mission = Missions.Door_open;
                                                 Ai_Action = Ai_Actions.Idle;
                                                 Ai_Timer = 0;
                                                 cont = false;
@@ -3204,7 +3204,7 @@ namespace Tactile.State
                                         if (door_target != null)
                                         {
                                             Temp_Ai_Loc = (Vector2)door_target;
-                                            unit.mission = 22;
+                                            unit.mission = Missions.Door_open;
                                             Ai_Action = Ai_Actions.Idle;
                                             Ai_Timer = 0;
                                             cont = false;
@@ -3257,7 +3257,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 24: Thief steal
-                case 24:
+                case Missions.Thief_steal:
                     switch (Ai_Action)
                     {
                         // Look for somewhere to steal from
@@ -3265,7 +3265,7 @@ namespace Tactile.State
                             // Inventory full/shouldn't be in this mission
                             if (unit.actor.is_full_items || !unit.can_steal())
                             {
-                                unit.mission = 3;
+                                unit.mission = Missions.Seek_and_attack_weakest;
                                 cont = false;
                             }
                             else
@@ -3283,7 +3283,7 @@ namespace Tactile.State
                                 }
                                 // No one to steal from, stab them instead
                                 else
-                                    unit.mission = 3;
+                                    unit.mission = Missions.Seek_and_attack_weakest;
                             }
                             break;
                         // Picks/attacks a target
@@ -3297,7 +3297,7 @@ namespace Tactile.State
                                 Ai_Action = Ai_Actions.Move_To_Target;
                             else
                             {
-                                unit.mission = 3;
+                                unit.mission = Missions.Seek_and_attack_weakest;
                                 Ai_Action = Ai_Actions.Idle;
                             }
                             break;
@@ -3319,7 +3319,7 @@ namespace Tactile.State
                                         if (door_target != null)
                                         {
                                             Temp_Ai_Loc = (Vector2)door_target;
-                                            unit.mission = 22;
+                                            unit.mission = Missions.Door_open;
                                             Ai_Action = Ai_Actions.Idle;
                                             Ai_Timer = 0;
                                             cont = false;
@@ -3387,8 +3387,8 @@ namespace Tactile.State
                 #endregion
 
                 #region 25/33: Find healing
-                case 25:
-                case 33:
+                case Missions.Find_healing:
+                case Missions.Attack_in_range_self_heal:
                     switch (Ai_Action)
                     {
                         // Moves to ally
@@ -3443,7 +3443,7 @@ namespace Tactile.State
                                         if (door_target != null)
                                         {
                                             Temp_Ai_Loc = (Vector2)door_target;
-                                            unit.mission = 22;
+                                            unit.mission = Missions.Door_open;
                                             Ai_Action = Ai_Actions.Idle;
                                             Ai_Timer = 0;
                                             cont = false;
@@ -3480,7 +3480,7 @@ namespace Tactile.State
                                     unit.ai_terrain_healing = true;
                                 if (unit.can_heal_self() && !unit.cantoing)
                                 {
-                                    unit.mission = 26;
+                                    unit.mission = Missions.Use_healing_item;
                                     Ai_Timer = 0;
                                     Ai_Action = Ai_Actions.Idle;
                                     cont = false;
@@ -3506,7 +3506,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 26: Use healing item
-                case 26:
+                case Missions.Use_healing_item:
                     switch (Ai_Action)
                     {
                         // Determine and use item
@@ -3570,7 +3570,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 27: Retreat
-                case 27:
+                case Missions.Retreat:
                     switch (Ai_Action)
                     {
                         // Moves to ally
@@ -3604,7 +3604,7 @@ namespace Tactile.State
                                     if (door_target != null)
                                     {
                                         Temp_Ai_Loc = (Vector2)door_target;
-                                        unit.mission = 22;
+                                        unit.mission = Missions.Door_open;
                                         Ai_Action = Ai_Actions.Idle;
                                         Ai_Timer = 0;
                                         cont = false;
@@ -3636,7 +3636,7 @@ namespace Tactile.State
                             {
                                 if (unit.can_heal_self() && !unit.cantoing)
                                 {
-                                    unit.mission = 26;
+                                    unit.mission = Missions.Use_healing_item;
                                     Ai_Timer = 0;
                                     Ai_Action = Ai_Actions.Idle;
                                     cont = false;
@@ -3662,7 +3662,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 28: Use items
-                case 28:
+                case Missions.Use_items:
                     switch (Ai_Action)
                     {
                         // Determine and use item
@@ -3711,7 +3711,7 @@ namespace Tactile.State
                                                 unit.sprite_moving = true;
                                             unit.face(Units[trade_target_id]);
 
-                                            unit.mission = 26;
+                                            unit.mission = Missions.Use_healing_item;
                                             Ai_Timer = 8;
                                             Ai_Action = Ai_Actions.Idle;
                                             cont = false;
@@ -3732,7 +3732,7 @@ namespace Tactile.State
                                             else if (unit.actor.has_critical_health() && unit.can_heal_self())
                                             {
                                                 Global.player.force_loc(unit.loc);
-                                                unit.mission = 26;
+                                                unit.mission = Missions.Use_healing_item;
                                                 Ai_Timer = 0;
                                                 Ai_Action = Ai_Actions.Idle;
                                             }
@@ -3770,7 +3770,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 29: Rescue
-                case 29:
+                case Missions.Rescue:
                     switch (Ai_Action)
                     {
                         // Moves to ally
@@ -3860,7 +3860,7 @@ namespace Tactile.State
                                 }
                                 else if (unit.has_canto())
                                 {
-                                    unit.mission = 3;
+                                    unit.mission = Missions.Seek_and_attack_weakest;
                                     Ai_Timer = 0;
                                     Ai_Action = Ai_Actions.Search_For_Targets;
                                     cont = false;
@@ -3880,7 +3880,7 @@ namespace Tactile.State
                 #endregion
 
                 #region 30: Rescue Drop
-                case 30:
+                case Missions.Rescue_Drop:
                     switch (Ai_Action)
                     {
                         // Moves to ally
@@ -3973,7 +3973,7 @@ namespace Tactile.State
                                 }
                                 else if (unit.has_canto())
                                 {
-                                    unit.mission = 3;
+                                    unit.mission = Missions.Seek_and_attack_weakest;
                                     Ai_Timer = 0;
                                     Ai_Action = Ai_Actions.Search_For_Targets;
                                     cont = false;
@@ -4281,7 +4281,7 @@ namespace Tactile.State
             //attack_ai_team_dup.AddRange(attack_ai_team);
             int active_ai_unit;
             Game_Unit unit;
-            int ai_mission;
+            Missions ai_mission;
 
             int modes = Enum_Values.GetEnumCount(typeof(NextAIUnitModes));
             for (int mode = 0; mode <= modes; mode++)
@@ -4297,7 +4297,7 @@ namespace Tactile.State
                         {
                             active_ai_unit = ai_team[i];
                             unit = Units[active_ai_unit];
-                            unit.mission = -1;
+                            unit.mission = Missions.NA;
                             if (unit.uncontrollable)
                             {
                                 continue;
@@ -4319,7 +4319,7 @@ namespace Tactile.State
                         {
                             active_ai_unit = ai_team[i];
                             unit = Units[active_ai_unit];
-                            unit.mission = -1;
+                            unit.mission = Missions.NA;
                             if (unit.uncontrollable && !uncontrollable)
                             {
                                 continue;
@@ -4346,7 +4346,7 @@ namespace Tactile.State
                         {
                             active_ai_unit = attack_ai_team_dup[i];
                             unit = Units[active_ai_unit];
-                            unit.mission = -1;
+                            unit.mission = Missions.NA;
                             if (unit.uncontrollable && !uncontrollable)
                             {
                                 continue;
@@ -4402,7 +4402,7 @@ namespace Tactile.State
                         {
                             active_ai_unit = ai_team[i];
                             unit = Units[active_ai_unit];
-                            unit.mission = -1;
+                            unit.mission = Missions.NA;
                             if (unit.uncontrollable && !uncontrollable)
                             {
                                 continue;
@@ -4434,7 +4434,7 @@ namespace Tactile.State
                         {
                             active_ai_unit = attack_ai_team_dup[i];
                             unit = Units[active_ai_unit];
-                            unit.mission = -1;
+                            unit.mission = Missions.NA;
                             if (unit.uncontrollable && !uncontrollable)
                             {
                                 continue;
@@ -4487,7 +4487,7 @@ namespace Tactile.State
                         {
                             active_ai_unit = ai_team[i];
                             unit = Units[active_ai_unit];
-                            unit.mission = -1;
+                            unit.mission = Missions.NA;
                             if (unit.uncontrollable && !uncontrollable)
                             {
                                 continue;
@@ -4519,7 +4519,7 @@ namespace Tactile.State
                                 // Torches/etc
                                 else if ((unit.could_use_torch() && unit.has_torch()) || false) // put other things here //Yeti
                                 {
-                                    unit.mission = 28;
+                                    unit.mission = Missions.Use_items;
                                     return active_ai_unit;
                                 }
                             }
@@ -4545,7 +4545,7 @@ namespace Tactile.State
                         {
                             active_ai_unit = ai_team[i];
                             unit = Units[active_ai_unit];
-                            unit.mission = -1;
+                            unit.mission = Missions.NA;
                             if (unit.uncontrollable && !uncontrollable)
                             {
                                 continue;

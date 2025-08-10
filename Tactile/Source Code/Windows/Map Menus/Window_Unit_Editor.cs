@@ -258,7 +258,7 @@ namespace Tactile.Windows.Map
             Game_Unit unit = active_unit;
             int team = unit.team;
             int ai_priority = unit.priority;
-            int ai_mission = unit.full_ai_mission;
+            Missions ai_mission = unit.full_ai_mission;
             Map_Sprite.texture = Scene_Map.get_team_map_sprite(
                 team, actor.map_sprite_name);
             if (Map_Sprite.texture != null)
@@ -381,8 +381,8 @@ namespace Tactile.Windows.Map
             Data_Labels[6].text = "PreLevels";
             Data[3].text = test_battler.Priority.ToString();
             Data[4].text = test_battler.Mission.ToString();
-            if (Game_AI.MISSION_NAMES.ContainsKey(test_battler.Mission % Game_AI.MISSION_COUNT))
-                Data[4].text += ": " + Game_AI.MISSION_NAMES[test_battler.Mission % Game_AI.MISSION_COUNT];
+            if (Game_AI.MISSION_NAMES.ContainsKey((Missions)(test_battler.Mission % Game_AI.MISSION_COUNT)))
+                Data[4].text += ": " + Game_AI.MISSION_NAMES[(Missions)(test_battler.Mission % Game_AI.MISSION_COUNT)];
             Data[5].text = test_battler.Level.ToString();
             Data[6].text = test_battler.Prepromote_Levels.ToString();
             // Stats

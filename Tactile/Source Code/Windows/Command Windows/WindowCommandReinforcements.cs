@@ -164,8 +164,8 @@ namespace Tactile.Windows.Command
                     "(no identifier)" : testBattler.Identifier;
                 Build.text = testBattler.Generic ? ((Generic_Builds)testBattler.Build).ToString() : "Unique";
                 int mission = testBattler.Mission % Game_AI.MISSION_COUNT;
-                Mission.text = Game_AI.MISSION_NAMES.ContainsKey(mission) ?
-                        Game_AI.MISSION_NAMES[mission] :
+                Mission.text = Game_AI.MISSION_NAMES.ContainsKey((Missions)mission) ?
+                        Game_AI.MISSION_NAMES[(Missions)mission] :
                         string.Format("Mission {0}", mission);
                 Inventory.set_images(testBattler.items);
             }
