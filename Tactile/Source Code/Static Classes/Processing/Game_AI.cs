@@ -1018,7 +1018,7 @@ namespace Tactile
                     // Ignore immobile non-combat units
                     if (target.actor.mov == 0 && target.actor.is_non_combat()) //not 100% sure about how this handles //Yeti
                         continue;
-                    if (!worth_casting(staff, target))
+                    if (!attack_staff_worth_casting(staff, target))
                         continue;
                     // Gets attack range
                     List<int> atk_distance = new List<int>();
@@ -1090,7 +1090,7 @@ namespace Tactile
             sort_use(ref target_ary);
             return target_ary[0];
         }
-        public static bool worth_casting(Data_Weapon staff, Game_Unit target)
+        public static bool attack_staff_worth_casting(Data_Weapon staff, Game_Unit target)
         {
             // If there are states to remove
             if (staff.Status_Remove.Except(target.actor.states).Any())
@@ -1105,6 +1105,11 @@ namespace Tactile
                     {
                         return true;
                     }
+            }
+            // If the staff can enfeeble
+            if (staff.Enfeeble() && target.temporary_stat_buff(Buffs.Pow) >= -1)
+            {
+                return true;
             }
             return false;
         }

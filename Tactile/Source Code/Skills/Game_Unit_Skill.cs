@@ -3793,7 +3793,7 @@ namespace Tactile
         private void refresh_hp_skill(int damageTaken)
         {
             // Skills: Guts
-            if (actor.has_skill("GUTS"))
+            if (actor.has_skill("GUTS") && damageTaken >= 3)
             {
                 int n = Math.Max(0, ((actor.maxhp - actor.hp) / 10));
                 set_stat_bonus(Buffs.Pow, n);
