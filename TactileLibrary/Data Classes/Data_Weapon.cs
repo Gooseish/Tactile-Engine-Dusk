@@ -463,6 +463,7 @@ namespace TactileLibrary
         public bool Barrier() { return Staff_Traits[(int)Stave_Traits.Barrier]; }
         public bool Rescue() { return Staff_Traits[(int)Stave_Traits.Rescue]; }
         public bool Warp() { return Staff_Traits[(int)Stave_Traits.Warp]; }
+        public bool Enfeeble() { return Config.StaffConfig.Enfeeble_Staves.Contains(Id); }
         #endregion
 
         public override object Clone()
