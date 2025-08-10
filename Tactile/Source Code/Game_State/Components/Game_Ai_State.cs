@@ -233,8 +233,8 @@ namespace Tactile.State
                                     Global.game_map.check_update_unit_move_range(unit);
                                     if (Ai_Healing)
                                         unit.mission = Game_AI.HEALING_MISSION;
-                                    else if (unit.mission == -1)
-                                        unit.mission = unit.ai_mission;
+                                    else if (unit.mission == Missions.NA)
+                                        unit.mission = (Missions)unit.ai_mission;
                                     // If the unit thinks it's on healing terrain but it's actually not for whatever reason, correct that
                                     if (unit.ai_terrain_healing && !unit.terrain_heals())
                                         unit.ai_terrain_healing = false;
@@ -270,7 +270,7 @@ namespace Tactile.State
 
                             unit = Units[Active_Ai_Unit_Id];
                             // Unit crashed into something moving through fog
-                            if (!unit.ready && unit.mission == -1) //Debug //unit.blocked //Yeti
+                            if (!unit.ready && unit.mission == Missions.NA) //Debug //unit.blocked //Yeti
                             {
                                 Ai_Timer = 0;
                                 Ai_Phase = 3;
@@ -497,7 +497,7 @@ namespace Tactile.State
                         case Ai_Actions.Idle:
                             unit.actor.sort_items();
                             if (unit.actor.staff_fix() || unit.actor.weapon == null)
-                                unit.mission = 10;
+                                unit.mission = Missions.Do_nothing;
                             else
                             {
                                 Ai_Move_Range = update_ai_move_range(unit);

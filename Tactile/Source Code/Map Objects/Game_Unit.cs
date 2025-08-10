@@ -38,7 +38,8 @@ namespace Tactile
         protected HashSet<Vector2> Move_Range = new HashSet<Vector2>(), Attack_Range = new HashSet<Vector2>(),
             Staff_Range = new HashSet<Vector2>(), Talk_Range = new HashSet<Vector2>();
         protected List<Vector2> Move_Route = new List<Vector2>();
-        protected int Mission = 0, Ai_Mission = 2;
+        protected Missions Mission = (Missions)0;
+        protected Ai_Missions Ai_Mission = (Ai_Missions)2;
         protected bool Dead = false;
         protected bool Boss = false, Drops_Item = false;
         protected int Priority = 0;
@@ -102,8 +103,8 @@ namespace Tactile
             Staff_Range.write(writer);
             Talk_Range.write(writer);
             Move_Route.write(writer);
-            writer.Write(Mission);
-            writer.Write(Ai_Mission);
+            writer.Write((int)Mission);
+            writer.Write((int)Ai_Mission);
             writer.Write(Dead);
             writer.Write(Boss);
             writer.Write(Drops_Item);
@@ -155,8 +156,8 @@ namespace Tactile
             Staff_Range.read(reader);
             Talk_Range.read(reader);
             Move_Route.read(reader);
-            Mission = reader.ReadInt32();
-            Ai_Mission = reader.ReadInt32();
+            Mission = (Missions)reader.ReadInt32();
+            Ai_Mission = (Ai_Missions)reader.ReadInt32();
             Dead = reader.ReadBoolean();
             Boss = reader.ReadBoolean();
             Drops_Item = reader.ReadBoolean();
@@ -359,23 +360,23 @@ namespace Tactile
         public bool move_route_empty { get { return Move_Route.Count == 0; } }
         public bool evented_move_route_empty { get { return EventedMoveRoute == null; } }
 
-        public int mission
+        public Missions mission
         {
             get { return Mission; }
             set { Mission = value; }
         }
-        public int full_ai_mission
+        public Ai_Missions full_ai_mission
         {
             get { return Ai_Mission; }
             set { Ai_Mission = value; }
         }
-        public int ai_mission
+        public Ai_Missions ai_mission
         {
-            get { return Ai_Mission % Game_AI.MISSION_COUNT; }
+            get { return (Ai_Missions)((int)Ai_Mission % Game_AI.MISSION_COUNT); }
         }
         public int ai_priority
         {
-            get { return Ai_Mission / Game_AI.MISSION_COUNT; }
+            get { return (int)Ai_Mission / Game_AI.MISSION_COUNT; }
         }
 
         public bool dead { get { return Dead; } }

@@ -11,62 +11,95 @@ using TactileWeaponExtension;
 namespace Tactile
 {
     enum Search_For_Ally_Modes { Anyone, Looking_To_Heal, Looking_For_Healing, Looking_For_Healing_Item, Attack_In_Range_Healing_Item, Looking_To_Dance }
+    enum Missions
+    {
+        NA = -1,
+        Still = 0,
+        Attack_in_range = 1,
+        Seek_and_attack_any = 2,
+        Seek_and_attack_weakest = 3,
+        Pillage = 4,
+        Thief = 5,
+        Defend_area = 6,
+        Staff_user = 7,
+        Seek_unit_to_talk = 8,
+        Seek_tile = 9,
+        Do_nothing = 10,
+        FoW_sentry = 13,
+        Savior = 14,
+        Escape = 15,
+        Dancer = 16,
+        Thief_escape = 21,
+        Door_open = 22,
+        Move_to_target = 23,
+        Thief_steal = 24,
+        Find_healing = 25,
+        Use_healing_item = 26,
+        Retreat = 27,
+        Use_items = 28,
+        Rescue = 29,
+        Rescue_Drop = 30,
+        Seek_and_attack_while_retreating = 31,
+        Safe_attack = 32,
+        Attack_in_range_self_heal = 33,
+    }
+    enum Ai_Missions { }
     class Game_AI
     {
 #if DEBUG
         public static bool AI_ENABLED = true;
 #endif
 
-        public readonly static int[] ATTACK_MISSIONS = new int[] { 0, 1, 2, 3, 15 };
-        public readonly static int[] STATUS_MISSIONS = new int[] { 0, 1, 2, 3, 7 };
-        public readonly static int[] STAFF_MISSIONS = new int[] { 7 };
-        public readonly static int[] HEALING_MISSIONS = new int[] { 7 };
-        public readonly static int[] IMMOBILE_MISSIONS = new int[] { 0, 10 };
-        public readonly static int[] UNMOVING_MISSIONS = new int[] { 0, 1, 10 };
-        public readonly static int[] MOVING_MISSIONS = new int[] { 2, 3, 4, 7 };
-        public readonly static int[] MOVE_TO_TILE_MISSIONS = new int[] { 9 };
+        public readonly static Missions[] ATTACK_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Escape };
+        public readonly static Missions[] STATUS_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Staff_user };
+        public readonly static Missions[] STAFF_MISSIONS = new Missions[] { Missions.Staff_user };
+        public readonly static Missions[] HEALING_MISSIONS = new Missions[] { Missions.Staff_user };
+        public readonly static Missions[] IMMOBILE_MISSIONS = new Missions[] { Missions.Still, Missions.Do_nothing };
+        public readonly static Missions[] UNMOVING_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Do_nothing };
+        public readonly static Missions[] MOVING_MISSIONS = new Missions[] { Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Pillage, Missions.Staff_user };
+        public readonly static Missions[] MOVE_TO_TILE_MISSIONS = new Missions[] { Missions.Seek_tile };
         // Missions where the unit's goal can dramatically change the map state (escaping, talking to a PC), and
         //      thus they shouldn't be sidetracked by anything that could cause their mission to fail, like healing
-        public readonly static int[] DETERMINED_MISSIONS = new int[] { 4, 8, 15 };
+        public readonly static Missions[] DETERMINED_MISSIONS = new Missions[] { Missions.Pillage, Missions.Seek_unit_to_talk, Missions.Escape };
 
         public const int MAIN_MISSION_COUNT = 20;
-        public const int ATTACK_IN_PLACE_MISSION = 0;
-        public const int ATTACK_IN_RANGE_MISSION = 1;
-        public const int BERSERK_MISSION = 2;
-        public const int PILLAGE_OVER_MISSION = 2;
-        public const int DO_NOTHING_MISSION = 10;
-        public const int SENTRY_MISSION = 13;
-        public const int SAVIOR_MISSION = 14;
-        public const int ESCAPE_MISSION = 15;
-        public const int STEAL_MISSION = 24;
-        public const int HEALING_MISSION = 25;
-        public const int RETREAT_MISSION = 27;
-        public const int USE_ITEM_MISSION = 28;
-        public const int RESCUE_MISSION = 29;
-        public const int RESCUE_DROP_MISSION = 30;
-        public const int RETREATING_ATTACK_MISSION = 31;
-        public const int SAFE_ATTACK_MISSION = 32;
-        public const int ATTACK_IN_RANGE_HEAL_SELF = 33;
+        public const Missions ATTACK_IN_PLACE_MISSION = Missions.Still;
+        public const Missions ATTACK_IN_RANGE_MISSION = Missions.Attack_in_range;
+        public const Missions BERSERK_MISSION = Missions.Seek_and_attack_any;
+        public const Missions PILLAGE_OVER_MISSION = Missions.Seek_and_attack_any;
+        public const Missions DO_NOTHING_MISSION = Missions.Do_nothing;
+        public const Missions SENTRY_MISSION = Missions.FoW_sentry;
+        public const Missions SAVIOR_MISSION = Missions.Savior;
+        public const Missions ESCAPE_MISSION = Missions.Escape;
+        public const Missions STEAL_MISSION = Missions.Thief_steal;
+        public const Missions HEALING_MISSION = Missions.Find_healing;
+        public const Missions RETREAT_MISSION = Missions.Retreat;
+        public const Missions USE_ITEM_MISSION = Missions.Use_items;
+        public const Missions RESCUE_MISSION = Missions.Rescue;
+        public const Missions RESCUE_DROP_MISSION = Missions.Rescue_Drop;
+        public const Missions RETREATING_ATTACK_MISSION = Missions.Seek_and_attack_while_retreating;
+        public const Missions SAFE_ATTACK_MISSION = Missions.Safe_attack;
+        public const Missions ATTACK_IN_RANGE_HEAL_SELF = Missions.Attack_in_range_self_heal;
         public const int MISSION_COUNT = 100;
         const int ATTACK_WEIGHT_PRECISION = 10000;
         const int HEALING_TERRAIN_SEARCH_RANGE = 2; // How many turns to search outward for healing terrain (forts)
 
-        internal readonly static Dictionary<int, string> MISSION_NAMES = new Dictionary<int, string> {
-            {  0, "Still" },
-            {  1, "Attack in range" },
-            {  2, "Seek and Attack (any)" },
-            {  3, "Seek and Attack (weakest)" },
-            {  4, "Pillage" },
-            {  5, "Thief" },
-            {  6, "Defend Area" },
-            {  7, "Staff User" },
-            {  8, "Seek Unit to Talk" },
-            {  9, "Seek Tile" },
-            { 10, "Do nothing" },
-            { 13, "FoW Sentry" },
-            { 14, "Savior" },
-            { 15, "Escape" },
-            { 16, "Dancer" }
+        internal readonly static Dictionary<Missions, string> MISSION_NAMES = new Dictionary<Missions, string> {
+            { Missions.Still, "Still" },
+            { Missions.Attack_in_range, "Attack in range" },
+            { Missions.Seek_and_attack_any, "Seek and Attack (any)" },
+            { Missions.Seek_and_attack_weakest, "Seek and Attack (weakest)" },
+            { Missions.Pillage, "Pillage" },
+            { Missions.Thief, "Thief" },
+            { Missions.Defend_area, "Defend Area" },
+            { Missions.Staff_user, "Staff User" },
+            { Missions.Seek_unit_to_talk, "Seek Unit to Talk" },
+            { Missions.Seek_tile, "Seek Tile" },
+            { Missions.Do_nothing, "Do nothing" },
+            { Missions.FoW_sentry, "FoW Sentry" },
+            { Missions.Savior, "Savior" },
+            { Missions.Escape, "Escape" },
+            { Missions.Dancer, "Dancer" }
         };
 
         #region Selecting target
