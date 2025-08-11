@@ -25,6 +25,7 @@ namespace Tactile
         Seek_unit_to_talk = 8,
         Seek_tile = 9,
         Do_nothing = 10,
+        Still_staff_user = 11,
         FoW_sentry = 13,
         Savior = 14,
         Escape = 15,
@@ -50,10 +51,10 @@ namespace Tactile
 #endif
 
         public readonly static Missions[] ATTACK_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Escape };
-        public readonly static Missions[] STATUS_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Staff_user };
-        public readonly static Missions[] STAFF_MISSIONS = new Missions[] { Missions.Staff_user };
-        public readonly static Missions[] HEALING_MISSIONS = new Missions[] { Missions.Staff_user };
-        public readonly static Missions[] IMMOBILE_MISSIONS = new Missions[] { Missions.Still, Missions.Do_nothing };
+        public readonly static Missions[] STATUS_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Staff_user, Missions.Still_staff_user };
+        public readonly static Missions[] STAFF_MISSIONS = new Missions[] { Missions.Staff_user, Missions.Still_staff_user };
+        public readonly static Missions[] HEALING_MISSIONS = new Missions[] { Missions.Staff_user, Missions.Still_staff_user };
+        public readonly static Missions[] IMMOBILE_MISSIONS = new Missions[] { Missions.Still, Missions.Do_nothing, Missions.Still_staff_user };
         public readonly static Missions[] UNMOVING_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Do_nothing };
         public readonly static Missions[] MOVING_MISSIONS = new Missions[] { Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Pillage, Missions.Staff_user };
         public readonly static Missions[] MOVE_TO_TILE_MISSIONS = new Missions[] { Missions.Seek_tile };
@@ -95,6 +96,7 @@ namespace Tactile
             { Missions.Seek_unit_to_talk, "Seek Unit to Talk" },
             { Missions.Seek_tile, "Seek Tile" },
             { Missions.Do_nothing, "Do nothing" },
+            { Missions.Still_staff_user, "Staff User (Still)"},
             { Missions.FoW_sentry, "FoW Sentry" },
             { Missions.Savior, "Savior" },
             { Missions.Escape, "Escape" },
