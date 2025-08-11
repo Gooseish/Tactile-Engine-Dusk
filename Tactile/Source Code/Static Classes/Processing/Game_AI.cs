@@ -30,6 +30,8 @@ namespace Tactile
         Savior = 14,
         Escape = 15,
         Dancer = 16,
+        Staff_or_fight = 17,
+        Fight_or_staff = 18,
         Thief_escape = 21,
         Door_open = 22,
         Move_to_target = 23,
@@ -50,12 +52,12 @@ namespace Tactile
         public static bool AI_ENABLED = true;
 #endif
 
-        public readonly static Missions[] ATTACK_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Escape };
-        public readonly static Missions[] STATUS_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Staff_user, Missions.Still_staff_user };
-        public readonly static Missions[] STAFF_MISSIONS = new Missions[] { Missions.Staff_user, Missions.Still_staff_user };
-        public readonly static Missions[] HEALING_MISSIONS = new Missions[] { Missions.Staff_user, Missions.Still_staff_user };
+        public readonly static Missions[] ATTACK_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Escape, Missions.Staff_or_fight, Missions.Fight_or_staff };
+        public readonly static Missions[] STATUS_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Staff_user, Missions.Still_staff_user, Missions.Staff_or_fight, Missions.Fight_or_staff };
+        public readonly static Missions[] STAFF_MISSIONS = new Missions[] { Missions.Staff_user, Missions.Still_staff_user, Missions.Staff_or_fight, Missions.Fight_or_staff };
+        public readonly static Missions[] HEALING_MISSIONS = new Missions[] { Missions.Staff_user, Missions.Still_staff_user, Missions.Staff_or_fight, Missions.Fight_or_staff };
         public readonly static Missions[] IMMOBILE_MISSIONS = new Missions[] { Missions.Still, Missions.Do_nothing, Missions.Still_staff_user };
-        public readonly static Missions[] UNMOVING_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Do_nothing };
+        public readonly static Missions[] UNMOVING_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Do_nothing, Missions.Staff_or_fight, Missions.Fight_or_staff };
         public readonly static Missions[] MOVING_MISSIONS = new Missions[] { Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Pillage, Missions.Staff_user };
         public readonly static Missions[] MOVE_TO_TILE_MISSIONS = new Missions[] { Missions.Seek_tile };
         // Missions where the unit's goal can dramatically change the map state (escaping, talking to a PC), and
@@ -100,7 +102,9 @@ namespace Tactile
             { Missions.FoW_sentry, "FoW Sentry" },
             { Missions.Savior, "Savior" },
             { Missions.Escape, "Escape" },
-            { Missions.Dancer, "Dancer" }
+            { Missions.Dancer, "Dancer" },
+            { Missions.Staff_or_fight, "Staff or fight" }, // Mixed decision-making between attacking or staffing in range, with priority given to staffing
+            { Missions.Fight_or_staff, "Fight or staff" },// Mixed decision-making between attacking or staffing in range, with priority given to fighting
         };
 
         #region Selecting target

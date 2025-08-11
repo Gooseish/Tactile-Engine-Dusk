@@ -384,7 +384,7 @@ namespace Tactile.State
             switch (unit.mission)
             {
                 #region 0: Still
-                case 0:
+                case Missions.Still:
                     switch (Ai_Action)
                     {
                         // Look for things to hit
@@ -2964,6 +2964,495 @@ namespace Tactile.State
                     break;
                 #endregion
 
+                #region 17: Staff or fight
+                case Missions.Staff_or_fight:
+                    switch (Ai_Action)
+                    {
+                        // Look for things to heal
+                        case Ai_Actions.Idle:
+                            unit.actor.sort_items();
+
+                            Ai_Move_Range = update_ai_move_range(unit);
+                            // Allies
+                            useable_staves = new List<int>();
+                            ally_target_ary = unit.allies_in_staff_range(Ai_Move_Range);
+                            foreach (int i in ally_target_ary[1])
+                            {
+                                if (!useable_staves.Contains((int)unit.actor.weapon_index(i)))
+                                    useable_staves.Add((int)unit.actor.weapon_index(i));
+                            }
+                            // Enemies
+                            enemy_target_ary = unit.enemies_in_staff_range(Ai_Move_Range);
+                            foreach (int i in enemy_target_ary[1])
+                            {
+                                if (!useable_staves.Contains((int)unit.actor.weapon_index(i)))
+                                    useable_staves.Add((int)unit.actor.weapon_index(i));
+                            }
+                            // Other
+                            untargeted_target_ary = unit.untargeted_staff_range(Ai_Move_Range);
+                            foreach (int i in untargeted_target_ary[1])
+                            {
+                                if (!useable_staves.Contains((int)unit.actor.weapon_index(i)))
+                                    useable_staves.Add((int)unit.actor.weapon_index(i));
+                            }
+                            if (useable_staves.Count > 0)
+                                Ai_Action = Ai_Actions.Selecting_Target;
+                            else
+                                Ai_Action = Ai_Actions.Search_For_Targets;
+                            cont = false;
+                            break;
+                        // Picks a target
+                        case Ai_Actions.Selecting_Target:
+                            // Healing staves
+                            useable_ally_staves = new List<int>();
+                            ally_target_ary = unit.allies_in_staff_range(Ai_Move_Range);
+                            foreach (int i in ally_target_ary[1])
+                            {
+                                if (!useable_ally_staves.Contains((int)unit.actor.weapon_index(i)))
+                                    useable_ally_staves.Add((int)unit.actor.weapon_index(i));
+                            }
+                            // Attack staves
+                            useable_enemy_staves = new List<int>();
+                            enemy_target_ary = unit.enemies_in_staff_range(Ai_Move_Range);
+                            foreach (int i in enemy_target_ary[1])
+                            {
+                                if (!useable_enemy_staves.Contains((int)unit.actor.weapon_index(i)))
+                                    useable_enemy_staves.Add((int)unit.actor.weapon_index(i));
+                            }
+                            // Untargeted staves
+                            useable_staves = new List<int>();
+                            untargeted_target_ary = unit.untargeted_staff_range(Ai_Move_Range);
+                            foreach (int i in untargeted_target_ary[1])
+                            {
+                                if (!useable_staves.Contains((int)unit.actor.weapon_index(i)))
+                                    useable_staves.Add((int)unit.actor.weapon_index(i));
+                            }
+                            // Determines target
+                            Temp_Ai_Target = Game_AI.get_heal_target(
+                                unit, ally_target_ary[0], useable_ally_staves, true);
+                            // If everyone moderately healthy, check for enemies to afflict
+                            if (Temp_Ai_Target == null)
+                                Temp_Ai_Target = Game_AI.get_attack_staff_target(
+                                    unit, enemy_target_ary[0], useable_enemy_staves, true);
+                            // If no one to afflict, check for untargeted staves
+                            if (Temp_Ai_Target == null)
+                            {
+                                Temp_Ai_Target = Game_AI.get_untargeted_staff_target(
+                                    unit, useable_staves, true);
+                                if (Temp_Ai_Target != null)
+                                {
+                                    Global.game_system.Staff_Target_Loc = new Vector2(
+                                        Temp_Ai_Target[0] % Global.game_map.width,
+                                        Temp_Ai_Target[0] / Global.game_map.width);
+                                    Temp_Ai_Target[0] = -1;
+                                }
+                            }
+                            // If nothing else to do, check if anyone is injured
+                            if (Temp_Ai_Target == null)
+                                Temp_Ai_Target = Game_AI.get_heal_target(
+                                    unit, ally_target_ary[0], useable_ally_staves, true, false);
+
+                            // If nothing at all to do, look for a target
+                            if (Temp_Ai_Target == null)
+                                unit.mission = Missions.Attack_in_range;
+                            //Ai_Action = Ai_Actions.Search_For_Targets;
+                            else
+                            {
+                                Ai_Action = Ai_Actions.Move_To_Target;
+                            }
+                            break;
+                        // Moves to enemy
+                        case Ai_Actions.Move_To_Target:
+                            switch (Ai_Timer)
+                            {
+                                case 0:
+                                    Ai_Timer++;
+                                    // If target data included a location
+                                    if (Temp_Ai_Target.Length > 3 && Temp_Ai_Target[3] != Config.OFF_MAP.X && Temp_Ai_Target[4] != Config.OFF_MAP.Y)
+                                    {
+                                        Temp_Ai_Loc = new Vector2(Temp_Ai_Target[3], Temp_Ai_Target[4]);
+                                    }
+                                    else
+                                    {
+                                        HashSet<Vector2> target_ary = Game_AI.move_to_hit( //Debug
+                                            Units[Temp_Ai_Target[0]], Ai_Move_Range, Units[Active_Ai_Unit_Id], Temp_Ai_Target[1] - 1);
+                                        //List<Vector2> target_ary = Game_AI.move_to_hit(
+                                        //    Units[Ai_Target[0]], Ai_Move_Range, Units[Active_Ai_Unit_Id], 0);
+
+                                        int target_index = (int)((Ai_Turn_Rn / 100.0f) * target_ary.Count);
+                                        Temp_Ai_Loc = target_ary.ToArray()[target_index]; //HashSet
+                                        // Tests for doors in the way // Not sure if this one works //Yeti
+                                        if (unit.can_open_door())
+                                        {
+                                            Vector2? door_target = Game_AI.door_target(unit, Temp_Ai_Loc);
+                                            // Doors are in the way, head toward them with intent of opening
+                                            if (door_target != null)
+                                            {
+                                                Temp_Ai_Loc = (Vector2)door_target;
+                                                unit.mission = Missions.Door_open;
+                                                Ai_Action = Ai_Actions.Idle;
+                                                Ai_Timer = 0;
+                                                cont = false;
+                                                return cont;
+                                            }
+                                        }
+                                    }
+                                    Global.player.force_loc(unit.loc);
+                                    break;
+                                default:
+                                    if (!Scrolling || Skip_Ai_Turn)
+                                    {
+                                        Ai_Timer = 0;
+                                        unit.ai_move_to(Temp_Ai_Loc);
+                                        Ai_Action = Ai_Actions.Wait_For_Move;
+                                    }
+                                    break;
+                            }
+                            break;
+                        // Waits until attacker has moved
+                        case Ai_Actions.Wait_For_Move:
+                            if (!unit.is_in_motion() && Temp_Ai_Loc == unit.loc)
+                            {
+                                Vector2 target_loc = Temp_Ai_Target[0] == -1 ? Global.game_system.Staff_Target_Loc : Units[Temp_Ai_Target[0]].loc;
+                                if (!is_off_screen(target_loc))
+                                    Ai_Timer = Constants.Map.AI_WAIT_TIME;
+                                if (Ai_Timer < ai_wait_time)
+                                    Ai_Timer++;
+                                else
+                                {
+                                    Ai_Timer = 0;
+                                    if (!Skip_Ai_Turn)
+                                    {
+                                        Global.player.target_tile(target_loc);
+                                        Global.player.force_loc(target_loc);
+                                    }
+                                    Ai_Action = Ai_Actions.Attack_Target;
+                                }
+                            }
+                            else
+                                cont = true;
+                            break;
+                        // Waits until attacker has moved
+                        case Ai_Actions.Attack_Target:
+                            if (!Global.player.is_targeting())
+                            {
+                                unit.equip(Temp_Ai_Target[1]);
+                                unit.actor.organize_items();
+                                unit.using_siege_engine = Temp_Ai_Target[1] - 1 ==
+                                    Siege_Engine.SiegeInventoryIndex;
+                                // Unit movement locked in
+                                unit.moved();
+                                Global.game_state.call_staff(unit.id, Temp_Ai_Target[0]);
+                                Ai_Action = Ai_Actions.Wait_For_Combat;
+                            }
+                            else
+                                cont = true;
+                            break;
+                        // Goes to next unit
+                        case Ai_Actions.Wait_For_Combat:
+                            if (!Global.game_state.staff_active)
+                                Ai_Phase = 3;
+                            else
+                                cont = true;
+                            break;
+                        case Ai_Actions.Search_For_Targets:
+                            // Healing~
+                            bool wants_healing = ai_unit_seeks_healing(unit);
+                            if (wants_healing)
+                            {
+                                unit.mission = Game_AI.HEALING_MISSION;
+                                Ai_Action = Ai_Actions.Idle;
+                                cont = false;
+                                return cont;
+                            }
+
+                            Maybe<Vector2>[] search_loc = null;
+                            if (unit.actor.useable_healing_staves().Count > 0)
+                            {
+                                // Find someone to heal, to move closer to
+                                search_loc = Game_AI.search_for_ally(
+                                    unit, Search_For_Ally_Modes.Looking_To_Heal);
+                            }
+                            // If no one to heal, look for status staff usage
+                            if (search_loc == null || search_loc[1].IsNothing)
+                                if (unit.actor.useable_attack_staves().Count > 0)
+                                {
+                                    // Move closer to enemies without entering their range
+                                    search_loc = Game_AI.search_for_enemy(unit);
+                                }
+
+                            // If nothing to do, retreat
+                            if (search_loc == null || search_loc[1].IsNothing)
+                            {
+                                unit.mission = Game_AI.SENTRY_MISSION;// 27; // For now stay still if no one to move toward and not in enemy range //Yeti
+                                Ai_Action = Ai_Actions.Idle;
+                                Ai_Timer = 0;
+                            }
+                            else
+                            {
+                                actual_target_loc = search_loc[0];
+                                Temp_Ai_Loc = search_loc[1];
+                                if (!unit.move_range.Contains(Temp_Ai_Loc))
+                                {
+                                    throw new IndexOutOfRangeException("whoops ai unit can't move where it's trying to");
+                                }
+                                if (is_blocked(Temp_Ai_Loc, Active_Ai_Unit_Id, false) || Temp_Ai_Loc == unit.loc)
+                                {
+                                    // Use items if needed
+                                    unit_use_item(unit);
+                                    cont = false;
+                                }
+                                else
+                                {
+                                    // Tests for doors in the way
+                                    if (unit.can_open_door())
+                                    {
+                                        Vector2? door_target = Game_AI.door_target(unit, actual_target_loc, Temp_Ai_Loc, -1);
+                                        if (door_target != null && Global.game_map.distance((Vector2)door_target, Temp_Ai_Loc) != 1)
+                                            door_target = null;
+                                        // Doors are in the way, head toward them with intent of opening
+                                        if (door_target != null)
+                                        {
+                                            Temp_Ai_Loc = (Vector2)door_target;
+                                            unit.mission = Missions.Door_open;
+                                            Ai_Action = Ai_Actions.Idle;
+                                            Ai_Timer = 0;
+                                            cont = false;
+                                            return cont;
+                                        }
+                                    }
+                                    Ai_Action = Ai_Actions.Move_In;
+                                    Global.player.force_loc(unit.loc);
+                                }
+                            }
+                            break;
+                        case Ai_Actions.Move_In:
+                            if (!unit.move_range.Contains(Temp_Ai_Loc))
+                            {
+                                throw new IndexOutOfRangeException("whoops ai unit can't move where it's trying to");
+                            }
+                            else if (!Scrolling || Skip_Ai_Turn)
+                            {
+                                unit.ai_move_to(Temp_Ai_Loc);
+                                Ai_Action = Ai_Actions.Wait_For_Move_In;
+                            }
+                            break;
+                        case Ai_Actions.Wait_For_Move_In:
+                            if (unit.loc == Temp_Ai_Loc)
+                                Ai_Action = Ai_Actions.Finish_Movement;
+                            else
+                                cont = true;
+                            break;
+                        case Ai_Actions.Finish_Movement:
+                            if (!unit.is_in_motion())
+                            {
+                                if (!unit.cantoing)
+                                {
+                                    // Use items if needed
+                                    unit_use_item(unit);
+                                    cont = false;
+                                }
+                                else
+                                {
+                                    unit.start_wait();
+                                    Ai_Timer = 0;
+                                    Ai_Action = Ai_Actions.Wait_For_Combat;
+                                }
+                            }
+                            else
+                                cont = true;
+                            break;
+                    }
+                    break;
+                #endregion
+
+                #region 18: Fight or staff
+                case Missions.Fight_or_staff:
+                    switch (Ai_Action)
+                    {
+                        // Look for things to hit
+                        case Ai_Actions.Idle:
+                            unit.actor.sort_items();
+                            if (unit.actor.staff_fix() || unit.actor.weapon == null)
+                                unit.mission = Missions.Do_nothing;
+                            else
+                            {
+                                Ai_Move_Range = update_ai_move_range(unit);
+                                if (unit.mission == Game_AI.SAFE_ATTACK_MISSION)
+                                {
+                                    if (Defending_Area && Ai_Move_Range.Intersect(Ai_Defend_Area).Any())
+                                        Ai_Move_Range.IntersectWith(Ai_Defend_Area);
+                                    if (Ai_Move_Range.Except(Ai_Enemy_Attack_Range).Any())
+                                        Ai_Move_Range.ExceptWith(Ai_Enemy_Attack_Range);
+                                }
+                                useable_weapons = new List<int>();
+                                enemy_target_ary = unit.enemies_in_range(Ai_Move_Range, true);
+                                foreach (int i in enemy_target_ary[1])
+                                {
+                                    int? weapon_index = unit.actor.weapon_index(i);
+                                    if (weapon_index == null)
+                                        weapon_index = Global.ActorConfig.NumItems;
+                                    if (!useable_weapons.Contains((int)weapon_index))
+                                        useable_weapons.Add((int)weapon_index);
+                                }
+
+                                // Healing~
+                                if (!unit.berserk)
+                                {
+                                    if (unit.actor.has_critical_health())
+                                    {
+                                        bool can_kill = false;
+                                        if (useable_weapons.Count > 0)
+                                        {
+                                            can_kill = Game_AI.can_kill_target(unit, enemy_target_ary[0], useable_weapons, true);
+                                        }
+
+                                        // If not too busy trying to finish a target, and not berserk
+                                        if (!can_kill)
+                                        {
+                                            bool wants_healing = ai_unit_seeks_healing(unit, true);
+                                            if (wants_healing)
+                                            {
+                                                unit.mission = Game_AI.ATTACK_IN_RANGE_HEAL_SELF;
+                                                Ai_Action = Ai_Actions.Idle;
+                                                cont = false;
+                                                return cont;
+                                            }
+                                        }
+                                    }
+                                }
+                                unit.ai_terrain_healing = false;
+
+                                if (useable_weapons.Count > 0)
+                                    Ai_Action = Ai_Actions.Selecting_Target;
+                                else
+                                {
+                                    unit.mission = Missions.Staff_or_fight;
+                                }
+                                cont = false;
+                            }
+                            break;
+                        // Picks/attacks a target
+                        case Ai_Actions.Selecting_Target:
+                            switch (Ai_Timer)
+                            {
+                                case 0:
+                                    Ai_Timer++;
+                                    break;
+                                default:
+                                    Ai_Timer = 0;
+                                    useable_weapons = new List<int>();
+                                    enemy_target_ary = unit.enemies_in_range(Ai_Move_Range, true);
+                                    foreach (int i in enemy_target_ary[1])
+                                    {
+                                        int? weapon_index = unit.actor.weapon_index(i);
+                                        if (weapon_index == null)
+                                            weapon_index = Global.ActorConfig.NumItems;
+                                        if (!useable_weapons.Contains((int)weapon_index))
+                                            useable_weapons.Add((int)weapon_index);
+                                    }
+                                    Temp_Ai_Target = Game_AI.get_atk_target(unit, enemy_target_ary[0], useable_weapons, true);
+                                    if (Temp_Ai_Target == null)
+                                    {
+                                        // Use items if needed
+                                        unit_use_item(unit);
+                                        cont = false;
+                                    }
+                                    else
+                                    {
+                                        Ai_Action = Ai_Actions.Move_To_Target;
+                                    }
+                                    break;
+                            }
+                            break;
+                        // Moves to enemy
+                        case Ai_Actions.Move_To_Target:
+                            switch (Ai_Timer)
+                            {
+                                case 0:
+                                    Ai_Timer++;
+                                    // If target data included a location
+                                    if (Temp_Ai_Target[3] != Config.OFF_MAP.X && Temp_Ai_Target[4] != Config.OFF_MAP.Y)
+                                    {
+                                        Temp_Ai_Loc = new Vector2(Temp_Ai_Target[3], Temp_Ai_Target[4]);
+                                    }
+                                    else
+                                    {
+                                        HashSet<Vector2> target_ary = Game_AI.move_to_hit( //Debug
+                                            Units[Temp_Ai_Target[0]], Ai_Move_Range, Units[Active_Ai_Unit_Id], Temp_Ai_Target[1] - 1);
+                                        // I switched to this version for some reason, but it crashed when a magic user tried to attack with a siege tome //Yeti
+                                        // First item was a normal tome, second was siege, so normal tome wasn't in range
+                                        // Why did I change it in the past?
+                                        //List<Vector2> target_ary = Game_AI.move_to_hit(
+                                        //    Units[Ai_Target[0]], Ai_Move_Range, Units[Active_Ai_Unit_Id], 0);
+
+                                        int target_index = (int)((Ai_Turn_Rn / 100.0f) * target_ary.Count);
+                                        Temp_Ai_Loc = target_ary.ToArray()[target_index]; //HashSet
+                                        // Tests for doors in the way // Not sure if this one works //Yeti
+                                        if (unit.can_open_door())
+                                        {
+                                            Vector2? door_target = Game_AI.door_target(unit, Temp_Ai_Loc);
+                                            // Doors are in the way, head toward them with intent of opening
+                                            if (door_target != null)
+                                            {
+                                                Temp_Ai_Loc = (Vector2)door_target;
+                                                unit.mission = Missions.Door_open;
+                                                Ai_Action = Ai_Actions.Idle;
+                                                Ai_Timer = 0;
+                                                cont = false;
+                                                return cont;
+                                            }
+                                        }
+                                    }
+                                    Global.player.force_loc(unit.loc);
+                                    break;
+                                default:
+                                    if (!Scrolling || Skip_Ai_Turn)
+                                    {
+                                        Ai_Timer = 0;
+                                        unit.ai_move_to(Temp_Ai_Loc);
+                                        Ai_Action = Ai_Actions.Wait_For_Move;
+                                    }
+                                    break;
+                            }
+                            break;
+                        // Waits until attacker has moved
+                        case Ai_Actions.Wait_For_Move:
+                            if (!unit.is_in_motion() && Temp_Ai_Loc == unit.loc)
+                            {
+                                Vector2 target_loc = Units[Temp_Ai_Target[0]].loc;
+                                if (!is_off_screen(target_loc))
+                                    Ai_Timer = Constants.Map.AI_WAIT_TIME;
+                                if (Ai_Timer < ai_wait_time)
+                                    Ai_Timer++;
+                                else
+                                {
+                                    Ai_Timer = 0;
+                                    if (!Skip_Ai_Turn)
+                                    {
+                                        Global.player.target_tile(target_loc);
+                                        Global.player.force_loc(target_loc);
+                                    }
+                                    Ai_Action = Ai_Actions.Attack_Target;
+                                }
+                            }
+                            else
+                                cont = true;
+                            break;
+                        // Waits until attacker has moved
+                        case Ai_Actions.Attack_Target:
+                            cont |= attack_target(unit);
+                            break;
+                        // Goes to next unit
+                        case Ai_Actions.Wait_For_Combat:
+                            if (!Global.game_state.combat_active)
+                                Ai_Phase = 3;
+                            else
+                                cont = true;
+                            break;
+                    }
+                    break;
+                #endregion
                 // Sub-missions (called from other missions) //
                 #region 21: Thief escape
                 case Missions.Thief_escape:
