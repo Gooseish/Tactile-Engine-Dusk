@@ -26,12 +26,14 @@ namespace Tactile
         Seek_tile = 9,
         Do_nothing = 10,
         Still_staff_user = 11,
+        Staff_or_fight_or_charge = 12,
         FoW_sentry = 13,
         Savior = 14,
         Escape = 15,
         Dancer = 16,
         Staff_or_fight = 17,
         Fight_or_staff = 18,
+        Fight_or_staff_or_charge = 19,
         Thief_escape = 21,
         Door_open = 22,
         Move_to_target = 23,
@@ -52,13 +54,13 @@ namespace Tactile
         public static bool AI_ENABLED = true;
 #endif
 
-        public readonly static Missions[] ATTACK_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Escape, Missions.Staff_or_fight, Missions.Fight_or_staff };
-        public readonly static Missions[] STATUS_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Staff_user, Missions.Still_staff_user, Missions.Staff_or_fight, Missions.Fight_or_staff };
-        public readonly static Missions[] STAFF_MISSIONS = new Missions[] { Missions.Staff_user, Missions.Still_staff_user, Missions.Staff_or_fight, Missions.Fight_or_staff };
-        public readonly static Missions[] HEALING_MISSIONS = new Missions[] { Missions.Staff_user, Missions.Still_staff_user, Missions.Staff_or_fight, Missions.Fight_or_staff };
+        public readonly static Missions[] ATTACK_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Escape, Missions.Staff_or_fight, Missions.Fight_or_staff, Missions.Staff_or_fight_or_charge, Missions.Fight_or_staff_or_charge };
+        public readonly static Missions[] STATUS_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Staff_user, Missions.Still_staff_user, Missions.Staff_or_fight, Missions.Fight_or_staff, Missions.Staff_or_fight_or_charge, Missions.Fight_or_staff_or_charge };
+        public readonly static Missions[] STAFF_MISSIONS = new Missions[] { Missions.Staff_user, Missions.Still_staff_user, Missions.Staff_or_fight, Missions.Fight_or_staff, Missions.Staff_or_fight_or_charge, Missions.Fight_or_staff_or_charge };
+        public readonly static Missions[] HEALING_MISSIONS = new Missions[] { Missions.Staff_user, Missions.Still_staff_user, Missions.Staff_or_fight, Missions.Fight_or_staff, Missions.Staff_or_fight_or_charge, Missions.Fight_or_staff_or_charge };
         public readonly static Missions[] IMMOBILE_MISSIONS = new Missions[] { Missions.Still, Missions.Do_nothing, Missions.Still_staff_user };
         public readonly static Missions[] UNMOVING_MISSIONS = new Missions[] { Missions.Still, Missions.Attack_in_range, Missions.Do_nothing, Missions.Staff_or_fight, Missions.Fight_or_staff };
-        public readonly static Missions[] MOVING_MISSIONS = new Missions[] { Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Pillage, Missions.Staff_user };
+        public readonly static Missions[] MOVING_MISSIONS = new Missions[] { Missions.Seek_and_attack_any, Missions.Seek_and_attack_weakest, Missions.Pillage, Missions.Staff_user, Missions.Staff_or_fight_or_charge, Missions.Fight_or_staff_or_charge };
         public readonly static Missions[] MOVE_TO_TILE_MISSIONS = new Missions[] { Missions.Seek_tile };
         // Missions where the unit's goal can dramatically change the map state (escaping, talking to a PC), and
         //      thus they shouldn't be sidetracked by anything that could cause their mission to fail, like healing
@@ -95,6 +97,7 @@ namespace Tactile
             { Missions.Thief, "Thief" },
             { Missions.Defend_area, "Defend Area" },
             { Missions.Staff_user, "Staff User" },
+            { Missions.Staff_or_fight_or_charge, "Staff or Fight or Charge"},
             { Missions.Seek_unit_to_talk, "Seek Unit to Talk" },
             { Missions.Seek_tile, "Seek Tile" },
             { Missions.Do_nothing, "Do nothing" },
@@ -1919,12 +1922,15 @@ namespace Tactile
                         distance_to_enemies.Remove(unit_id);*/
 
                     // Sorts the target units by hp needed and distance
-                    searched_targets.Sort(delegate(UnitDistance a, UnitDistance b)
+                    if (!IMMOBILE_MISSIONS.Contains(unit.mission))
                     {
-                        return (int)(ATTACK_WEIGHT_PRECISION * (
-                            heal_distance(unit, a, distance_to_enemies[a.Id]) -
-                            heal_distance(unit, b, distance_to_enemies[b.Id])));
-                    });
+                        searched_targets.Sort(delegate (UnitDistance a, UnitDistance b)
+                        {
+                            return (int)(ATTACK_WEIGHT_PRECISION * (
+                                heal_distance(unit, a, distance_to_enemies[a.Id]) -
+                                heal_distance(unit, b, distance_to_enemies[b.Id])));
+                        });
+                    }
                     break;
                 case Search_For_Ally_Modes.Looking_For_Healing:
                     // Remove units that aren't on a healing mission or can't heal
