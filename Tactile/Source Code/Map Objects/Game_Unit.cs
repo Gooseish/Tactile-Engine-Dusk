@@ -3559,6 +3559,9 @@ namespace Tactile
             if (target.actor.equipped == i + 1)
                 return false;
             Item_Data item_data = target.actor.items[i];
+            // Can't steal weapons
+            if (item_data.is_weapon)
+                return false;
             // Can't steal invalid items
             if (item_data.Id == 0)
                 return false;
