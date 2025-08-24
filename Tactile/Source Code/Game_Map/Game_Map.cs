@@ -1222,13 +1222,7 @@ namespace Tactile
         }
         public void refresh_alpha(int time)
         {
-            // If alpha is irrelevant
-            if (time == 0 && Min_Alpha == 255)
-            {
-                Tile_Alpha = new float[,] { { 1f } };
-            }
-            else
-                set_map_alpha();
+            set_map_alpha();
             if (get_scene_map() != null)
                 get_scene_map().set_map_alpha_texture(Tile_Alpha, time);
         }
