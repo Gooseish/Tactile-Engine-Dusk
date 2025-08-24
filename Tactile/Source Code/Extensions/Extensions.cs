@@ -240,7 +240,26 @@ namespace TactileListExtension
             for (int i = 0; i < count; i++)
                 list.Add(reader.ReadByte());
         }
+        // List<Turnwheel_Snapshots>
+        public static void write(this List<Tactile.Turnwheel_Snapshot> snapshots, BinaryWriter writer)
+        {
+            writer.Write(snapshots.Count);
+            foreach(Tactile.Turnwheel_Snapshot snapshot in snapshots)
+            {
+                snapshot.write(writer);
+            }
+        }
 
+        public static void read(this List<Tactile.Turnwheel_Snapshot> snapshots, BinaryReader reader)
+        {
+            snapshots.Clear();
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                snapshots.Add(new Tactile.Turnwheel_Snapshot());
+                snapshots[snapshots.Count - 1].read(reader);
+            }
+        }
         // List<Game_Actor>
         public static void write(this List<Tactile.Game_Actor> actors, BinaryWriter writer)
         {

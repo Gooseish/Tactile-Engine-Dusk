@@ -7,6 +7,7 @@ using Tactile.Graphics.Help;
 using Tactile.Menus;
 using Tactile.Menus.Map;
 using Tactile.Menus.Map.Unit;
+using Tactile.Menus.Map.Turnwheel;
 using Tactile.Windows.Command;
 using Tactile.Windows.Command.Items;
 using Tactile.Windows.Map;
@@ -39,6 +40,7 @@ namespace Tactile
 #endif
     {
         protected MenuManager MapMenu;
+        protected MenuManager TurnwheelMenu;
         protected UnitMenuManager UnitMenu;
         
         Parchment_Confirm_Window Map_Save_Confirm_Window;
@@ -46,6 +48,8 @@ namespace Tactile
         private Window_Minimap Minimap;
 
         protected bool Overwriting_Checkpoint = false;
+
+        public int ripple_timer = 0;
 
         #region Accessors
         public bool manual_targeting
@@ -138,6 +142,11 @@ namespace Tactile
                 call_map_menu();
                 open_map_menu();
             }
+            if (Global.game_temp.turnwheel_menu_call)
+            {
+                call_turnwheel_menu();
+                open_turnwheel_menu();
+            }
             if (Global.game_temp.status_menu_call)
                 open_status_menu();
             if (Global.game_temp.discard_menu_call && !is_map_popup_active())
@@ -161,6 +170,8 @@ namespace Tactile
                 return;
             }
             if (update_menu_map())
+                return;
+            if (update_menu_turnwheel())
                 return;
             if (update_menu_unit())
                 return;
@@ -194,6 +205,17 @@ namespace Tactile
                 return true;
             }
 
+            return false;
+        }
+        protected virtual bool update_menu_turnwheel()
+        {
+            if (TurnwheelMenu != null)
+            {
+                TurnwheelMenu.Update();
+                if (TurnwheelMenu != null && TurnwheelMenu.Finished)
+                    TurnwheelMenu = null;
+                return true;
+            }
             return false;
         }
 
@@ -1077,6 +1099,26 @@ namespace Tactile
 #endif
         #endregion
 
+        #region Turnwheel Menu
+        protected void call_turnwheel_menu()
+        {
+            Global.game_map.clear_move_range();
+            Global.game_temp.menuing = true;
+            Global.game_temp.menu_call = false;
+            Global.game_temp.turnwheel_menu_call = false;
+            Global.game_system.play_se(System_Sounds.Open);
+        }
+
+        protected void open_turnwheel_menu()
+        {
+            TurnwheelMenu = new TurnwheelMenuManager(this);
+        }
+        protected void close_turnwheel_menu()
+        {
+
+        }
+        #endregion
+
         #region Status Menu
         protected void open_status_menu()
         {
@@ -1267,6 +1309,8 @@ namespace Tactile
         {
             if (MapMenu != null)
                 MapMenu.Draw(sprite_batch, device, renderTargets);
+            if (TurnwheelMenu != null)
+                TurnwheelMenu.Draw(sprite_batch, device, renderTargets);
             if (UnitMenu != null)
                 // Draw over messages when discarding or a dialogue prompt, in another function
                 if (!(Global.game_temp.discard_menuing ||

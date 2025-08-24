@@ -1319,6 +1319,7 @@ namespace Tactile
 
             // Idle units (that aren't under a roof)
             draw_units(sprite_batch, device, render_targets, false, roof_tiles);
+
             #endregion
 
             draw_arrow(sprite_batch);
@@ -1356,6 +1357,9 @@ namespace Tactile
             draw_effects(sprite_batch);
             #endregion
 
+            // Apply ripple effect
+            draw_ripple(sprite_batch, device, render_targets);
+
             // Draw Player
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             draw_formation_change2(sprite_batch);
@@ -1374,7 +1378,33 @@ namespace Tactile
                     draw_unit_icons_above_cursor(sprite_batch, units);
             }
         }
+        private void draw_ripple(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets)
+        {
+            device.SetRenderTarget(render_targets[1]);
+            device.Clear(Color.Transparent);
 
+            Effect map_shader;
+
+            if (Global.game_temp.turnwheel_preview == null)
+                map_shader = null;
+            else
+                map_shader = Global.effect_shader();
+            if (map_shader != null)
+            {
+                (Global.scene as Scene_Map).ripple_timer++;
+                map_shader.CurrentTechnique = map_shader.Techniques["Ripple"];
+                map_shader.Parameters["timer"].SetValue((Global.scene as Scene_Map).ripple_timer);
+            }
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.PointClamp, null, null, map_shader);
+            sprite_batch.Draw(render_targets[0], Vector2.Zero, Color.White);
+            sprite_batch.End();
+
+            device.SetRenderTarget(render_targets[0]);
+            sprite_batch.Begin();
+            sprite_batch.Draw(render_targets[1], Vector2.Zero, Color.White);
+            sprite_batch.End();
+        }
         //@Debug: are these final
         private void DrawTileOutlines(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets)
         {
@@ -1933,6 +1963,27 @@ namespace Tactile
             //draw_unit_icons(sprite_batch, units);
         }
 
+        protected List<int> previewed_units_to_draw(
+            bool rotated, bool ignoreBounds = false)
+        {
+            // Units to skip and draw at the end
+            List<int> units = new List<int>(Global.game_temp.turnwheel_preview.game_map.units.Count);
+            Rectangle area = Tilemap.view_area(rotated);
+            area.X = area.X - 1;
+            area.Y = area.Y - 1;
+            area.Width = area.Width + 2;
+            area.Height = area.Height + 2;
+            foreach (Game_Unit unit in Global.game_temp.turnwheel_preview.game_map.units.Values)
+            {
+
+                if (ignoreBounds || area.Contains((int)unit.loc.X, (int)unit.loc.Y))
+                {
+                    units.Add(unit.id);
+                }
+            }
+            return units;
+            //return sort_units(units);
+        }
         protected List<int> units_to_draw(
             List<int> deferredUnits, bool rotated, bool ignoreBounds = false)
         {
@@ -2008,7 +2059,6 @@ namespace Tactile
                 sprite_batch.End();
             }
         }
-
         protected void draw_idle_units(SpriteBatch sprite_batch, List<int> units)
         {
             // Begin map sprite batch
@@ -2489,7 +2539,6 @@ namespace Tactile
                 }
             }
         }
-
         protected void get_deferred_unit_ids()
         {
             DeferredUnitIds.Clear();

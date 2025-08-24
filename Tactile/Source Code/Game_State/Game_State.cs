@@ -263,6 +263,8 @@ namespace Tactile
 
         protected void update_state_functions()
         {
+            if (Global.game_temp.turnwheel_preview != null)
+                return;
             CombatState.update();
             RescueState.update();
             ItemState.update();

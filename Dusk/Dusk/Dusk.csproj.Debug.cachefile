@@ -1,6 +1,8 @@
 Content\Effect.xnb
 Content\manifest.xnb
 Content\DiagFont.xnb
+Content\White_Square.xnb
+Content\Effect_Goose.xnb
 Redist\dotNetFx40_Full_setup.exe
 Redist\oalinst.exe
 Redist\xnafx40_redist.msi

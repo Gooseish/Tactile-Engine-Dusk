@@ -2041,12 +2041,30 @@ namespace Tactile
                         else if (unit.dead)
                             dead_units.Add(unit.id);
                     }
+                    bool take_turnwheel_snapshot = false;
+                    string turnwheel_snapshot_name = "";
+                    foreach (int id in dead_units)
+                    {
+                        if (DefeatedAlliedUnits.Contains(id) && Global.game_state.is_player_turn)
+                        {
+                            take_turnwheel_snapshot = true;
+                            turnwheel_snapshot_name = "Ally fell";
+                        }
+                        if (!DefeatedAlliedUnits.Contains(id) && !Global.game_state.is_player_turn)
+                        {
+                            take_turnwheel_snapshot = true;
+                            turnwheel_snapshot_name = "Enemy fell";
+                        }
+                    }
                     foreach (int id in dead_units)
                         remove_unit(id);
                     // Moved down from above
                     //Pathfinding.reset();
                     Run_Move_Update = true;
                     refresh_alpha(30);
+
+                    if (take_turnwheel_snapshot)
+                        Global.turnwheel.Take_Snapshot(turnwheel_snapshot_name);
                 }
             }
         }
@@ -2160,11 +2178,17 @@ namespace Tactile
                     }
                     foreach (Tuple<int, bool> pair in Waiting_Units)
                         this.units[pair.Item1].wait(pair.Item2);
+
+                    string turnwheel_snapshot_name = this.units[Waiting_Units[0].Item1].name + " acted";
                     Waiting_Units.Clear();
                     Waiting_Unit_Skip.Clear();
+
+                    Global.turnwheel.Take_Snapshot(turnwheel_snapshot_name);
                     // This was getting called before the move range update loop could fire //Debug
                     // Which updated one unit early and also before fow updated
                     //highlight_test();
+
+
                 }
                 else
                 {
@@ -2503,6 +2527,14 @@ namespace Tactile
 
                 }
                 Global.game_temp.map_menu_call = true;
+                Global.game_temp.menu_call = true;
+            }
+        }
+        internal void open_turnwheel_menu()
+        {
+            if (!Scrolling)
+            {
+                Global.game_temp.turnwheel_menu_call = true;
                 Global.game_temp.menu_call = true;
             }
         }

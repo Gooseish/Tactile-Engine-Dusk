@@ -18,6 +18,7 @@ namespace Tactile
         public bool prompt_menuing = false;
         public bool menu_call = false;
         public bool map_menu_call = false;
+        public bool turnwheel_menu_call = false;
         public bool end_turn_highlit = false;
         public bool unit_menu_call = false;
         public bool status_menu_call = false;
@@ -48,10 +49,18 @@ namespace Tactile
         public Dictionary<string, HashSet<Vector2>> temp_skill_ranges = new Dictionary<string, HashSet<Vector2>>();
         public Dictionary<string, HashSet<Vector2>> temp_skill_move_ranges = new Dictionary<string, HashSet<Vector2>>();
 
+        public Turnwheel_Snapshot turnwheel_preview = null;
 #if DEBUG
         internal bool chapter_skipped = false;
 #endif
+        public void clear_turnwheel_preview()
+        {
+            turnwheel_preview = null;
 
+            Global.init_map();
+            Global.game_map.refresh_alpha();
+            Global.scene_change("Rewind_Turnwheel");
+        }
         public void clear_temp_range()
         {
             temp_attack_range.Clear();

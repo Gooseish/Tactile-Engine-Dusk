@@ -429,12 +429,13 @@ namespace Tactile
                     return;
                 }
                 // Open the map menu
+                /*
                 else if (Global.Input.triggered(Inputs.Select) ||
                     Global.game_temp.MapHelpInput.HasFlag(MapHelpButtonInputs.Menu))
                 {
                     Global.game_map.open_map_menu(highlighted_unit);
                     return;
-                }
+                }*/
                 // Close enemy range
                 else if (Global.Input.triggered(Inputs.B))
                 {
@@ -447,7 +448,7 @@ namespace Tactile
             {
                 // A button
                 // Select button
-                if (Global.Input.triggered(Inputs.A) || Global.Input.triggered(Inputs.Select) ||
+                if (Global.Input.triggered(Inputs.A) /*|| Global.Input.triggered(Inputs.Select)*/ ||
                     (Global.Input.mouse_click(MouseButtons.Left) &&
                         Global.player.at_mouse_loc) ||
                     Global.game_temp.MapHelpInput.HasFlag(MapHelpButtonInputs.Menu))
@@ -457,6 +458,14 @@ namespace Tactile
                 }
             }
 
+            // Select button
+            if (Global.Input.triggered(Inputs.Select))
+            {
+                if(Global.turnwheel.active)
+                    Global.game_map.open_turnwheel_menu();
+                else
+                    Global.game_system.play_se(System_Sounds.Buzzer);
+            }
             // Start button
             if (Global.Input.triggered(Inputs.Start))
             {
@@ -997,6 +1006,8 @@ namespace Tactile
 
         protected void update_main_turn_change()
         {
+            if (Global.game_temp.turnwheel_preview != null)
+                return;
             // This needs to not stop on non-player turns on turn 0??? //@Yeti
             if (Changing_Turn)
             {
@@ -1798,7 +1809,7 @@ namespace Tactile
         {
             get
             {
-                if (!is_map_ready() || Global.game_temp.menu_call || is_menuing) return false;
+                //if (!is_map_ready() || Global.game_temp.menu_call/* || is_menuing*/) return false;
                 if (is_changing_turns) return false;
                 if (get_scene_map() == null) return false;
                 return true;

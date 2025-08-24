@@ -121,12 +121,15 @@
     <Compile Include="Source Code\Menus\Map\ConfirmationPromptMenu.cs" />
     <Compile Include="Source Code\Menus\Map\DialoguePromptMenu.cs" />
     <Compile Include="Source Code\Menus\Map\Unit\Skill\SummonMenu.cs" />
+    <Compile Include="Source Code\Menus\Map\TurnwheelMenu.cs" />
+    <Compile Include="Source Code\Menus\Map\TurnwheelMenuEffect.cs" />
     <Compile Include="Source Code\Menus\Options\TitleSettingsTopMenu.cs" />
     <Compile Include="Source Code\Menus\SpriteMenu.cs" />
     <Compile Include="Source Code\Menus\Options\GameplaySettingsTopMenu.cs" />
     <Compile Include="Source Code\Menus\Options\SettingsMenu.cs" />
     <Compile Include="Source Code\Menus\Options\SettingsTopMenu.cs" />
     <Compile Include="Source Code\Menus\Title\CommunityMenu.cs" />
+    <Compile Include="Source Code\Menus\Map\TurnwheelMenuManager.cs" />
     <Compile Include="Source Code\Options\Settings Data\NullSettingsData.cs" />
     <Compile Include="Source Code\Options\Settings\KeyboardSettings.cs" />
     <Compile Include="Source Code\Options\Settings\GamepadSettings.cs" />
@@ -356,6 +359,8 @@
     <Compile Include="Source Code\Sprites\Status Components\Page 3\Status_Support_List.cs" />
     <Compile Include="Source Code\Sprites\Text\Battle_Hit_Number.cs" />
     <Compile Include="Source Code\Sprites\Text\Quick_Stat_Up_Num.cs" />
+    <Compile Include="Source Code\Turnwheel.cs" />
+    <Compile Include="Source Code\Turnwheel_Snapshot.cs" />
     <Compile Include="Source Code\Windows\Command Windows\WindowCommandSupportViewerActor.cs" />
     <Compile Include="Source Code\Windows\IndexScrollComponent.cs" />
     <Compile Include="Source Code\Windows\Map Menus\UnitScreenHeader.cs" />
@@ -369,6 +374,7 @@
     <Compile Include="Source Code\Windows\Target Windows\Window_Target_Swap.cs" />
     <Compile Include="Source Code\Windows\Target Windows\Window_Target_Teleport.cs" />
     <Compile Include="Source Code\Windows\Title\WindowSupportViewerActorList.cs" />
+    <Compile Include="Source Code\Windows\Turnwheel\Window_Turnwheel.cs" />
     <Compile Include="Source Code\Windows\User Interface\Command\Config\ConfigLabeledUINode.cs" />
     <Compile Include="Source Code\Windows\User Interface\Command\Config\GamepadRemapUINode.cs" />
     <Compile Include="Source Code\Windows\User Interface\Command\Config\KeyRemapUINode.cs" />

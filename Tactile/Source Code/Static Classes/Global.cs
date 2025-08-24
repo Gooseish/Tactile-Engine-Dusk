@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Text;
 using System.Collections.Generic;
 #if DEBUG
 using System.Diagnostics;
@@ -487,10 +489,10 @@ namespace Tactile
         }
 
         // Shader
-        public static bool shader_exists { get { return Content.Load<Effect>(@"Effect") != null; } } //Debug
+        public static bool shader_exists { get { return Content.Load<Effect>(@"Effect_Goose") != null; } } //Debug
         public static Effect effect_shader(int width = Config.WINDOW_WIDTH, int height = Config.WINDOW_HEIGHT)
         {
-            Effect shader = Content.Load<Effect>(@"Effect");
+            Effect shader = Content.Load<Effect>(@"Effect_Goose");
             Matrix projection = Matrix.CreateOrthographicOffCenter(
                 //0, width * render_target_zoom, height * render_target_zoom, 0, -10000, 10000); //Debug
                 0, width * 1, height * 1, 0, -10000, 10000);
@@ -753,6 +755,7 @@ namespace Tactile
 
             Global.reset_game_state();
             Global.game_map = new Game_Map();
+            Global.turnwheel = new Turnwheel();
             Global.player = new Player();
 
             // Trying to start this after everything else, instead of in the middle
@@ -1037,13 +1040,72 @@ namespace Tactile
             get { return @Save_File; }
             set { @Save_File = value; }
         }
+        // Turnwheel Snapshots
+        static Turnwheel @Turnwheel;
+        internal static Turnwheel turnwheel
+        {
+            get { return @Turnwheel; }
+            set { Turnwheel = value; }
+        }
+        
+        //Should these turnwheel methods be handled somewhere else?
+        public static void rewind_turnwheel(int index)
+        {
+            Turnwheel_Snapshot snapshot = turnwheel.rewind(index);
+            Clone_Turnwheel_Data(snapshot);
+            Global.scene_change("Rewind_Turnwheel");
+            init_map();
+            Global.game_map.refresh_alpha();
+        }
+        private static void Clone_Turnwheel_Data(Turnwheel_Snapshot snapshot)
+        {
+            string temp_filename = System.IO.Path.GetTempFileName();
 
+            // Write temp data
+            using (var stream = File.Open(temp_filename, FileMode.Create))
+            {
+                using (var writer = new BinaryWriter(stream, Encoding.UTF8))
+                    snapshot.write_data(writer);
+            }
+
+            // Copy from temp data
+            using (var stream = File.Open(temp_filename, FileMode.Open))
+            {
+                using (var reader = new BinaryReader(stream, Encoding.UTF8))
+                {
+                    Game_Battalions = new Game_Battalions();
+                    Game_Battalions.read(reader);
+                    Game_Actors = new Game_Actors();
+                    Game_Actors.read(reader);
+                    Game_System = new Game_System();
+                    Game_System.read(reader);
+                    Player = new Player();
+                    Player.read(reader);
+                    Game_State = new Game_State();
+                    Game_State.read(reader);
+                    Game_Map = new Game_Map();
+                    Game_Map.read(reader);
+                }
+            }
+
+            // Delete temp data
+            if (File.Exists(temp_filename))
+            {
+                File.Delete(temp_filename);
+            }
+        }
         // Game Actors
         static Game_Actors @Game_Actors;
 
         internal static Game_Actors game_actors
         {
-            get { return @Game_Actors; }
+            get
+            {
+                if (game_temp.turnwheel_preview == null)
+                    return @Game_Actors;
+                else
+                    return game_temp.turnwheel_preview.game_actors;
+            }
             set { @Game_Actors = value; }
         }
 
@@ -1079,7 +1141,12 @@ namespace Tactile
 
         internal static Game_Map game_map
         {
-            get { return @Game_Map; }
+            get {
+                if (game_temp.turnwheel_preview == null)
+                    return @Game_Map;
+                else
+                    return game_temp.turnwheel_preview.game_map;
+            }
             set { @Game_Map = value; }
         }
 
@@ -1097,7 +1164,13 @@ namespace Tactile
 
         internal static Game_State game_state
         {
-            get { return @Game_State; }
+            get
+            {
+                if (game_temp.turnwheel_preview == null)
+                    return @Game_State;
+                else
+                    return game_temp.turnwheel_preview.game_state;
+            }
             set { @Game_State = value; }
         }
 
@@ -1162,7 +1235,13 @@ namespace Tactile
 
         internal static Player player
         {
-            get { return @Player; }
+            get
+            {
+                if (game_temp.turnwheel_preview == null)
+                    return @Player;
+                else
+                    return game_temp.turnwheel_preview.player;
+            }
             set { @Player = value; }
         }
         #endregion
