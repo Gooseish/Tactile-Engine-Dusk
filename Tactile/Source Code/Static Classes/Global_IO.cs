@@ -171,8 +171,6 @@ namespace Tactile
 
         private static void WriteSuspend(BinaryWriter writer)
         {
-            Global.turnwheel.write(writer);
-
             Global.game_battalions.write(writer);
             Global.game_actors.write(writer);
             Global.write_game_system(writer);
@@ -182,6 +180,8 @@ namespace Tactile
             Global.game_state.write(writer);
             Global.game_map.write(writer);
             Global.write_events(writer);
+
+            Global.turnwheel.write(writer);
         }
 
         internal static bool load_suspend(
@@ -299,9 +299,6 @@ namespace Tactile
             // Create a new Game_Temp
             Global.game_temp = new Game_Temp();
 
-            Global.turnwheel = new Turnwheel();
-            Global.turnwheel.read(reader);
-
             Global.game_battalions = new Game_Battalions();
             Global.game_battalions.read(reader);
             Global.game_actors = new Game_Actors();
@@ -316,6 +313,9 @@ namespace Tactile
             Global.game_map = new Game_Map();
             Global.game_map.read(reader);
             Global.read_events(reader);
+
+            Global.turnwheel = new Turnwheel();
+            Global.turnwheel.read(reader);
         }
         #endregion
 
