@@ -487,10 +487,10 @@ namespace Tactile
         }
 
         // Shader
-        public static bool shader_exists { get { return Content.Load<Effect>(@"Effect") != null; } } //Debug
+        public static bool shader_exists { get { return Content.Load<Effect>(@"Effect_Goose") != null; } } //Debug
         public static Effect effect_shader(int width = Config.WINDOW_WIDTH, int height = Config.WINDOW_HEIGHT)
         {
-            Effect shader = Content.Load<Effect>(@"Effect");
+            Effect shader = Content.Load<Effect>(@"Effect_Goose");
             Matrix projection = Matrix.CreateOrthographicOffCenter(
                 //0, width * render_target_zoom, height * render_target_zoom, 0, -10000, 10000); //Debug
                 0, width * 1, height * 1, 0, -10000, 10000);
