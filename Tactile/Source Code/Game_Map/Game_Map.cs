@@ -73,6 +73,8 @@ namespace Tactile
         private List<Tuple<Rectangle, string>> Area_Background = new List<Tuple<Rectangle, string>>();
         private int Grid_Opacity = 32;
         private List<Vector2>[] Light_Sources = new List<Vector2>[0];
+        private List<Light_Source> Light_Sources_New = new List<Light_Source> { };
+        private byte[,] Lighting_Cost_Map;
         private int Min_Alpha = 0;
         private int Ally_Alpha;
         private Dictionary<int, List<Rectangle>>[] Team_Defend_Areas;
@@ -1222,6 +1224,7 @@ namespace Tactile
         }
         public void refresh_alpha(int time)
         {
+            refresh_lighting();
             // If alpha is irrelevant
             if (time == 0 && Min_Alpha == 255)
             {
@@ -1355,7 +1358,40 @@ namespace Tactile
             return new Color(alpha, alpha, alpha, 255);
         }
         #endregion
+        #region Lighting
 
+        public void refresh_lighting()
+        {
+            set_cost_map();
+            get_light_sources();
+            update_light_sources();
+        }
+        public void get_light_sources()
+        {
+            Light_Sources_New.Clear();
+            for (int y = 0; y < this.height; y++)
+                for (int x = 0; x < this.width; x++)
+                    if (get_unit(new Vector2(x, y)) != null && get_unit(new Vector2(x, y)).is_ally) //Multi
+                    {
+                        Light_Sources_New.Add(new Light_Source(Color.White, new Vector2(x, y)));
+                    }
+        }
+        public void set_cost_map()
+        {
+            Lighting_Cost_Map = new byte[this.width*Constants.Map.ALPHA_GRANULARITY, this.height*Constants.Map.ALPHA_GRANULARITY];
+            for (int x = 0; x < Lighting_Cost_Map.GetLength(0); x++)
+                for (int y = 0; y < Lighting_Cost_Map.GetLength(1); y++)
+                {
+                    Lighting_Cost_Map[x, y] = (byte)(alpha_cost(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY)*Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST);
+                }
+        }
+        public void update_light_sources()
+        {
+            foreach (Light_Source light_source in Light_Sources_New)
+                light_source.calculate_lightmap(Lighting_Cost_Map);
+        }
+
+        #endregion
         public int width
         {
             get
