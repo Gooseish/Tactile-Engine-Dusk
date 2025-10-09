@@ -81,6 +81,20 @@ namespace Tactile
         public bool map_transition { get { return Map_Transition; } }
         public bool map_transition_ready { get { return Map_Transition && Transition_Timer < 0; } }
         public bool map_transition_running { get { return Black_Screen_Time > 0 || (!Map_Transition && Transition_Timer > 0); } }
+
+        private int current_render_index = 0;
+        private void next_render_target()
+        {
+                current_render_index = 1 - current_render_index;
+        }
+        private int current_render_target
+        {
+            get { return current_render_index; }
+        }
+        private int last_render_target
+        {
+            get { return 1-current_render_index; }
+        }
         #endregion
 
         public Scene_Map()
@@ -1283,11 +1297,13 @@ namespace Tactile
 
             #region Active Units
             // Draw active units on render target 1, then copy them with tone on render target 0
-            device.SetRenderTarget(render_targets[1]);
+            current_render_index = 1;
+            device.SetRenderTarget(render_targets[current_render_target]);
             device.Clear(Color.Transparent);
             draw_active_units(sprite_batch);
             // Unit tone
-            device.SetRenderTarget(render_targets[0]);
+            next_render_target();
+            device.SetRenderTarget(render_targets[current_render_target]);
             Effect map_shader = Global.effect_shader();
             if (map_shader != null)
             {
@@ -1295,7 +1311,7 @@ namespace Tactile
                 map_shader.Parameters["tone"].SetValue(Global.game_state.screen_tone.to_vector_4(Config.UNIT_TONE_PERCENT));
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[1], Vector2.Zero, Color.White);
+            sprite_batch.Draw(render_targets[last_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
 
             // Status animations and icons
@@ -1576,13 +1592,15 @@ namespace Tactile
         /// <param name="roof">If true, draws map tiles that are fading out and are "above" units under them; otherwise draws the base map.</param>
         protected void draw_map(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets, bool roof = false)
         {
+            current_render_index = 1;
             // Draw fog tiles to render target 1
-            device.SetRenderTarget(render_targets[1]);
+            device.SetRenderTarget(render_targets[current_render_target]);
             device.Clear(Color.Transparent);
             draw_raw_map(sprite_batch, false, fog: true, roof: roof);
 
             // Copy fog tiles with the fog effect to render target 0
-            device.SetRenderTarget(render_targets[0]);
+            next_render_target();
+            device.SetRenderTarget(render_targets[current_render_target]);
             device.Clear(Color.Transparent);
 
             Color fog_color;
@@ -1591,14 +1609,15 @@ namespace Tactile
 
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[1], Vector2.Zero, fog_color);
+            sprite_batch.Draw(render_targets[last_render_target], Vector2.Zero, fog_color);
             sprite_batch.End();
 
             // Draw regular tiles on top of fog tiles
             draw_raw_map(sprite_batch, false, fog: false, roof: roof);
 
             // Draw map to render target 1 with map alpha effects applied
-            device.SetRenderTarget(render_targets[1]);
+            next_render_target();
+            device.SetRenderTarget(render_targets[current_render_target]);
             device.Clear(Color.Transparent);
 
             Effect alpha_shader = Global.effect_shader();
@@ -1619,7 +1638,7 @@ namespace Tactile
             // Darken screen for spells if needed
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, alpha_shader);
-            sprite_batch.Draw(render_targets[0], Vector2.Zero,
+            sprite_batch.Draw(render_targets[last_render_target], Vector2.Zero,
                 new Color(Map_Spell_Darken, Map_Spell_Darken, Map_Spell_Darken, 255));
             sprite_batch.End();
 #if __ANDROID__
@@ -1631,7 +1650,8 @@ namespace Tactile
 #endif
 
             // Draw map to render target 0 with map tone applied
-            device.SetRenderTarget(render_targets[0]);
+            next_render_target();
+            device.SetRenderTarget(render_targets[current_render_target]);
             device.Clear(roof ? Color.Transparent : Color.Black);
             if (Global.game_map.width <= 0)
                 return;
@@ -1644,7 +1664,7 @@ namespace Tactile
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[1], Vector2.Zero, Color.White);
+            sprite_batch.Draw(render_targets[last_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
         }
 
@@ -1847,12 +1867,14 @@ namespace Tactile
                 return;
 
             // Draw units on render target 1, then copy them with tone on render target 0
-            device.SetRenderTarget(render_targets[1]);
+            next_render_target();
+            device.SetRenderTarget(render_targets[current_render_target]);
             device.Clear(Color.Transparent);
             draw_units(sprite_batch, roof: roof, roof_tiles: roof_tiles);
 
             // Unit tone
-            device.SetRenderTarget(render_targets[0]);
+            next_render_target();
+            device.SetRenderTarget(render_targets[current_render_target]);
             Effect map_shader = Global.effect_shader();
             if (map_shader != null)
             {
@@ -1860,7 +1882,7 @@ namespace Tactile
                 map_shader.Parameters["tone"].SetValue(Global.game_state.screen_tone.to_vector_4(Config.UNIT_TONE_PERCENT));
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[1], Vector2.Zero, Color.White);
+            sprite_batch.Draw(render_targets[last_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
         }
 
