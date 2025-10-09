@@ -21,6 +21,8 @@ namespace Tactile
         private Texture2D Lightmap_Contribution;
         private byte[,] Brightness_Map;
 
+        public Texture2D lightmap_contribution { get { return Lightmap_Contribution; } }
+
         public void write(BinaryWriter writer)
         {
             Color.write(writer);
@@ -40,7 +42,6 @@ namespace Tactile
             set 
             { 
                 Color = value;
-                Max_Steps = value.A / Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST;
             }
         }
         public Vector2 loc { get { return Loc; } }
@@ -53,6 +54,7 @@ namespace Tactile
 
         public void calculate_lightmap(byte[,] cost_map)
         {
+            set_max_steps();
             Brightness_Map = new byte[cost_map.GetLength(0), cost_map.GetLength(1)];
             for (int x = 0; x < cost_map.GetLength(0); x++)
                 for (int y = 0; y < cost_map.GetLength(1); y++)
@@ -67,7 +69,7 @@ namespace Tactile
         {
             byte brightness = Color.A;
             Vector2 pixel_location = new Vector2(x, y);
-            Vector2 difference_vector = pixel_location - loc;
+            Vector2 difference_vector = pixel_location - loc*Constants.Map.ALPHA_GRANULARITY;
             Vector2 step_vector = Vector2.Normalize(difference_vector) / Constants.Map.SUBPIXEL_GRANULARITY;
 
             int number_of_steps = (int)(difference_vector.Length() / step_vector.Length());
@@ -76,7 +78,7 @@ namespace Tactile
                 return 0;
             }
 
-            Vector2 temp_vector = loc;
+            Vector2 temp_vector = loc * Constants.Map.ALPHA_GRANULARITY;
             for (int n = 0; n < number_of_steps; n++)
             {
                 byte brightness_cost = cost_map[(int)temp_vector.X, (int)temp_vector.Y];
@@ -110,6 +112,11 @@ namespace Tactile
                     n++;
                 }
             Lightmap_Contribution.SetData(texture_data);
+        }
+
+        public void set_max_steps()
+        {
+            Max_Steps = Color.A / Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST;
         }
     }
 }
