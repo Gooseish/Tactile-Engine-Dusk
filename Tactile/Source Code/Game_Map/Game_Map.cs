@@ -703,6 +703,11 @@ namespace Tactile
         public bool icons_visible { get { return rescue_anim_timer < Config.RESCUE_VISIBLE_TIME; } }
         public float icon_timer { get { return rescue_anim_timer / (float)Config.RESCUE_TIME ; } }
         public int icon_loops { get { return rescue_anim_loops; } }
+
+        public List<Light_Source> light_sources_new
+        {
+            get { return Light_Sources_New; }
+        }
         #endregion
 
         public Game_Map()

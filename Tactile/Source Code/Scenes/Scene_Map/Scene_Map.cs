@@ -77,6 +77,8 @@ namespace Tactile
 
         protected int TILE_SIZE { get { return Constants.Map.TILE_SIZE; } }
 
+        protected Texture2D Lightmap;
+
         #region Accessors
         public bool map_transition { get { return Map_Transition; } }
         public bool map_transition_ready { get { return Map_Transition && Transition_Timer < 0; } }
@@ -1245,6 +1247,8 @@ namespace Tactile
             camera.zoom = Vector2.One;
             camera.angle = 0f;
 
+            draw_lightmap(sprite_batch, device, render_targets);
+
             #region Map and Idle Units
             // Base map
             draw_map(sprite_batch, device, render_targets);
@@ -1635,11 +1639,13 @@ namespace Tactile
 #endif
                 }
             }
+            alpha_shader.Parameters["LightmapTexture"].SetValue(Lightmap);
             // Darken screen for spells if needed
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, alpha_shader);
             sprite_batch.Draw(render_targets[last_render_target], Vector2.Zero,
                 new Color(Map_Spell_Darken, Map_Spell_Darken, Map_Spell_Darken, 255));
+
             sprite_batch.End();
 #if __ANDROID__
             // There has to be a way to do this for both
@@ -1705,6 +1711,30 @@ namespace Tactile
             sprite_batch.End();
         }
         #endregion
+
+        protected void draw_lightmap(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets)
+        {
+            RenderTarget2D lightmap = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
+
+            current_render_index = 1;
+            device.SetRenderTarget(lightmap);
+            device.Clear(Color.Transparent);
+            sprite_batch.Begin();
+            foreach (Light_Source light_source in Global.game_map.light_sources_new)
+            {
+                sprite_batch.Draw(light_source.lightmap_contribution, Vector2.Zero, Color.White);
+            }
+            sprite_batch.End();
+
+            next_render_target();
+            device.SetRenderTarget(render_targets[current_render_target]);
+
+            Global.effect_shader().Parameters["Ambient_Color"].SetValue(Color.Black.ToVector4());
+            //Global.effect_shader().Parameters["LightmapTexture"].SetValue(render_targets[last_render_target]);
+
+            Lightmap = new Texture2D(device, lightmap.Width, lightmap.Height);
+            Lightmap = lightmap;
+        }
 
         #region Draw Ranges
         protected void draw_ranges(SpriteBatch sprite_batch)

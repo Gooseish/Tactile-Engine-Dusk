@@ -22,6 +22,14 @@ uniform float2 game_size;
 Texture2D LightmapTexture;
 float4 Ambient_Color;
 
+sampler2D LightmapTextureSampler = sampler_state
+{
+	Texture = <LightmapTexture>;
+	Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
+
 //--------------------------------------------------------------------------------
 // Vertex Shader
 //--------------------------------------------------------------------------------
@@ -256,7 +264,9 @@ technique Normal
 float4 map_lighting(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
 {
 	float4 Color = tex2D(TextureSampler, uv);
-	Color *= tex2D(Map_Alpha, (uv * game_size + alpha_offset) / (16 * map_size));
+	//Color *= tex2D(Map_Alpha, (uv * game_size + alpha_offset) / (16 * map_size));
+	//Color *= tex2D(LightmapTextureSampler, uv);
+	Color *= tex2D(LightmapTextureSampler, (uv * game_size + alpha_offset) / (16 * map_size));
 	return Color * color;
 	
 	
