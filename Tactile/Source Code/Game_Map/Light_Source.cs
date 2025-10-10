@@ -45,6 +45,7 @@ namespace Tactile
             }
         }
         public Vector2 loc { get { return Loc; } }
+        public Vector2 centered_loc { get { return (Loc + new Vector2(0.5f, 0.5f))*Constants.Map.ALPHA_GRANULARITY; } }
 
         public Light_Source(Color color, Vector2 loc)
         {
@@ -68,8 +69,8 @@ namespace Tactile
         byte raymarch_brightness(int x, int y, byte[,] cost_map)
         {
             byte brightness = Color.A;
-            Vector2 pixel_location = new Vector2(x, y);
-            Vector2 difference_vector = pixel_location - loc*Constants.Map.ALPHA_GRANULARITY;
+            Vector2 pixel_location = new Vector2(x, y) + new Vector2(0.5f, 0.5f);
+            Vector2 difference_vector = pixel_location - centered_loc;
             Vector2 step_vector = Vector2.Normalize(difference_vector) / Constants.Map.SUBPIXEL_GRANULARITY;
 
             int number_of_steps = (int)(difference_vector.Length() / step_vector.Length());
@@ -78,7 +79,7 @@ namespace Tactile
                 return 0;
             }
 
-            Vector2 temp_vector = loc * Constants.Map.ALPHA_GRANULARITY;
+            Vector2 temp_vector = centered_loc;
             for (int n = 0; n < number_of_steps; n++)
             {
                 byte brightness_cost = cost_map[(int)temp_vector.X, (int)temp_vector.Y];
