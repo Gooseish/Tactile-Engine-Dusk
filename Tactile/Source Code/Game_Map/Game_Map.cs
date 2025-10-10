@@ -1378,7 +1378,7 @@ namespace Tactile
                 for (int x = 0; x < this.width; x++)
                     if (get_unit(new Vector2(x, y)) != null && get_unit(new Vector2(x, y)).is_ally) //Multi
                     {
-                        Light_Sources_New.Add(new Light_Source(Color.White, new Vector2(x, y)));
+                        Light_Sources_New.Add(new Light_Source(Color.White, new Vector2(x, y), Light_Source_Type.Unit));
                     }
         }
         public void set_cost_map()

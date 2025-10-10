@@ -13,6 +13,11 @@ using TactileColorExtension;
 
 namespace Tactile
 {
+    enum Light_Source_Type
+    {
+        Static,
+        Unit
+    }
     class Light_Source
     {
         private Color @Color;
@@ -20,14 +25,18 @@ namespace Tactile
         private int Max_Steps;
         private Texture2D Lightmap_Contribution;
         private byte[,] Brightness_Map;
+        private Light_Source_Type Type;
 
         public Texture2D lightmap_contribution { get { return Lightmap_Contribution; } }
+
+ 
 
         public void write(BinaryWriter writer)
         {
             Color.write(writer);
             Loc.write(writer);
             Brightness_Map.write(writer);
+            writer.Write((int)Type);
         }
         public void read(BinaryReader reader)
         {
@@ -35,6 +44,7 @@ namespace Tactile
             Loc.read(reader);
             Brightness_Map = Brightness_Map.read(reader);
             refresh_light_texture();
+            Type = (Light_Source_Type)reader.ReadInt32();
         }
 
         public Color color { 
@@ -46,11 +56,14 @@ namespace Tactile
         }
         public Vector2 loc { get { return Loc; } }
         public Vector2 centered_loc { get { return (Loc + new Vector2(0.5f, 0.5f))*Constants.Map.ALPHA_GRANULARITY; } }
+        public Light_Source_Type type { get { return Type; } }
 
-        public Light_Source(Color color, Vector2 loc)
+
+        public Light_Source(Color color, Vector2 loc, Light_Source_Type type)
         {
             Color = color;
             Loc = loc;
+            Type = type;
         }
 
         public void calculate_lightmap(byte[,] cost_map)
@@ -118,6 +131,11 @@ namespace Tactile
         public void set_max_steps()
         {
             Max_Steps = Color.A / Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST;
+        }
+
+        public bool is_equivalent(Light_Source compared_light_source)
+        {
+            return (color == compared_light_source.color && loc == compared_light_source.loc && type == compared_light_source.type);
         }
     }
 }
