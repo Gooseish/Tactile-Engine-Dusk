@@ -424,7 +424,7 @@ namespace Tactile
             base.draw_scene(sprite_batch, device, render_targets);
         }
 
-        protected override void draw_units(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets, bool roof, HashSet<Vector2> roof_tiles)
+        protected override void draw_units(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D cumulative_render_target, RenderTarget2D[] volatile_render_targets, bool roof, HashSet<Vector2> roof_tiles)
         {
             // The map fades out to hide the units anyway, so we're just wasting processing
             return;

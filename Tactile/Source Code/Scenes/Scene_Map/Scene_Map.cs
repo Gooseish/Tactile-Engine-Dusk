@@ -1242,6 +1242,10 @@ namespace Tactile
 
         protected virtual void draw_scene(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets)
         {
+            RenderTarget2D cumulative_render_target = render_targets[0];
+            RenderTarget2D[] volatile_render_targets = new RenderTarget2D[2] { render_targets[1], render_targets[2] };
+        
+
             camera.pos = Vector2.Zero;
             camera.offset = Vector2.Zero;
             camera.zoom = Vector2.One;
@@ -1254,7 +1258,7 @@ namespace Tactile
 
             #region Map and Idle Units
             // Base map
-            draw_map(sprite_batch, device, render_targets);
+            draw_map(sprite_batch, device, cumulative_render_target, volatile_render_targets);
 
             // Move ranges
             draw_ranges(sprite_batch);
@@ -1263,7 +1267,7 @@ namespace Tactile
             var roof_tiles = @Tilemap.roof_tiles;
             if (roof_tiles.Count > 0)
             {
-                draw_units(sprite_batch, device, render_targets, true, roof_tiles);
+                draw_units(sprite_batch, device, cumulative_render_target, volatile_render_targets, true, roof_tiles);
                 // Copies the map with units on it to render_targets[2]
                 device.SetRenderTarget(render_targets[2]);
                 device.Clear(Color.Transparent);
@@ -1272,7 +1276,7 @@ namespace Tactile
                 sprite_batch.End();
 
                 // Draws the roof tiles to render_targets[0]
-                draw_map(sprite_batch, device, render_targets, roof: true);
+                draw_map(sprite_batch, device, cumulative_render_target, volatile_render_targets, roof: true);
 
                 // Copies the roof tiles to render_targets[2] on top of the current map, then moves it all back to render_targets[0]
                 //device.SetRenderTarget(render_targets[2]);
@@ -1297,7 +1301,7 @@ namespace Tactile
             DrawTileOutlines(sprite_batch, device, render_targets);
 
             // Idle units (that aren't under a roof)
-            draw_units(sprite_batch, device, render_targets, false, roof_tiles);
+            draw_units(sprite_batch, device, cumulative_render_target, volatile_render_targets, false, roof_tiles);
             #endregion
 
             draw_arrow(sprite_batch);
@@ -1597,17 +1601,17 @@ namespace Tactile
         /// <param name="device">The game's GraphicsDevice object</param>
         /// <param name="render_targets">A of render targets to draw on</param>
         /// <param name="roof">If true, draws map tiles that are fading out and are "above" units under them; otherwise draws the base map.</param>
-        protected void draw_map(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets, bool roof = false)
+        protected void draw_map(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D cumulative_render_target, RenderTarget2D[] volatile_render_targets, bool roof = false)
         {
             current_render_index = 1;
             // Draw fog tiles to render target 1
-            device.SetRenderTarget(render_targets[current_render_target]);
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
             device.Clear(Color.Transparent);
             draw_raw_map(sprite_batch, false, fog: true, roof: roof);
 
             // Copy fog tiles with the fog effect to render target 0
             next_render_target();
-            device.SetRenderTarget(render_targets[current_render_target]);
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
             device.Clear(Color.Transparent);
 
             Color fog_color;
@@ -1616,7 +1620,7 @@ namespace Tactile
 
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[last_render_target], Vector2.Zero, fog_color);
+            sprite_batch.Draw(volatile_render_targets[last_render_target], Vector2.Zero, fog_color);
             sprite_batch.End();
 
             // Draw regular tiles on top of fog tiles
@@ -1624,7 +1628,7 @@ namespace Tactile
 
             // Draw map to render target 1 with map alpha effects applied
             next_render_target();
-            device.SetRenderTarget(render_targets[current_render_target]);
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
             device.Clear(Color.Transparent);
 
             Effect alpha_shader = Global.effect_shader();
@@ -1646,7 +1650,7 @@ namespace Tactile
             // Darken screen for spells if needed
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, alpha_shader);
-            sprite_batch.Draw(render_targets[last_render_target], Vector2.Zero,
+            sprite_batch.Draw(volatile_render_targets[last_render_target], Vector2.Zero,
                 new Color(Map_Spell_Darken, Map_Spell_Darken, Map_Spell_Darken, 255));
 
             sprite_batch.End();
@@ -1659,8 +1663,7 @@ namespace Tactile
 #endif
 
             // Draw map to render target 0 with map tone applied
-            next_render_target();
-            device.SetRenderTarget(render_targets[current_render_target]);
+            device.SetRenderTarget(cumulative_render_target);
             device.Clear(roof ? Color.Transparent : Color.Black);
             if (Global.game_map.width <= 0)
                 return;
@@ -1673,7 +1676,7 @@ namespace Tactile
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[last_render_target], Vector2.Zero, Color.White);
+            sprite_batch.Draw(volatile_render_targets[current_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
         }
 
@@ -1904,7 +1907,7 @@ namespace Tactile
         /// <param name="sprite_batch">The active SpriteBatch</param>
         /// <param name="device">The game's GraphicsDevuce object</param>
         /// <param name="render_targets">A of render targets to draw on</param>
-        protected virtual void draw_units(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets,
+        protected virtual void draw_units(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D cumulative_render_target, RenderTarget2D[] volatile_render_targets,
             bool roof, HashSet<Vector2> roof_tiles)
         {
             // Units hidden
@@ -1912,14 +1915,14 @@ namespace Tactile
                 return;
 
             // Draw units on render target 1, then copy them with tone on render target 0
-            next_render_target();
-            device.SetRenderTarget(render_targets[current_render_target]);
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
             device.Clear(Color.Transparent);
             draw_units(sprite_batch, roof: roof, roof_tiles: roof_tiles);
 
             // Unit tone
             next_render_target();
-            device.SetRenderTarget(render_targets[current_render_target]);
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
+            device.Clear(Color.Transparent);
             Effect map_shader = Global.effect_shader();
             if (map_shader != null)
             {
@@ -1927,7 +1930,17 @@ namespace Tactile
                 map_shader.Parameters["tone"].SetValue(Global.game_state.screen_tone.to_vector_4(Config.UNIT_TONE_PERCENT));
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[last_render_target], Vector2.Zero, Color.White);
+            sprite_batch.Draw(volatile_render_targets[last_render_target], Vector2.Zero, Color.White);
+            sprite_batch.End();
+
+            // Map Lighting
+            device.SetRenderTarget(cumulative_render_target);
+            if (map_shader != null)
+            {
+                map_shader.CurrentTechnique = map_shader.Techniques["Map_Lighting"];
+            }
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
+            sprite_batch.Draw(volatile_render_targets[current_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
         }
 
