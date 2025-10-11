@@ -1308,13 +1308,13 @@ namespace Tactile
 
             #region Active Units
             // Draw active units on render target 1, then copy them with tone on render target 0
-            current_render_index = 1;
-            device.SetRenderTarget(render_targets[current_render_target]);
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
             device.Clear(Color.Transparent);
             draw_active_units(sprite_batch);
             // Unit tone
             next_render_target();
-            device.SetRenderTarget(render_targets[current_render_target]);
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
+            device.Clear(Color.Transparent);
             Effect map_shader = Global.effect_shader();
             if (map_shader != null)
             {
@@ -1322,7 +1322,16 @@ namespace Tactile
                 map_shader.Parameters["tone"].SetValue(Global.game_state.screen_tone.to_vector_4(Config.UNIT_TONE_PERCENT));
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[last_render_target], Vector2.Zero, Color.White);
+            sprite_batch.Draw(volatile_render_targets[last_render_target], Vector2.Zero, Color.White);
+            sprite_batch.End();
+            // Map Lighting
+            device.SetRenderTarget(cumulative_render_target);
+            if (map_shader != null)
+            {
+                map_shader.CurrentTechnique = map_shader.Techniques["Map_Lighting"];
+            }
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
+            sprite_batch.Draw(volatile_render_targets[current_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
 
             // Status animations and icons
