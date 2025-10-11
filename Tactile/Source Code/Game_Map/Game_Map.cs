@@ -72,8 +72,8 @@ namespace Tactile
         private HashSet<Vector2> Seized_Points = new HashSet<Vector2>();
         private List<Tuple<Rectangle, string>> Area_Background = new List<Tuple<Rectangle, string>>();
         private int Grid_Opacity = 32;
-        private List<Vector2>[] Light_Sources = new List<Vector2>[0];
-        private List<Light_Source> Light_Sources_New = new List<Light_Source> { };
+        private List<Vector2>[] Light_Sources_Oldcode = new List<Vector2>[0];
+        private List<Light_Source> Light_Sources = new List<Light_Source> { };
         private byte[,] Lighting_Cost_Map;
         private int Min_Alpha = 0;
         private int Ally_Alpha;
@@ -154,7 +154,7 @@ namespace Tactile
             Seized_Points.write(writer);
             Area_Background.write(writer);
             writer.Write(Grid_Opacity);
-            Light_Sources.write(writer);
+            Light_Sources_Oldcode.write(writer);
             writer.Write(Min_Alpha);
             writer.Write(Ally_Alpha);
             Team_Defend_Areas.write(writer);
@@ -299,7 +299,7 @@ namespace Tactile
             Seized_Points.read(reader);
             Area_Background.read(reader);
             Grid_Opacity = reader.ReadInt32();
-            Light_Sources = Light_Sources.read(reader);
+            Light_Sources_Oldcode = Light_Sources_Oldcode.read(reader);
             refresh_alpha();
             Min_Alpha = reader.ReadInt32();
             Ally_Alpha = reader.ReadInt32();
@@ -704,9 +704,9 @@ namespace Tactile
         public float icon_timer { get { return rescue_anim_timer / (float)Config.RESCUE_TIME ; } }
         public int icon_loops { get { return rescue_anim_loops; } }
 
-        public List<Light_Source> light_sources_new
+        public List<Light_Source> light_sources
         {
-            get { return Light_Sources_New; }
+            get { return Light_Sources; }
         }
         #endregion
 
@@ -895,9 +895,9 @@ namespace Tactile
             Window_Minimap.clear();
             UnitsHidden = false;
 
-            Light_Sources = new List<Vector2>[Constants.Map.ALPHA_MAX];
-            for(int i = 0; i < Light_Sources.Length; i++)
-                Light_Sources[i] = new List<Vector2>();
+            Light_Sources_Oldcode = new List<Vector2>[Constants.Map.ALPHA_MAX];
+            for(int i = 0; i < Light_Sources_Oldcode.Length; i++)
+                Light_Sources_Oldcode[i] = new List<Vector2>();
             Min_Alpha = 255;
             Ally_Alpha = -1;
             refresh_alpha();
@@ -1252,12 +1252,12 @@ namespace Tactile
                 return;
             }
             Dictionary<float, List<Vector2>> light_sources = new Dictionary<float, List<Vector2>>();
-            List<Vector2>[] sources_with_units = new List<Vector2>[Light_Sources.Length];
+            List<Vector2>[] sources_with_units = new List<Vector2>[Light_Sources_Oldcode.Length];
 
             for (int i = 0; i < sources_with_units.Length; i++)
             {
                 sources_with_units[i] = new List<Vector2>();
-                sources_with_units[i].AddRange(Light_Sources[i]);
+                sources_with_units[i].AddRange(Light_Sources_Oldcode[i]);
             }
             if (Ally_Alpha >= 0)
                 for (int y = 0; y < this.height; y++)
@@ -1333,13 +1333,13 @@ namespace Tactile
 
         public void add_alpha_source(Vector2 loc, int value)
         {
-            Light_Sources[value].Add(loc);
+            Light_Sources_Oldcode[value].Add(loc);
         }
 
         public void clear_alpha()
         {
-            for (int i = 0; i < Light_Sources.Length; i++)
-                Light_Sources[i].Clear();
+            for (int i = 0; i < Light_Sources_Oldcode.Length; i++)
+                Light_Sources_Oldcode[i].Clear();
         }
 
         public Color get_unit_tint(Vector2 loc)
@@ -1372,7 +1372,9 @@ namespace Tactile
         }
         public void update_light_sources()
         {
-            // Light sources on the board
+            List<Light_Source> result = new List<Light_Source> { };
+
+            // Get all light sources on the board
             List<Light_Source> light_source_check = new List<Light_Source> { };
             for (int y = 0; y < this.height; y++)
                 for (int x = 0; x < this.width; x++)
@@ -1382,30 +1384,30 @@ namespace Tactile
                     }
 
             // Check which light sources have been added or removed
-            List<Light_Source> result = new List<Light_Source> { };
-            foreach (Light_Source old_light_source in Light_Sources_New)
+            foreach (Light_Source old_light_source in Light_Sources)
             {
                 int n = 0;
                 foreach (Light_Source new_light_source in light_source_check)
                 {
                     if (old_light_source.is_equivalent(new_light_source))
                     {
-                        result.Add(old_light_source);
+                        result.Add(old_light_source);   // Keep old light sources that are still in use
                         break;
                     }
                     n++;
                 }
-                if (n != light_source_check.Count()) // true only if the light source was confirmed to be unchanged
+                if (n != light_source_check.Count()) // True only if the light source was confirmed to be unchanged
                     light_source_check.RemoveAt(n);
             }
 
+            // Calculate ray march for new light sources
             foreach (Light_Source light_source in light_source_check)
             {
                 light_source.calculate_lightmap(Lighting_Cost_Map);
                 result.Add(light_source);
             }
 
-            Light_Sources_New = result;
+            Light_Sources = result;
         }
         public void set_cost_map()
         {
