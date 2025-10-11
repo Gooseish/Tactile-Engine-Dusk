@@ -75,6 +75,7 @@ namespace Tactile
         private List<Vector2>[] Light_Sources_Oldcode = new List<Vector2>[0];
         private List<Light_Source> Light_Sources = new List<Light_Source> { };
         private List<Light_Source> Static_Light_Sources = new List<Light_Source> { };
+        public bool lightmap_needs_redrawing = true;
         private byte[,] Lighting_Cost_Map;
         private int Min_Alpha = 0;
         private int Ally_Alpha;
@@ -1400,6 +1401,8 @@ namespace Tactile
                 }
                 if (n != light_source_check.Count()) // True only if the light source was confirmed to be unchanged
                     light_source_check.RemoveAt(n);
+                else
+                    lightmap_needs_redrawing = true;
             }
 
             // Calculate ray march for new light sources
@@ -1407,6 +1410,7 @@ namespace Tactile
             {
                 light_source.calculate_lightmap(Lighting_Cost_Map);
                 result.Add(light_source);
+                lightmap_needs_redrawing = true;
             }
 
             Light_Sources = result;
@@ -1424,6 +1428,7 @@ namespace Tactile
             if (Lighting_Cost_Map != null && result != Lighting_Cost_Map)
             {
                 find_light_sources_that_need_updating();
+                lightmap_needs_redrawing = true;
             }
             
             Lighting_Cost_Map = result;

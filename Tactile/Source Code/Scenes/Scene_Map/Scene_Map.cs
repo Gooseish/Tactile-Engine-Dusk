@@ -1247,7 +1247,8 @@ namespace Tactile
             camera.zoom = Vector2.One;
             camera.angle = 0f;
 
-            draw_lightmap(sprite_batch, device);
+            if (Global.game_map.lightmap_needs_redrawing)
+                draw_lightmap(sprite_batch, device);
 
             #region Map and Idle Units
             // Base map
@@ -1741,6 +1742,7 @@ namespace Tactile
             sprite_batch.End();
 
             Lightmap = lightmap[current_render_target];
+            Global.game_map.lightmap_needs_redrawing = false;
         }
 
         #region Draw Ranges
