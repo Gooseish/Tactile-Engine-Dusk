@@ -74,6 +74,7 @@ namespace Tactile
         private int Grid_Opacity = 32;
         private List<Vector2>[] Light_Sources_Oldcode = new List<Vector2>[0];
         private List<Light_Source> Light_Sources = new List<Light_Source> { };
+        private List<Light_Source> Static_Light_Sources = new List<Light_Source> { };
         private byte[,] Lighting_Cost_Map;
         private int Min_Alpha = 0;
         private int Ally_Alpha;
@@ -1382,6 +1383,7 @@ namespace Tactile
                     {
                         light_source_check.Add(new Light_Source(Color.White, new Vector2(x, y), Light_Source_Type.Unit));
                     }
+            light_source_check.AddRange(Static_Light_Sources);
 
             // Check which light sources have been added or removed
             foreach (Light_Source old_light_source in Light_Sources)
