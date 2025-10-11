@@ -28,7 +28,6 @@ namespace Tactile
         private Light_Source_Type Type;
 
         public Texture2D lightmap_contribution { get { return Lightmap_Contribution; } }
-
  
 
         public void write(BinaryWriter writer)

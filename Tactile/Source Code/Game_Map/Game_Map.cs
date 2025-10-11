@@ -1368,18 +1368,44 @@ namespace Tactile
         public void refresh_lighting()
         {
             set_cost_map();
-            get_light_sources();
             update_light_sources();
         }
-        public void get_light_sources()
+        public void update_light_sources()
         {
-            Light_Sources_New.Clear();
+            // Light sources on the board
+            List<Light_Source> light_source_check = new List<Light_Source> { };
             for (int y = 0; y < this.height; y++)
                 for (int x = 0; x < this.width; x++)
                     if (get_unit(new Vector2(x, y)) != null && get_unit(new Vector2(x, y)).is_ally) //Multi
                     {
-                        Light_Sources_New.Add(new Light_Source(Color.White, new Vector2(x, y), Light_Source_Type.Unit));
+                        light_source_check.Add(new Light_Source(Color.White, new Vector2(x, y), Light_Source_Type.Unit));
                     }
+
+            // Check which light sources have been added or removed
+            List<Light_Source> result = new List<Light_Source> { };
+            foreach (Light_Source old_light_source in Light_Sources_New)
+            {
+                int n = 0;
+                foreach (Light_Source new_light_source in light_source_check)
+                {
+                    if (old_light_source.is_equivalent(new_light_source))
+                    {
+                        result.Add(old_light_source);
+                        break;
+                    }
+                    n++;
+                }
+                if (n != light_source_check.Count()) // true only if the light source was confirmed to be unchanged
+                    light_source_check.RemoveAt(n);
+            }
+
+            foreach (Light_Source light_source in light_source_check)
+            {
+                light_source.calculate_lightmap(Lighting_Cost_Map);
+                result.Add(light_source);
+            }
+
+            Light_Sources_New = result;
         }
         public void set_cost_map()
         {
@@ -1389,11 +1415,6 @@ namespace Tactile
                 {
                     Lighting_Cost_Map[x, y] = (byte)(alpha_cost(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY)*Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST);
                 }
-        }
-        public void update_light_sources()
-        {
-            foreach (Light_Source light_source in Light_Sources_New)
-                light_source.calculate_lightmap(Lighting_Cost_Map);
         }
 
         #endregion
