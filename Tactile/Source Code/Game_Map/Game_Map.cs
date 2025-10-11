@@ -1413,12 +1413,25 @@ namespace Tactile
         }
         public void set_cost_map()
         {
-            Lighting_Cost_Map = new byte[this.width*Constants.Map.ALPHA_GRANULARITY, this.height*Constants.Map.ALPHA_GRANULARITY];
-            for (int x = 0; x < Lighting_Cost_Map.GetLength(0); x++)
-                for (int y = 0; y < Lighting_Cost_Map.GetLength(1); y++)
+            byte[,] result = new byte[this.width*Constants.Map.ALPHA_GRANULARITY, this.height*Constants.Map.ALPHA_GRANULARITY];
+            for (int x = 0; x < result.GetLength(0); x++)
+                for (int y = 0; y < result.GetLength(1); y++)
                 {
-                    Lighting_Cost_Map[x, y] = (byte)(alpha_cost(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY)*Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST);
+                    result[x, y] = (byte)(alpha_cost(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY)*Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST);
                 }
+            
+
+            if (Lighting_Cost_Map != null && result != Lighting_Cost_Map)
+            {
+                find_light_sources_that_need_updating();
+            }
+            
+            Lighting_Cost_Map = result;
+        }
+
+        public void find_light_sources_that_need_updating()
+        {
+
         }
 
         #endregion
