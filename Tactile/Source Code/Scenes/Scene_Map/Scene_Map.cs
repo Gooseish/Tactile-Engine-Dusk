@@ -1594,7 +1594,7 @@ namespace Tactile
         /// Draws the map onto render_targets[0].
         /// </summary>
         /// <param name="sprite_batch">The active SpriteBatch</param>
-        /// <param name="device">The game's GraphicsDevuce object</param>
+        /// <param name="device">The game's GraphicsDevice object</param>
         /// <param name="render_targets">A of render targets to draw on</param>
         /// <param name="roof">If true, draws map tiles that are fading out and are "above" units under them; otherwise draws the base map.</param>
         protected void draw_map(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets, bool roof = false)
@@ -1719,7 +1719,8 @@ namespace Tactile
         {
             current_render_index = 0;
             RenderTarget2D[] lightmap = new RenderTarget2D[2];
-            lightmap[current_render_target] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
+            for (int n = 0; n < 2; n++)
+                lightmap[n] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
 
             device.SetRenderTarget(lightmap[current_render_target]);
             device.Clear(Color.Transparent);
@@ -1735,7 +1736,6 @@ namespace Tactile
             ambient_blender.CurrentTechnique = ambient_blender.Techniques["Ambient_Blend"];
 
             next_render_target();
-            lightmap[current_render_target] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
 
             device.SetRenderTarget(lightmap[current_render_target]);
             device.Clear(Color.Transparent);
@@ -1743,7 +1743,11 @@ namespace Tactile
             sprite_batch.Draw(lightmap[last_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
 
+            device.SetRenderTarget(null);
+
             Lightmap = lightmap[current_render_target];
+
+            lightmap[last_render_target].Dispose();
             Global.game_map.lightmap_needs_redrawing = false;
         }
 
