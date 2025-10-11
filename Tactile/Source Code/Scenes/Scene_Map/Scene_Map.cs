@@ -1247,7 +1247,7 @@ namespace Tactile
             camera.zoom = Vector2.One;
             camera.angle = 0f;
 
-            draw_lightmap(sprite_batch, device, render_targets);
+            draw_lightmap(sprite_batch, device);
 
             #region Map and Idle Units
             // Base map
@@ -1712,28 +1712,33 @@ namespace Tactile
         }
         #endregion
 
-        protected void draw_lightmap(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets)
+        protected void draw_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
         {
-            RenderTarget2D lightmap = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
+            //RenderTarget2D lightmap = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
+            RenderTarget2D[] lightmap = new RenderTarget2D[2];
+            lightmap[0] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
+            lightmap[1] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
 
-            current_render_index = 1;
-            device.SetRenderTarget(lightmap);
+            device.SetRenderTarget(lightmap[0]);
             device.Clear(Color.Transparent);
-            sprite_batch.Begin();
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
             foreach (Light_Source light_source in Global.game_map.light_sources)
             {
                 sprite_batch.Draw(light_source.lightmap_contribution, Vector2.Zero, Color.White);
             }
             sprite_batch.End();
 
-            next_render_target();
-            device.SetRenderTarget(render_targets[current_render_target]);
+            Effect ambient_blender = Global.effect_shader();
+            ambient_blender.Parameters["Ambient_Color"].SetValue(Color.Blue.ToVector4());
+            ambient_blender.CurrentTechnique = ambient_blender.Techniques["Ambient_Blend"];
 
-            Global.effect_shader().Parameters["Ambient_Color"].SetValue(Color.Black.ToVector4());
-            //Global.effect_shader().Parameters["LightmapTexture"].SetValue(render_targets[last_render_target]);
+            device.SetRenderTarget(lightmap[1]);
+            device.Clear(Color.Transparent);
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, ambient_blender);
+            sprite_batch.Draw(lightmap[0], Vector2.Zero, Color.White);
+            sprite_batch.End();
 
-            Lightmap = new Texture2D(device, lightmap.Width, lightmap.Height);
-            Lightmap = lightmap;
+            Lightmap = lightmap[1];
         }
 
         #region Draw Ranges

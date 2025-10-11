@@ -281,6 +281,21 @@ technique Map_Lighting
 	}
 }
 
+float4 ambient_blend(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
+{
+	float4 Color = tex2D(TextureSampler, uv);
+	Color = lerp(Ambient_Color, Color, Color.a);
+	return Color;
+}
+
+technique Ambient_Blend
+{
+	pass Pass1
+	{
+		PixelShader = compile ps_2_0 ambient_blend();
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Mask
 //-----------------------------------------------------------------------------
