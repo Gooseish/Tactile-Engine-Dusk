@@ -1247,6 +1247,8 @@ namespace Tactile
             camera.zoom = Vector2.One;
             camera.angle = 0f;
 
+            device.SamplerStates[3] = SamplerState.PointClamp; // This prevents crashes after resuming a minimized session... for some godforsaken reason
+
             if (Global.game_map.lightmap_needs_redrawing)
                 draw_lightmap(sprite_batch, device);
 
