@@ -1714,12 +1714,11 @@ namespace Tactile
 
         protected void draw_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
         {
-            //RenderTarget2D lightmap = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
+            current_render_index = 0;
             RenderTarget2D[] lightmap = new RenderTarget2D[2];
-            lightmap[0] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
-            lightmap[1] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
+            lightmap[current_render_target] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
 
-            device.SetRenderTarget(lightmap[0]);
+            device.SetRenderTarget(lightmap[current_render_target]);
             device.Clear(Color.Transparent);
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
             foreach (Light_Source light_source in Global.game_map.light_sources)
@@ -1732,13 +1731,16 @@ namespace Tactile
             ambient_blender.Parameters["Ambient_Color"].SetValue(Color.Blue.ToVector4());
             ambient_blender.CurrentTechnique = ambient_blender.Techniques["Ambient_Blend"];
 
-            device.SetRenderTarget(lightmap[1]);
+            next_render_target();
+            lightmap[current_render_target] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
+
+            device.SetRenderTarget(lightmap[current_render_target]);
             device.Clear(Color.Transparent);
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, ambient_blender);
-            sprite_batch.Draw(lightmap[0], Vector2.Zero, Color.White);
+            sprite_batch.Draw(lightmap[last_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
 
-            Lightmap = lightmap[1];
+            Lightmap = lightmap[current_render_target];
         }
 
         #region Draw Ranges
