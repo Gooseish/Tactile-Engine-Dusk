@@ -23,6 +23,7 @@ namespace Tactile
         private Color @Color;
         private Vector2 Loc;
         private int Max_Steps;
+        private int Max_Distance;
         private Texture2D Lightmap_Contribution;
         private byte[,] Brightness_Map;
         private Light_Source_Type Type;
@@ -57,6 +58,12 @@ namespace Tactile
         public Vector2 centered_loc { get { return (Loc + new Vector2(0.5f, 0.5f))*Constants.Map.ALPHA_GRANULARITY; } }
         public Light_Source_Type type { get { return Type; } }
 
+        public int max_distance { get { return Max_Distance; } }
+
+        public void set_max_distance()
+        {
+            Max_Distance = Color.A / Constants.Map.BASE_PIXEL_BRIGHTNESS_COST / Constants.Map.ALPHA_GRANULARITY;
+        }
 
         public Light_Source(Color color, Vector2 loc, Light_Source_Type type)
         {

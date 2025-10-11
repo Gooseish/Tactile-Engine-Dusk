@@ -1369,10 +1369,10 @@ namespace Tactile
 
         public void refresh_lighting()
         {
-            set_cost_map();
-            update_light_sources();
+            List<Vector2> changed_tiles = set_cost_map();
+            update_light_sources(changed_tiles);
         }
-        public void update_light_sources()
+        public void update_light_sources(List<Vector2> changed_tiles)
         {
             List<Light_Source> result = new List<Light_Source> { };
 
@@ -1405,6 +1405,17 @@ namespace Tactile
                     lightmap_needs_redrawing = true;
             }
 
+            // Recalculate ray march for any light source near a changed tile
+            foreach (Light_Source light_source in result)
+            {
+                light_source.set_max_distance();
+                foreach(Vector2 changed_tile_loc in changed_tiles)
+                {
+                    if (Vector2.Distance(light_source.loc, changed_tile_loc) < light_source.max_distance)
+                        light_source.calculate_lightmap(Lighting_Cost_Map);
+                }
+            }
+
             // Calculate ray march for new light sources
             foreach (Light_Source light_source in light_source_check)
             {
@@ -1415,28 +1426,29 @@ namespace Tactile
 
             Light_Sources = result;
         }
-        public void set_cost_map()
+        public List<Vector2> set_cost_map()
         {
-            byte[,] result = new byte[this.width*Constants.Map.ALPHA_GRANULARITY, this.height*Constants.Map.ALPHA_GRANULARITY];
-            for (int x = 0; x < result.GetLength(0); x++)
-                for (int y = 0; y < result.GetLength(1); y++)
+            if (Lighting_Cost_Map == null)
+                Lighting_Cost_Map = new byte[this.width * Constants.Map.ALPHA_GRANULARITY, this.height * Constants.Map.ALPHA_GRANULARITY];
+
+            byte[,] new_cost_map = new byte[this.width*Constants.Map.ALPHA_GRANULARITY, this.height*Constants.Map.ALPHA_GRANULARITY];
+
+            List<Vector2> changed_tiles = new List<Vector2> { };
+            
+            
+            for (int x = 0; x < new_cost_map.GetLength(0); x++)
+                for (int y = 0; y < new_cost_map.GetLength(1); y++)
                 {
-                    result[x, y] = (byte)(alpha_cost(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY)*Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST);
+                    new_cost_map[x, y] = (byte)(alpha_cost(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY)*Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST);
+                    if (new_cost_map[x, y] != Lighting_Cost_Map[x, y])
+                    {
+                        changed_tiles.Add(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY);
+                    }
                 }
             
+            Lighting_Cost_Map = new_cost_map;
 
-            if (Lighting_Cost_Map != null && result != Lighting_Cost_Map)
-            {
-                find_light_sources_that_need_updating();
-                lightmap_needs_redrawing = true;
-            }
-            
-            Lighting_Cost_Map = result;
-        }
-
-        public void find_light_sources_that_need_updating()
-        {
-
+            return changed_tiles;
         }
 
         #endregion
