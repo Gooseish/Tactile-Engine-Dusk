@@ -1412,7 +1412,10 @@ namespace Tactile
                 foreach(Vector2 changed_tile_loc in changed_tiles)
                 {
                     if (Vector2.Distance(light_source.loc, changed_tile_loc) < light_source.max_distance)
+                    {
                         light_source.calculate_lightmap(Lighting_Cost_Map);
+                        break;
+                    }
                 }
             }
 
@@ -1436,10 +1439,20 @@ namespace Tactile
             List<Vector2> changed_tiles = new List<Vector2> { };
             
             
-            for (int x = 0; x < new_cost_map.GetLength(0); x++)
-                for (int y = 0; y < new_cost_map.GetLength(1); y++)
+            for (int x = 0; x < new_cost_map.GetLength(0); x += Constants.Map.ALPHA_GRANULARITY)
+                for (int y = 0; y < new_cost_map.GetLength(1); y += Constants.Map.ALPHA_GRANULARITY)
                 {
-                    new_cost_map[x, y] = (byte)(alpha_cost(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY)*Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST);
+                    // Each tile on the map corresponds to an N by N grid of pixels in the cost map, where N is the alpha granularity
+
+                    // Check the tile's brightness cost
+                    byte new_alpha_cost = (byte)(alpha_cost(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY) * Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST);
+
+                    // Fill in the N by N grid
+                    for (int n = 0; n < Constants.Map.ALPHA_GRANULARITY; n++)
+                        for (int m = 0; m < Constants.Map.ALPHA_GRANULARITY; m++)
+                            new_cost_map[x + n, y + m] = new_alpha_cost;
+
+                    // Check if the cost has changed so we can recalculate the raymarch of nearby light sources
                     if (new_cost_map[x, y] != Lighting_Cost_Map[x, y])
                     {
                         changed_tiles.Add(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY);
