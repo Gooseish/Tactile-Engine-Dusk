@@ -1729,8 +1729,13 @@ namespace Tactile
 
         protected void draw_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
         {
+            if (Global.game_map.width == 0)
+                return;
+
             current_render_index = 0;
             RenderTarget2D[] lightmap = new RenderTarget2D[2];
+            
+
             for (int n = 0; n < 2; n++)
                 lightmap[n] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
 
@@ -1744,7 +1749,7 @@ namespace Tactile
             sprite_batch.End();
 
             Effect ambient_blender = Global.effect_shader();
-            ambient_blender.Parameters["Ambient_Color"].SetValue(Color.Blue.ToVector4());
+            ambient_blender.Parameters["Ambient_Color"].SetValue(Global.game_map.ambient_lighting.ToVector4());
             ambient_blender.CurrentTechnique = ambient_blender.Techniques["Ambient_Blend"];
 
             next_render_target();

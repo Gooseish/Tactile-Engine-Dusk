@@ -2783,6 +2783,41 @@ namespace Tactile
                     }
                     break;
                 #endregion
+                case "Set Ally Lighting":
+                    #region Set Ally Lighting; Set color and brightness of allies for the ray march lighting system
+                    // Value[1] = r
+                    // Value[2] = g
+                    // Value[3] = b
+                    // Value[4] = a
+                    // Value[5] = Class ID (optional)
+                    byte r = (byte)process_number(command.Value[1]);
+                    byte g = (byte)process_number(command.Value[2]);
+                    byte b = (byte)process_number(command.Value[3]);
+                    byte a = (byte)process_number(command.Value[4]);
+                    
+
+                    if (command.Value.Length > 5)
+                    {
+                        int id = process_number(command.Value[5]);
+                        Global.game_map.class_ally_lighting[id] = new Color(r, g, b, a);
+                    }
+                    else
+                        Global.game_map.ally_lighting = new Color(r, g, b, a);
+                    break;
+                #endregion
+                case "Set Ambient Lighting":
+                    #region Set Ambient Lighting
+                    // Value[1] = r
+                    // Value[2] = g
+                    // Value[3] = b
+                    // Value[4] = a
+                    r = (byte)process_number(command.Value[1]);
+                    g = (byte)process_number(command.Value[2]);
+                    b = (byte)process_number(command.Value[3]);
+                    a = (byte)process_number(command.Value[4]);
+                    Global.game_map.ambient_lighting = new Color(r, g, b, a);
+                    break;
+                #endregion
 #if DEBUG
                 default:
                     throw event_case_missing_exception(command.Value[0], command.Key);

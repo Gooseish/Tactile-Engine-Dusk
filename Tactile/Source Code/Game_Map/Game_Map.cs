@@ -79,6 +79,9 @@ namespace Tactile
         private byte[,] Lighting_Cost_Map;
         private int Min_Alpha = 0;
         private int Ally_Alpha;
+        private Color Ally_Lighting;
+        private Dictionary<int, Color> Class_Ally_Lighting = new Dictionary<int, Color> { };
+        private Color Ambient_Lighting = Color.White;
         private Dictionary<int, List<Rectangle>>[] Team_Defend_Areas;
         private Dictionary<int, Vector2> Unit_Seek_Locs;
         private Dictionary<int, Dictionary<int, Vector2>> Team_Seek_Locs;
@@ -694,6 +697,21 @@ namespace Tactile
             {
                 Ally_Alpha = (int)MathHelper.Clamp(value, -1, Constants.Map.ALPHA_MAX - 1);
             }
+        }
+
+        public Color ally_lighting
+        {
+            get { return Ally_Lighting; }
+            set { Ally_Lighting = value; }
+        }
+        public Dictionary<int, Color> class_ally_lighting
+        {
+            get { return Class_Ally_Lighting; }
+        }
+        public Color ambient_lighting
+        {
+            get { return Ambient_Lighting; }
+            set { Ambient_Lighting = value; }
         }
 
         internal Dictionary<int, Vector2> unit_seek_locs { get { return Unit_Seek_Locs; } }
@@ -1378,12 +1396,24 @@ namespace Tactile
 
             // Get all light sources on the board
             List<Light_Source> light_source_check = new List<Light_Source> { };
-            for (int y = 0; y < this.height; y++)
-                for (int x = 0; x < this.width; x++)
-                    if (get_unit(new Vector2(x, y)) != null && get_unit(new Vector2(x, y)).is_ally) //Multi
-                    {
-                        light_source_check.Add(new Light_Source(Color.Red, new Vector2(x, y), Light_Source_Type.Unit));
-                    }
+            if (Global.game_map.ally_lighting != Color.Transparent)
+            {
+                for (int y = 0; y < this.height; y++)
+                    for (int x = 0; x < this.width; x++)
+                        if (get_unit(new Vector2(x, y)) != null) //Multi
+                        {
+                            Game_Unit unit = get_unit(new Vector2(x, y));
+                            if (unit.is_ally)
+                            {
+                                if (class_ally_lighting.ContainsKey(unit.actor.class_id))
+                                    light_source_check.Add(new Light_Source(Global.game_map.class_ally_lighting[unit.actor.class_id], new Vector2(x, y), Light_Source_Type.Unit));
+                                else
+                                    light_source_check.Add(new Light_Source(Global.game_map.ally_lighting, new Vector2(x, y), Light_Source_Type.Unit));
+                            }
+                                
+                        }    
+                            
+            }
             light_source_check.AddRange(Static_Light_Sources);
 
             // Check which light sources have been added or removed
@@ -1431,10 +1461,12 @@ namespace Tactile
         }
         public List<Vector2> set_cost_map()
         {
-            if (Lighting_Cost_Map == null)
+            byte[,] new_cost_map = new byte[this.width * Constants.Map.ALPHA_GRANULARITY, this.height * Constants.Map.ALPHA_GRANULARITY];
+
+            if (Lighting_Cost_Map == null || Lighting_Cost_Map.GetLength(0) != new_cost_map.GetLength(0) || Lighting_Cost_Map.GetLength(1) != new_cost_map.GetLength(1))
                 Lighting_Cost_Map = new byte[this.width * Constants.Map.ALPHA_GRANULARITY, this.height * Constants.Map.ALPHA_GRANULARITY];
 
-            byte[,] new_cost_map = new byte[this.width*Constants.Map.ALPHA_GRANULARITY, this.height*Constants.Map.ALPHA_GRANULARITY];
+            
 
             List<Vector2> changed_tiles = new List<Vector2> { };
             
