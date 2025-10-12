@@ -74,7 +74,7 @@ namespace Tactile
         private int Grid_Opacity = 32;
         private List<Vector2>[] Light_Sources_Oldcode = new List<Vector2>[0];
         private List<Light_Source> Light_Sources = new List<Light_Source> { };
-        private List<Light_Source> Static_Light_Sources = new List<Light_Source> { };
+        private Dictionary<Vector2, Light_Source> Static_Light_Sources = new Dictionary<Vector2, Light_Source> { };
         public bool lightmap_needs_redrawing = true;
         private byte[,] Lighting_Cost_Map;
         private int Min_Alpha = 0;
@@ -712,6 +712,10 @@ namespace Tactile
         {
             get { return Ambient_Lighting; }
             set { Ambient_Lighting = value; }
+        }
+        public Dictionary<Vector2, Light_Source> static_light_sources
+        {
+            get { return Static_Light_Sources; }
         }
 
         internal Dictionary<int, Vector2> unit_seek_locs { get { return Unit_Seek_Locs; } }
@@ -1414,7 +1418,7 @@ namespace Tactile
                         }    
                             
             }
-            light_source_check.AddRange(Static_Light_Sources);
+            light_source_check.AddRange(Static_Light_Sources.Values);
 
             // Check which light sources have been added or removed
             foreach (Light_Source old_light_source in Light_Sources)
