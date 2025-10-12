@@ -264,7 +264,7 @@ technique Normal
 float4 map_lighting(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
 {
 	float4 Color = tex2D(TextureSampler, uv);
-	Color *= tex2D(LightmapTextureSampler, (uv * game_size + alpha_offset) / (16 * map_size));
+	Color.rgb *= tex2D(LightmapTextureSampler, (uv * game_size + alpha_offset) / (16 * map_size)).rgb;
 	return Color * color;
 }
 
@@ -280,6 +280,7 @@ technique Map_Lighting
 float4 ambient_blend(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
 {
 	float4 Color = tex2D(TextureSampler, uv);
+	Color.rgb /= Color.a; //un-premultiply
 	Color = lerp(Ambient_Color, Color, Color.a);
 	return Color;
 }

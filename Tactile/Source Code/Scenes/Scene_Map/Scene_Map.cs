@@ -1741,7 +1741,7 @@ namespace Tactile
 
             device.SetRenderTarget(lightmap[current_render_target]);
             device.Clear(Color.Transparent);
-            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null);
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp, null, null);
             foreach (Light_Source light_source in Global.game_map.light_sources)
             {
                 sprite_batch.Draw(light_source.lightmap_contribution, Vector2.Zero, Color.White);

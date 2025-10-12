@@ -123,7 +123,7 @@ namespace Tactile
             for (int y = 0; y < Lightmap_Contribution.Height; y++)
                 for (int x = 0; x < Lightmap_Contribution.Width; x++)
                 {
-                    float brightness_scalar = (float)Brightness_Map[x, y] / 256f;
+                    float brightness_scalar = (float)Brightness_Map[x, y] / 255f;
                     Vector4 pixel_color = Color.ToVector4();
 
                     // Premultiplied alpha
