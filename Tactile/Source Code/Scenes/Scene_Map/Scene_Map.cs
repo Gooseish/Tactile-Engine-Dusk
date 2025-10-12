@@ -80,11 +80,13 @@ namespace Tactile
 
         protected int TILE_SIZE { get { return Constants.Map.TILE_SIZE; } }
 
-        protected Texture2D Lightmap;
+        protected Texture2D Target_Lightmap;
+        protected Color[] Target_Lightmap_Data;
         protected Texture2D Old_Lightmap;
         protected Texture2D Current_Lightmap;
 
         #region Accessors
+        public Color[] target_lightmap_data { get { return Target_Lightmap_Data; } }
         public bool map_transition { get { return Map_Transition; } }
         public bool map_transition_ready { get { return Map_Transition && Transition_Timer < 0; } }
         public bool map_transition_running { get { return Black_Screen_Time > 0 || (!Map_Transition && Transition_Timer > 0); } }
@@ -1273,7 +1275,7 @@ namespace Tactile
             if (Lighting_Transition_Timer > 0)
                 transition_lightmap(sprite_batch, device);
             else
-                Current_Lightmap = Lightmap;
+                Current_Lightmap = Target_Lightmap;
 
             #region Map and Idle Units
             // Base map
@@ -1749,12 +1751,12 @@ namespace Tactile
 
         protected void draw_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
         {
-            if(Lightmap != null)
+            if (Target_Lightmap != null)
             {
-                Old_Lightmap = new Texture2D(device, Lightmap.Width, Lightmap.Height);
-                Global.game_map.old_lightmap = new Color[Lightmap.Width * Lightmap.Height];
-                Lightmap.GetData<Color>(Global.game_map.old_lightmap);
-                Old_Lightmap.SetData<Color>(Global.game_map.old_lightmap);
+                Old_Lightmap = new Texture2D(device, Target_Lightmap.Width, Target_Lightmap.Height);
+                Color[] Old_Lightmap_Data = new Color[Target_Lightmap.Width * Target_Lightmap.Height];
+                Target_Lightmap.GetData<Color>(Old_Lightmap_Data);
+                Old_Lightmap.SetData<Color>(Old_Lightmap_Data);
                 Lighting_Transition_Timer = Lighting_Transition_Duration;
             }
                 
@@ -1791,7 +1793,10 @@ namespace Tactile
 
             device.SetRenderTarget(null);
 
-            Lightmap = lightmap[current_render_target];
+            Target_Lightmap = lightmap[current_render_target];
+
+            Target_Lightmap_Data = new Color[Target_Lightmap.Width * Target_Lightmap.Height];
+            Target_Lightmap.GetData<Color>(Target_Lightmap_Data);
 
             lightmap[last_render_target].Dispose();
             Global.game_map.lightmap_needs_redrawing = false;
@@ -1809,7 +1814,7 @@ namespace Tactile
                 if (lightmap_shader != null)
                 {
                     lightmap_shader.CurrentTechnique = lightmap_shader.Techniques["Transition_Lightmap"];
-                    lightmap_shader.Parameters["LightmapTexture"].SetValue(Lightmap);
+                    lightmap_shader.Parameters["LightmapTexture"].SetValue(Target_Lightmap);
                     lightmap_shader.Parameters["Lightmap_Transition_Factor"].SetValue(Lighting_Transition_Factor);
                 }
             }

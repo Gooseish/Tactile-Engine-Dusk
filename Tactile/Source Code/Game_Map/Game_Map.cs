@@ -2125,6 +2125,30 @@ namespace Tactile
             }
         }
 
+        protected HashSet<Vector2> fow_sight_area_from_lightmap()
+        {
+            HashSet<Vector2> result = new HashSet<Vector2>{ };
+
+            Color[] lightmap_data = (Global.scene as Scene_Map).target_lightmap_data;
+
+            for (int x = 0; x < this.width*Constants.Map.ALPHA_GRANULARITY; x += Constants.Map.ALPHA_GRANULARITY)
+                for (int y = 0; y < this.height * Constants.Map.ALPHA_GRANULARITY; y += Constants.Map.ALPHA_GRANULARITY)
+                {
+                    byte[] alpha_values = new byte[Constants.Map.ALPHA_GRANULARITY * Constants.Map.ALPHA_GRANULARITY];
+                    int i = 0;
+                    for (int m = 0; m < Constants.Map.ALPHA_GRANULARITY; m++)
+                        for (int n = 0; n < Constants.Map.ALPHA_GRANULARITY; n++)
+                        {
+                            int lightmap_data_index = (x + m) + (y + n) * this.width * Constants.Map.ALPHA_GRANULARITY;
+                            alpha_values[i] = lightmap_data[lightmap_data_index].A;
+                            i++;
+                        }
+                    if (alpha_values.Max() > 40)
+                        result.Add(new Vector2(x, y));
+                }
+            return result;
+        }
+
         protected bool test_unit_move_range_update(Game_Unit unit)
         {
             // Everyone needs updated
