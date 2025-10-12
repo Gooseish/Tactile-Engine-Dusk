@@ -1801,6 +1801,7 @@ namespace Tactile
 
             lightmap[last_render_target].Dispose();
             Global.game_map.lightmap_needs_redrawing = false;
+            Global.game_map.update_fow();
         }
 
         protected void transition_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
