@@ -13,12 +13,12 @@ using TactileColorExtension;
 
 namespace Tactile
 {
-    enum Light_Source_Type
+    public enum Light_Source_Type
     {
         Static,
         Unit
     }
-    class Light_Source
+    public class Light_Source
     {
         private Color @Color;
         private Vector2 Loc;
@@ -29,22 +29,23 @@ namespace Tactile
         private Light_Source_Type Type;
 
         public Texture2D lightmap_contribution { get { return Lightmap_Contribution; } }
- 
 
         public void write(BinaryWriter writer)
         {
             Color.write(writer);
             Loc.write(writer);
-            Brightness_Map.write(writer);
             writer.Write((int)Type);
+
+            Brightness_Map.write(writer);
         }
         public void read(BinaryReader reader)
         {
             Color.read(reader);
             Loc.read(reader);
+            Type = (Light_Source_Type)reader.ReadInt32();
+
             Brightness_Map = Brightness_Map.read(reader);
             refresh_light_texture();
-            Type = (Light_Source_Type)reader.ReadInt32();
         }
 
         public Color color { 
@@ -70,6 +71,10 @@ namespace Tactile
             Color = color;
             Loc = loc;
             Type = type;
+        }
+        public Light_Source()
+        {
+
         }
 
         public void calculate_lightmap(byte[,] cost_map)

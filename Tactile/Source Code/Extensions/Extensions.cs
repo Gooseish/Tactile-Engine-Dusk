@@ -630,6 +630,26 @@ namespace TactileListExtension
                 list.Add(new Tuple<Rectangle, string>(key, value));
             }
         }
+
+        // List<Light_Source>
+        public static void write(this List<Tactile.Light_Source> list, BinaryWriter writer)
+        {
+            writer.Write(list.Count);
+            foreach (Tactile.Light_Source light_source in list)
+                light_source.write(writer);
+        }
+
+        public static void read(this List<Tactile.Light_Source> list, BinaryReader reader)
+        {
+            list.Clear();
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                Tactile.Light_Source v = new Tactile.Light_Source();
+                v.read(reader);
+                list.Add(v);
+            }
+        }
     }
 }
 
@@ -1221,6 +1241,55 @@ namespace TactileDictionaryExtension
                 dictionary.Add(key, value);
             }
         }
+
+        // Dictionary <int, Light_Source>
+        public static void write(this Dictionary<int, Tactile.Light_Source> dictionary, BinaryWriter writer)
+        {
+            writer.Write(dictionary.Count);
+            foreach (KeyValuePair<int, Tactile.Light_Source> pair in dictionary)
+            {
+                writer.Write(pair.Key);
+                pair.Value.write(writer);
+            }
+        }
+        public static void read(this Dictionary<int, Tactile.Light_Source> dictionary, BinaryReader reader)
+        {
+            dictionary.Clear();
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                int key = reader.ReadInt32();
+                Tactile.Light_Source value = new Tactile.Light_Source();
+                value.read(reader);
+                dictionary.Add(key, value);
+            }
+        }
+
+        // Dictionary <Vector2, Light_Source>
+        public static void write(this Dictionary<Vector2, Tactile.Light_Source> dictionary, BinaryWriter writer)
+        {
+            writer.Write(dictionary.Count);
+            foreach (KeyValuePair<Vector2, Tactile.Light_Source> pair in dictionary)
+            {
+                pair.Key.write(writer);
+                pair.Value.write(writer);
+            }
+        }
+
+        public static void read(this Dictionary<Vector2, Tactile.Light_Source> dictionary, BinaryReader reader)
+        {
+            dictionary.Clear();
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                Vector2 key = new Vector2();
+                key = key.read(reader);
+                Tactile.Light_Source value = new Tactile.Light_Source();
+                value.read(reader);
+                dictionary.Add(key, value);
+            }
+        }
+
     }
 }
 
