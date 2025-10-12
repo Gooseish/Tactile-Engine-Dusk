@@ -1364,10 +1364,10 @@ namespace Tactile
         protected int alpha_cost(Vector2 loc)
         {
             int cost = Global.data_terrains[Global.data_tilesets[Map_Data.GetTileset()].Terrain_Tags[
-                Map_Data.GetValue((int)loc.X, (int)loc.Y)]].Move_Costs[Global.game_state.weather][0];
+                Map_Data.GetValue((int)loc.X, (int)loc.Y)]].alpha_cost;
             if (cost == -1)
                 return 4;
-            return Math.Min(4, cost);
+            return Math.Min(7, cost);
             return 1;
         }
 

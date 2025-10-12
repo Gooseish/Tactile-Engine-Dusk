@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Xna.Framework.Content;
 using ArrayExtension;
 using ListExtension;
+using TactileLibrary.Config;
 
 namespace TactileLibrary
 {
@@ -137,6 +138,19 @@ namespace TactileLibrary
             Minimap_Group.write(output);
         }
         #endregion
+
+        public int alpha_cost
+        {
+            get
+            {
+                if (TerrainConfig.TERRAIN_ALPHA_COST.Keys.Contains(Id))
+                    return TerrainConfig.TERRAIN_ALPHA_COST[Id];
+                else if (!Fire_Through)
+                    return 7;
+                else
+                    return 1;
+            }
+        }
 
         #region ICloneable
         public override object Clone()
