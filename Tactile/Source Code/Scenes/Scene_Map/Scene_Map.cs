@@ -82,6 +82,7 @@ namespace Tactile
 
         protected Texture2D Lightmap;
         protected Texture2D Old_Lightmap;
+        protected Texture2D Current_Lightmap;
 
         #region Accessors
         public bool map_transition { get { return Map_Transition; } }
@@ -1271,6 +1272,8 @@ namespace Tactile
 
             if (Lighting_Transition_Timer > 0)
                 transition_lightmap(sprite_batch, device);
+            else
+                Current_Lightmap = Lightmap;
 
             #region Map and Idle Units
             // Base map
@@ -1671,7 +1674,7 @@ namespace Tactile
 #endif
                 }
             }
-            alpha_shader.Parameters["LightmapTexture"].SetValue(Lightmap);
+            alpha_shader.Parameters["LightmapTexture"].SetValue(Current_Lightmap);
             // Darken screen for spells if needed
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, alpha_shader);
@@ -1804,19 +1807,20 @@ namespace Tactile
                 sprite_batch.GraphicsDevice.SamplerStates[1] = SamplerState.LinearClamp;
                 if (lightmap_shader != null)
                 {
-                    lightmap_shader.CurrentTechnique = lightmap_shader.Techniques["Map_Lighting"];
+                    lightmap_shader.CurrentTechnique = lightmap_shader.Techniques["Transition_Lightmap"];
                     lightmap_shader.Parameters["LightmapTexture"].SetValue(Lightmap);
                     lightmap_shader.Parameters["Lightmap_Transition_Factor"].SetValue(Lighting_Transition_Factor);
                 }
             }
             device.SetRenderTarget(lightmap);
-            // Darken screen for spells if needed
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, lightmap_shader);
             sprite_batch.Draw(Old_Lightmap, Vector2.Zero, Color.White);
-
             sprite_batch.End();
 
+            device.SetRenderTarget(null);
+
+            Current_Lightmap = lightmap;
         }
 
         #region Draw Ranges
