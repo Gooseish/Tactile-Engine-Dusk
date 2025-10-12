@@ -17,6 +17,7 @@ using TactileVector2Extension;
 using TactileDictionaryExtension;
 using TactileListExtension;
 using TactileVersionExtension;
+using TactileColorExtension;
 
 namespace Tactile
 {
@@ -171,6 +172,14 @@ namespace Tactile
             writer.Write(Last_Added_Unit_Id);
 
             move_range_write(writer);
+
+            Light_Sources.write(writer);
+            Static_Light_Sources.write(writer);
+            Lighting_Cost_Map.write(writer);
+            Ally_Lighting.write(writer);
+            Class_Ally_Lighting.write(writer);
+            Ambient_Lighting.write(writer);
+            
         }
 
         public void read(BinaryReader reader)
@@ -323,6 +332,13 @@ namespace Tactile
             Last_Added_Unit_Id = reader.ReadInt32();
 
             move_range_read(reader);
+
+            Light_Sources.read(reader);
+            Static_Light_Sources.read(reader);
+            Lighting_Cost_Map.read(reader);
+            Ally_Lighting.read(reader);
+            Class_Ally_Lighting.read(reader);
+            Ambient_Lighting.read(reader);
         }
 
         public void load_suspend()
