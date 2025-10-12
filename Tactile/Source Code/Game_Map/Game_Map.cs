@@ -2143,7 +2143,7 @@ namespace Tactile
                             alpha_values[i] = lightmap_data[lightmap_data_index].A;
                             i++;
                         }
-                    if (alpha_values.Max() > 5)
+                    if (alpha_values.Max() > 10)
                         result.Add(new Vector2(x, y)/Constants.Map.ALPHA_GRANULARITY);
                 }
             return result;
