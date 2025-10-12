@@ -297,7 +297,7 @@ technique Ambient_Blend
 float4 transition_lightmap(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
 {
 	float4 Color = tex2D(TextureSampler, uv);
-	Color = lerp(Color, tex2D(LightmapTextureSampler, uv), Lightmap_Transition_Factor);
+	Color = lerp(tex2D(LightmapTextureSampler, uv), Color, Lightmap_Transition_Factor);
 	return Color;
 }
 

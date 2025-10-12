@@ -74,7 +74,7 @@ namespace Tactile
         protected Color[] Map_Alpha_Data;
         protected int Map_Alpha_Timer, Map_Alpha_Duration;
         protected int Lighting_Transition_Timer;
-        protected int Lighting_Transition_Duration = 100;
+        protected int Lighting_Transition_Duration = 50;
         protected float Lighting_Transition_Factor;
         protected int Suspend_Fade_Timer = 0;
 
@@ -380,7 +380,7 @@ namespace Tactile
             if (Lighting_Transition_Timer > 0)
             {
                 Lighting_Transition_Timer--;
-                Lighting_Transition_Factor = (float)(Lighting_Transition_Factor) / (float)(Lighting_Transition_Duration);
+                Lighting_Transition_Factor = (float)(Lighting_Transition_Timer) / (float)(Lighting_Transition_Duration);
             }
         }
         protected void update_map_alpha()
@@ -1813,6 +1813,7 @@ namespace Tactile
                 }
             }
             device.SetRenderTarget(lightmap);
+            device.Clear(Color.Transparent);
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, lightmap_shader);
             sprite_batch.Draw(Old_Lightmap, Vector2.Zero, Color.White);
