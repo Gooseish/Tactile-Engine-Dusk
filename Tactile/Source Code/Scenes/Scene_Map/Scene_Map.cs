@@ -1787,6 +1787,10 @@ namespace Tactile
 
             device.SetRenderTarget(lightmap[current_render_target]);
             device.Clear(Color.Transparent);
+
+            Target_Lightmap_Data = new Color[lightmap[current_render_target].Width * lightmap[current_render_target].Height];
+            lightmap[last_render_target].GetData(Target_Lightmap_Data);
+
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, ambient_blender);
             sprite_batch.Draw(lightmap[last_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
@@ -1794,9 +1798,6 @@ namespace Tactile
             device.SetRenderTarget(null);
 
             Target_Lightmap = lightmap[current_render_target];
-
-            Target_Lightmap_Data = new Color[Target_Lightmap.Width * Target_Lightmap.Height];
-            Target_Lightmap.GetData<Color>(Target_Lightmap_Data);
 
             lightmap[last_render_target].Dispose();
             Global.game_map.lightmap_needs_redrawing = false;

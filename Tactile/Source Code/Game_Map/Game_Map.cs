@@ -2118,7 +2118,7 @@ namespace Tactile
                     viewers.AddRange(Torch_Staves);
                     viewers.AddRange(VisionPoints);
 
-                    HashSet<Vector2> visibility = Pathfind.fow_sight_area(viewers);
+                    HashSet<Vector2> visibility = fow_sight_area_from_lightmap();
                     foreach (int team_id in group)
                         Fow_Visibility[team_id] = visibility;
                 }
@@ -2143,8 +2143,8 @@ namespace Tactile
                             alpha_values[i] = lightmap_data[lightmap_data_index].A;
                             i++;
                         }
-                    if (alpha_values.Max() > 40)
-                        result.Add(new Vector2(x, y));
+                    if (alpha_values.Max() > 5)
+                        result.Add(new Vector2(x, y)/Constants.Map.ALPHA_GRANULARITY);
                 }
             return result;
         }
