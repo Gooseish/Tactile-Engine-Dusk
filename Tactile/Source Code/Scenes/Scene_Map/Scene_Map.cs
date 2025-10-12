@@ -1348,6 +1348,7 @@ namespace Tactile
             if (map_shader != null)
             {
                 map_shader.CurrentTechnique = map_shader.Techniques["Map_Lighting"];
+                map_shader.Parameters["LightmapTexture"].SetValue(Current_Lightmap);
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
             sprite_batch.Draw(volatile_render_targets[current_render_target], Vector2.Zero, Color.White);
@@ -2008,6 +2009,7 @@ namespace Tactile
             if (map_shader != null)
             {
                 map_shader.CurrentTechnique = map_shader.Techniques["Map_Lighting"];
+                map_shader.Parameters["LightmapTexture"].SetValue(Current_Lightmap);
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
             sprite_batch.Draw(volatile_render_targets[current_render_target], Vector2.Zero, Color.White);
