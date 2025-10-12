@@ -1269,6 +1269,9 @@ namespace Tactile
             if (Global.game_map.lightmap_needs_redrawing)
                 draw_lightmap(sprite_batch, device);
 
+            if (Lighting_Transition_Timer > 0)
+                transition_lightmap(sprite_batch, device);
+
             #region Map and Idle Units
             // Base map
             draw_map(sprite_batch, device, cumulative_render_target, volatile_render_targets);
@@ -1757,7 +1760,6 @@ namespace Tactile
 
             current_render_index = 0;
             RenderTarget2D[] lightmap = new RenderTarget2D[2];
-            
 
             for (int n = 0; n < 2; n++)
                 lightmap[n] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
@@ -1786,8 +1788,35 @@ namespace Tactile
             device.SetRenderTarget(null);
 
             Lightmap = lightmap[current_render_target];
-            
+
+            lightmap[last_render_target].Dispose();
             Global.game_map.lightmap_needs_redrawing = false;
+        }
+
+        protected void transition_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
+        {
+            current_render_index = 0;
+            RenderTarget2D lightmap = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
+
+            Effect lightmap_shader = Global.effect_shader();
+            if (Current_Map_Alpha != null)
+            {
+                sprite_batch.GraphicsDevice.SamplerStates[1] = SamplerState.LinearClamp;
+                if (lightmap_shader != null)
+                {
+                    lightmap_shader.CurrentTechnique = lightmap_shader.Techniques["Map_Lighting"];
+                    lightmap_shader.Parameters["LightmapTexture"].SetValue(Lightmap);
+                    lightmap_shader.Parameters["Lightmap_Transition_Factor"].SetValue(Lighting_Transition_Factor);
+                }
+            }
+            device.SetRenderTarget(lightmap);
+            // Darken screen for spells if needed
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.PointClamp, null, null, lightmap_shader);
+            sprite_batch.Draw(Old_Lightmap, Vector2.Zero, Color.White);
+
+            sprite_batch.End();
+
         }
 
         #region Draw Ranges

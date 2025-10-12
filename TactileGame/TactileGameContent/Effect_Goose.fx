@@ -21,6 +21,7 @@ uniform float2 game_size;
 
 Texture2D LightmapTexture;
 float4 Ambient_Color;
+float Lightmap_Transition_Factor;
 
 sampler2D LightmapTextureSampler = sampler_state
 {
@@ -290,6 +291,21 @@ technique Ambient_Blend
 	pass Pass1
 	{
 		PixelShader = compile ps_2_0 ambient_blend();
+	}
+}
+
+float4 transition_lightmap(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
+{
+	float4 Color = tex2D(TextureSampler, uv);
+	Color = lerp(Color, tex2D(LightmapTextureSampler, uv), Lightmap_Transition_Factor);
+	return Color;
+}
+
+technique Transition_Lightmap
+{
+	pass Pass1
+	{
+		PixelShader = compile ps_2_0 transition_lightmap();
 	}
 }
 
