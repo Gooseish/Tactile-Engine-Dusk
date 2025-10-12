@@ -83,6 +83,7 @@ namespace Tactile
         private Color Ally_Lighting;
         private Dictionary<int, Color> Class_Ally_Lighting = new Dictionary<int, Color> { };
         private Color Ambient_Lighting = Color.White;
+        private Color[] Old_Lightmap;
         private Dictionary<int, List<Rectangle>>[] Team_Defend_Areas;
         private Dictionary<int, Vector2> Unit_Seek_Locs;
         private Dictionary<int, Dictionary<int, Vector2>> Team_Seek_Locs;
@@ -732,6 +733,12 @@ namespace Tactile
         public Dictionary<Vector2, Light_Source> static_light_sources
         {
             get { return Static_Light_Sources; }
+        }
+
+        public Color[] old_lightmap
+        {
+            get { return Old_Lightmap; }
+            set { Old_Lightmap = value; }
         }
 
         internal Dictionary<int, Vector2> unit_seek_locs { get { return Unit_Seek_Locs; } }
