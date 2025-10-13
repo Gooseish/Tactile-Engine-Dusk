@@ -106,7 +106,7 @@ namespace Tactile
             Vector2 temp_vector = centered_loc;
             for (int n = 0; n < number_of_steps; n++)
             {
-                byte brightness_cost = cost_map[(int)temp_vector.X, (int)temp_vector.Y];
+                byte brightness_cost = cost_map[(int)(temp_vector.X + step_vector.X), (int)(temp_vector.Y + step_vector.Y)];
                 if (brightness <= brightness_cost)
                     return 0;
                 brightness -= brightness_cost;

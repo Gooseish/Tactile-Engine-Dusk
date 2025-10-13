@@ -146,7 +146,7 @@ namespace TactileLibrary
                 if (TerrainConfig.TERRAIN_ALPHA_COST.Keys.Contains(Id))
                     return TerrainConfig.TERRAIN_ALPHA_COST[Id];
                 else if (!Fire_Through)
-                    return 7;
+                    return 50;
                 else
                     return 1;
             }

@@ -1374,7 +1374,8 @@ namespace Tactile
                 Map_Data.GetValue((int)loc.X, (int)loc.Y)]].alpha_cost;
             if (cost == -1)
                 return 4;
-            return Math.Min(7, cost);
+            //return Math.Min(7, cost);
+            return cost;
             return 1;
         }
 
@@ -2095,6 +2096,7 @@ namespace Tactile
                 for (int i = 0; i < Constants.Team.TEAM_GROUPS.Length; i++)
                 {
                     int[] group = Constants.Team.TEAM_GROUPS[i];
+                    /*
                     List<int> team = new List<int>();
                     foreach (int team_id in group)
                         team.AddRange(Teams[team_id]);
@@ -2117,6 +2119,7 @@ namespace Tactile
 
                     viewers.AddRange(Torch_Staves);
                     viewers.AddRange(VisionPoints);
+                    */
 
                     HashSet<Vector2> visibility = fow_sight_area_from_lightmap();
                     foreach (int team_id in group)
