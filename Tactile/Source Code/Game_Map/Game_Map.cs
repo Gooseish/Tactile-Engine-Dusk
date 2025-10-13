@@ -1434,9 +1434,9 @@ namespace Tactile
                             if (unit.is_ally)
                             {
                                 if (class_ally_lighting.ContainsKey(unit.actor.class_id))
-                                    light_source_check.Add(new Light_Source(Global.game_map.class_ally_lighting[unit.actor.class_id], new Vector2(x, y), Light_Source_Type.Unit));
+                                    light_source_check.Add(new Light_Source(Global.game_map.class_ally_lighting[unit.actor.class_id], new Vector2(x, y), Light_Source_Type.Unit, 0.5f));
                                 else
-                                    light_source_check.Add(new Light_Source(Global.game_map.ally_lighting, new Vector2(x, y), Light_Source_Type.Unit));
+                                    light_source_check.Add(new Light_Source(Global.game_map.ally_lighting, new Vector2(x, y), Light_Source_Type.Unit, 1f));
                             }
                                 
                         }    

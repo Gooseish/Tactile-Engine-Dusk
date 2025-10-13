@@ -27,6 +27,7 @@ namespace Tactile
         private Texture2D Lightmap_Contribution;
         private byte[,] Brightness_Map;
         private Light_Source_Type Type;
+        private double Penalty_Modifier;
 
         public Texture2D lightmap_contribution { get { return Lightmap_Contribution; } }
 
@@ -35,6 +36,7 @@ namespace Tactile
             Color.write(writer);
             Loc.write(writer);
             writer.Write((int)Type);
+            writer.Write(Penalty_Modifier);
 
             Brightness_Map.write(writer);
         }
@@ -43,6 +45,7 @@ namespace Tactile
             Color.read(reader);
             Loc.read(reader);
             Type = (Light_Source_Type)reader.ReadInt32();
+            Penalty_Modifier = reader.ReadDouble();
 
             Brightness_Map = Brightness_Map.read(reader);
             refresh_light_texture();
@@ -66,12 +69,14 @@ namespace Tactile
             Max_Distance = Color.A / Constants.Map.BASE_PIXEL_BRIGHTNESS_COST / Constants.Map.ALPHA_GRANULARITY;
         }
 
-        public Light_Source(Color color, Vector2 loc, Light_Source_Type type)
+        public Light_Source(Color color, Vector2 loc, Light_Source_Type type, float penalty_modifier)
         {
             Color = color;
             Loc = loc;
             Type = type;
+            Penalty_Modifier = penalty_modifier;
         }
+
         public Light_Source()
         {
 
@@ -109,7 +114,7 @@ namespace Tactile
                 byte brightness_cost = cost_map[(int)(temp_vector.X + step_vector.X), (int)(temp_vector.Y + step_vector.Y)];
                 if (brightness <= brightness_cost)
                     return 0;
-                brightness -= brightness_cost;
+                brightness -= (byte)(brightness_cost*Penalty_Modifier);
                 temp_vector += step_vector;
             }
             return brightness;
