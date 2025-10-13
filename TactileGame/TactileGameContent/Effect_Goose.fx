@@ -309,6 +309,31 @@ technique Transition_Lightmap
 	}
 }
 
+float4 blur(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
+{
+	float4 Color = 0.2*tex2D(TextureSampler, uv);
+	float unblurred_a = Color.a;
+	uv.x += 0.5/map_size.x;
+	Color += 0.2*tex2D(TextureSampler, uv);
+	uv.x -= 1/map_size.x;
+	Color += 0.2*tex2D(TextureSampler, uv);
+	uv.x += 0.5/map_size.x;
+	uv.y += 0.5/map_size.y;
+	Color += 0.2*tex2D(TextureSampler, uv);
+	uv.y -= 1/map_size.y;
+	Color += 0.2*tex2D(TextureSampler, uv);
+	
+	return Color;
+}
+
+technique Blur
+{
+	pass Pass1
+	{
+		PixelShader = compile ps_2_0 blur();
+	}
+}
+
 //-----------------------------------------------------------------------------
 // Mask
 //-----------------------------------------------------------------------------

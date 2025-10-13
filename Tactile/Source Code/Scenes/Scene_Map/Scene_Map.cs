@@ -1764,6 +1764,7 @@ namespace Tactile
             if (Global.game_map.width == 0)
                 return;
 
+            // Add contributions from each light source
             current_render_index = 0;
             RenderTarget2D[] lightmap = new RenderTarget2D[2];
 
@@ -1779,22 +1780,34 @@ namespace Tactile
             }
             sprite_batch.End();
 
-            Effect ambient_blender = Global.effect_shader();
-            ambient_blender.Parameters["Ambient_Color"].SetValue(Global.game_map.ambient_lighting.ToVector4());
-            ambient_blender.CurrentTechnique = ambient_blender.Techniques["Ambient_Blend"];
+            // Apply blur effect
+            Effect effect_shader = Global.effect_shader();
+            effect_shader.CurrentTechnique = effect_shader.Techniques["Blur"];
 
             next_render_target();
+            device.SetRenderTarget(lightmap[current_render_target]);
+            device.Clear(Color.Transparent);
 
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, effect_shader);
+            sprite_batch.Draw(lightmap[last_render_target], Vector2.Zero, Color.White);
+            sprite_batch.End();
+
+            // Add ambient lighting
+            effect_shader.Parameters["Ambient_Color"].SetValue(Global.game_map.ambient_lighting.ToVector4());
+            effect_shader.CurrentTechnique = effect_shader.Techniques["Ambient_Blend"];
+
+            next_render_target();
             device.SetRenderTarget(lightmap[current_render_target]);
             device.Clear(Color.Transparent);
 
             Target_Lightmap_Data = new Color[lightmap[current_render_target].Width * lightmap[current_render_target].Height];
             lightmap[last_render_target].GetData(Target_Lightmap_Data);
 
-            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, ambient_blender);
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, effect_shader);
             sprite_batch.Draw(lightmap[last_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
 
+            // Finish Process
             device.SetRenderTarget(null);
 
             Target_Lightmap = lightmap[current_render_target];
