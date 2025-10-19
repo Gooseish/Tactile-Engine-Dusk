@@ -2868,6 +2868,11 @@ namespace Tactile
                     Global.game_map.static_light_sources.Remove(loc);
                     break;
                 #endregion
+                case "Use Lightmap FoW":
+                    #region Use Lightmap FoW
+                    Global.game_map.fow_uses_lightmap = process_bool(command.Value[1]);
+                    break;
+                #endregion
 #if DEBUG
                 default:
                     throw event_case_missing_exception(command.Value[0], command.Key);

@@ -57,6 +57,7 @@ namespace Tactile
         private int[,] Unit_Locations = new int[,] { };
         internal bool UnitsHidden { get; private set; }
         private bool Fow;
+        private bool FoW_Uses_Lightmap;
         private int Vision_Range;
         private Tone Fow_Color = new Tone(40, 40, 40, 72);
         private bool Fow_Updated = false;
@@ -180,6 +181,7 @@ namespace Tactile
             Ally_Lighting.write(writer);
             Class_Ally_Lighting.write(writer);
             Ambient_Lighting.write(writer);
+            writer.Write(FoW_Uses_Lightmap);
             
         }
 
@@ -340,6 +342,7 @@ namespace Tactile
             Ally_Lighting.read(reader);
             Class_Ally_Lighting.read(reader);
             Ambient_Lighting.read(reader);
+            FoW_Uses_Lightmap = reader.ReadBoolean();
         }
 
         public void load_suspend()
@@ -656,6 +659,12 @@ namespace Tactile
                 if (!Refresh_Move_Ranges)
                     update_enemy_range();
             }
+        }
+
+        public bool fow_uses_lightmap
+        {
+            get { return FoW_Uses_Lightmap; }
+            set { FoW_Uses_Lightmap = value; }
         }
 
         public int vision_range
@@ -2095,33 +2104,41 @@ namespace Tactile
                 // Calculate the sight ranges by team groups
                 for (int i = 0; i < Constants.Team.TEAM_GROUPS.Length; i++)
                 {
+                    HashSet<Vector2> visibility;
                     int[] group = Constants.Team.TEAM_GROUPS[i];
-                    /*
-                    List<int> team = new List<int>();
-                    foreach (int team_id in group)
-                        team.AddRange(Teams[team_id]);
-                    // Remove units that are rescued
-                    int j = 0;
-                    while (j < team.Count)
+                    if (FoW_Uses_Lightmap)
                     {
-                        if (this.units[team[j]].is_rescued)
-                            team.RemoveAt(j);
-                        else
-                            j++;
+                        visibility = fow_sight_area_from_lightmap();
                     }
-                    // Calculate visible area
-                    List<Fow_View_Object> viewers = new List<Fow_View_Object>();
-                    for (j = 0; j < team.Count; j++)
+                    else
                     {
-                        Game_Unit unit = this.units[team[j]];
-                        viewers.Add(new Fow_View_Object(unit));
+                        List<int> team = new List<int>();
+                        foreach (int team_id in group)
+                            team.AddRange(Teams[team_id]);
+                        // Remove units that are rescued
+                        int j = 0;
+                        while (j < team.Count)
+                        {
+                            if (this.units[team[j]].is_rescued)
+                                team.RemoveAt(j);
+                            else
+                                j++;
+                        }
+                        // Calculate visible area
+                        List<Fow_View_Object> viewers = new List<Fow_View_Object>();
+                        for (j = 0; j < team.Count; j++)
+                        {
+                            Game_Unit unit = this.units[team[j]];
+                            viewers.Add(new Fow_View_Object(unit));
+                        }
+
+                        viewers.AddRange(Torch_Staves);
+                        viewers.AddRange(VisionPoints);
+
+
+                        visibility = Pathfind.fow_sight_area(viewers);
                     }
-
-                    viewers.AddRange(Torch_Staves);
-                    viewers.AddRange(VisionPoints);
-                    */
-
-                    HashSet<Vector2> visibility = fow_sight_area_from_lightmap();
+                    
                     foreach (int team_id in group)
                         Fow_Visibility[team_id] = visibility;
                 }
