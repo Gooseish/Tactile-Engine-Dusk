@@ -18,6 +18,34 @@ namespace Tactile
         Static,
         Unit
     }
+
+    public class Light_Data
+    {
+        public Color color;
+        public double penalty_modifier;
+
+        public void write(BinaryWriter writer)
+        {
+            color.write(writer);
+            writer.Write(penalty_modifier);
+        }
+        public void read(BinaryReader reader)
+        {
+            color.read(reader);
+            penalty_modifier = reader.ReadDouble();
+        }
+
+        public Light_Data(Color Color, double Penalty_Modifier)
+        {
+            color = Color;
+            penalty_modifier = Penalty_Modifier;
+        }
+        public Light_Data()
+        {
+            color = Color.Transparent;
+            penalty_modifier = 1.0d;
+        }
+    }
     public class Light_Source
     {
         private Color @Color;
@@ -69,12 +97,12 @@ namespace Tactile
             Max_Distance = Color.A / Constants.Map.BASE_PIXEL_BRIGHTNESS_COST / Constants.Map.ALPHA_GRANULARITY;
         }
 
-        public Light_Source(Color color, Vector2 loc, Light_Source_Type type, float penalty_modifier)
+        public Light_Source(Light_Data light_data, Vector2 loc, Light_Source_Type type)
         {
-            Color = color;
+            Color = light_data.color;
             Loc = loc;
             Type = type;
-            Penalty_Modifier = penalty_modifier;
+            Penalty_Modifier = light_data.penalty_modifier;
         }
 
         public Light_Source()

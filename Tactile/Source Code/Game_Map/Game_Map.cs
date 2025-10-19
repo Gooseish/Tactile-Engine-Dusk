@@ -80,8 +80,8 @@ namespace Tactile
         private byte[,] Lighting_Cost_Map;
         private int Min_Alpha = 0;
         private int Ally_Alpha;
-        private Color Ally_Lighting;
-        private Dictionary<int, Color> Class_Ally_Lighting = new Dictionary<int, Color> { };
+        private Light_Data Ally_Lighting = new Light_Data();
+        private Dictionary<int, Light_Data> Class_Ally_Lighting = new Dictionary<int, Light_Data> { };
         private Color Ambient_Lighting = Color.White;
         private Color[] Old_Lightmap;
         private Dictionary<int, List<Rectangle>>[] Team_Defend_Areas;
@@ -716,12 +716,12 @@ namespace Tactile
             }
         }
 
-        public Color ally_lighting
+        public Light_Data ally_lighting
         {
             get { return Ally_Lighting; }
             set { Ally_Lighting = value; }
         }
-        public Dictionary<int, Color> class_ally_lighting
+        public Dictionary<int, Light_Data> class_ally_lighting
         {
             get { return Class_Ally_Lighting; }
         }
@@ -1424,7 +1424,7 @@ namespace Tactile
 
             // Get all light sources on the board
             List<Light_Source> light_source_check = new List<Light_Source> { };
-            if (Global.game_map.ally_lighting != Color.Transparent)
+            if (Global.game_map.ally_lighting.color != Color.Transparent)
             {
                 for (int y = 0; y < this.height; y++)
                     for (int x = 0; x < this.width; x++)
@@ -1434,9 +1434,9 @@ namespace Tactile
                             if (unit.is_ally)
                             {
                                 if (class_ally_lighting.ContainsKey(unit.actor.class_id))
-                                    light_source_check.Add(new Light_Source(Global.game_map.class_ally_lighting[unit.actor.class_id], new Vector2(x, y), Light_Source_Type.Unit, 0.5f));
+                                    light_source_check.Add(new Light_Source(Global.game_map.class_ally_lighting[unit.actor.class_id], new Vector2(x, y), Light_Source_Type.Unit));
                                 else
-                                    light_source_check.Add(new Light_Source(Global.game_map.ally_lighting, new Vector2(x, y), Light_Source_Type.Unit, 1f));
+                                    light_source_check.Add(new Light_Source(Global.game_map.ally_lighting, new Vector2(x, y), Light_Source_Type.Unit));
                             }
                                 
                         }    
