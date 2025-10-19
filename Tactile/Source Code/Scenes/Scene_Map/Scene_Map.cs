@@ -191,6 +191,8 @@ namespace Tactile
             // Cache textures that will be used by the map, but not immediately
             Battle_Transition = new Battle_Transition_Effect(Global.Content.Load<Texture2D>(@"Graphics/Pictures/Turn_Change"));
             create_info_windows();
+
+            Global.game_map.lightmap_needs_redrawing = true;
         }
 
         protected override void clear_graphic_objects()
