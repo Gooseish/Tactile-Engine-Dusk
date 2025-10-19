@@ -76,8 +76,7 @@ namespace Tactile.Rendering
 
         private void on_device_reset(object sender, EventArgs e)
         {
-            if (Global.game_map != null)
-                Global.game_map.lightmap_needs_redrawing = true;
+
         }
 
         private void SetInitialResolution()

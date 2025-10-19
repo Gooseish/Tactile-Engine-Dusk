@@ -1753,7 +1753,7 @@ namespace Tactile
         {
             if (Target_Lightmap != null)
             {
-                Old_Lightmap = new Texture2D(device, Target_Lightmap.Width, Target_Lightmap.Height);
+                Old_Lightmap = (Global.Content as ContentManagers.ThreadSafeContentManager).texture_from_size(Target_Lightmap.Width, Target_Lightmap.Height);
                 Color[] Old_Lightmap_Data = new Color[Target_Lightmap.Width * Target_Lightmap.Height];
                 Target_Lightmap.GetData<Color>(Old_Lightmap_Data);
                 Old_Lightmap.SetData<Color>(Old_Lightmap_Data);
@@ -1769,7 +1769,12 @@ namespace Tactile
             RenderTarget2D[] lightmap = new RenderTarget2D[2];
 
             for (int n = 0; n < 2; n++)
-                lightmap[n] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
+                lightmap[n] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY,
+                    false,
+                    SurfaceFormat.Color,
+                    DepthFormat.Depth24,
+                    0,
+                    RenderTargetUsage.PreserveContents);
 
             device.SetRenderTarget(lightmap[current_render_target]);
             device.Clear(Color.Transparent);
@@ -1810,9 +1815,14 @@ namespace Tactile
             // Finish Process
             device.SetRenderTarget(null);
 
-            Target_Lightmap = lightmap[current_render_target];
+            Target_Lightmap = (Global.Content as ContentManagers.ThreadSafeContentManager).texture_from_size(lightmap[current_render_target].Width, lightmap[current_render_target].Height);
+            Color[] Temp_Lightmap_Data = new Color[Target_Lightmap.Width * Target_Lightmap.Height];
+            lightmap[current_render_target].GetData<Color>(Temp_Lightmap_Data);
+            Target_Lightmap.SetData<Color>(Target_Lightmap_Data);
+
 
             lightmap[last_render_target].Dispose();
+            lightmap[current_render_target].Dispose();
             Global.game_map.lightmap_needs_redrawing = false;
 
             if (Global.game_map.fow_uses_lightmap)
