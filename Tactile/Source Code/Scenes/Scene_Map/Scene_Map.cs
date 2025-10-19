@@ -81,12 +81,10 @@ namespace Tactile
         protected int TILE_SIZE { get { return Constants.Map.TILE_SIZE; } }
 
         protected Texture2D Target_Lightmap;
-        protected Color[] Target_Lightmap_Data;
         protected Texture2D Old_Lightmap;
         protected Texture2D Current_Lightmap;
 
         #region Accessors
-        public Color[] target_lightmap_data { get { return Target_Lightmap_Data; } }
         public bool map_transition { get { return Map_Transition; } }
         public bool map_transition_ready { get { return Map_Transition && Transition_Timer < 0; } }
         public bool map_transition_running { get { return Black_Screen_Time > 0 || (!Map_Transition && Transition_Timer > 0); } }
@@ -1805,8 +1803,9 @@ namespace Tactile
             device.SetRenderTarget(lightmap[current_render_target]);
             device.Clear(Color.Transparent);
 
-            Target_Lightmap_Data = new Color[lightmap[current_render_target].Width * lightmap[current_render_target].Height];
-            lightmap[last_render_target].GetData(Target_Lightmap_Data);
+            Color[] FoW_Lightmap_Data = new Color[lightmap[current_render_target].Width * lightmap[current_render_target].Height];
+            lightmap[last_render_target].GetData(FoW_Lightmap_Data);
+            Global.game_map.set_FoW_lightmap(FoW_Lightmap_Data);
 
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, effect_shader);
             sprite_batch.Draw(lightmap[last_render_target], Vector2.Zero, Color.White);
@@ -1816,8 +1815,8 @@ namespace Tactile
             device.SetRenderTarget(null);
 
             Target_Lightmap = (Global.Content as ContentManagers.ThreadSafeContentManager).texture_from_size(lightmap[current_render_target].Width, lightmap[current_render_target].Height);
-            Color[] Temp_Lightmap_Data = new Color[Target_Lightmap.Width * Target_Lightmap.Height];
-            lightmap[current_render_target].GetData<Color>(Temp_Lightmap_Data);
+            Color[] Target_Lightmap_Data = new Color[Target_Lightmap.Width * Target_Lightmap.Height];
+            lightmap[current_render_target].GetData<Color>(Target_Lightmap_Data);
             Target_Lightmap.SetData<Color>(Target_Lightmap_Data);
 
 

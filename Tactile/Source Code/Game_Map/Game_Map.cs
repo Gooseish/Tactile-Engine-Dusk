@@ -84,7 +84,7 @@ namespace Tactile
         private Light_Data Ally_Lighting = new Light_Data();
         private Dictionary<int, Light_Data> Class_Ally_Lighting = new Dictionary<int, Light_Data> { };
         private Color Ambient_Lighting = Color.White;
-        private Color[] Old_Lightmap;
+        private Color[] FoW_Lightmap_Data;
         private Dictionary<int, List<Rectangle>>[] Team_Defend_Areas;
         private Dictionary<int, Vector2> Unit_Seek_Locs;
         private Dictionary<int, Dictionary<int, Vector2>> Team_Seek_Locs;
@@ -742,12 +742,6 @@ namespace Tactile
         public Dictionary<Vector2, Light_Source> static_light_sources
         {
             get { return Static_Light_Sources; }
-        }
-
-        public Color[] old_lightmap
-        {
-            get { return Old_Lightmap; }
-            set { Old_Lightmap = value; }
         }
 
         internal Dictionary<int, Vector2> unit_seek_locs { get { return Unit_Seek_Locs; } }
@@ -2149,8 +2143,6 @@ namespace Tactile
         {
             HashSet<Vector2> result = new HashSet<Vector2>{ };
 
-            Color[] lightmap_data = (Global.scene as Scene_Map).target_lightmap_data;
-
             for (int x = 0; x < this.width*Constants.Map.ALPHA_GRANULARITY; x += Constants.Map.ALPHA_GRANULARITY)
                 for (int y = 0; y < this.height * Constants.Map.ALPHA_GRANULARITY; y += Constants.Map.ALPHA_GRANULARITY)
                 {
@@ -2160,13 +2152,17 @@ namespace Tactile
                         for (int n = 0; n < Constants.Map.ALPHA_GRANULARITY; n++)
                         {
                             int lightmap_data_index = (x + m) + (y + n) * this.width * Constants.Map.ALPHA_GRANULARITY;
-                            alpha_values[i] = lightmap_data[lightmap_data_index].A;
+                            alpha_values[i] = FoW_Lightmap_Data[lightmap_data_index].A;
                             i++;
                         }
                     if (alpha_values.Max() > 10)
                         result.Add(new Vector2(x, y)/Constants.Map.ALPHA_GRANULARITY);
                 }
             return result;
+        }
+        public void set_FoW_lightmap(Color[] value)
+        {
+            FoW_Lightmap_Data = value;
         }
 
         protected bool test_unit_move_range_update(Game_Unit unit)
