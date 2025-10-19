@@ -1827,7 +1827,7 @@ namespace Tactile
             Global.game_map.lightmap_needs_redrawing = false;
 
             if (Global.game_map.fow_uses_lightmap)
-                Global.game_map.update_fow();
+                Global.game_map.refresh_move_ranges();
         }
 
         protected void transition_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
