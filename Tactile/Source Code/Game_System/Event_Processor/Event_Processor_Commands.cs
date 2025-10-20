@@ -2878,16 +2878,16 @@ namespace Tactile
                     g = (byte)process_number(command.Value[2]);
                     b = (byte)process_number(command.Value[3]);
                     a = (byte)process_number(command.Value[4]);
-                    int id = (int)process_number(command.Value[5]);
+                    int class_id = (int)process_number(command.Value[5]);
 
 
                     if (command.Value.Length > 6)
                     {
                         double penalty_modifier = (double)process_number(command.Value[6])/100d;
-                        Global.game_map.class_ally_lighting[id] = new Light_Data(new Color(r, g, b, a), penalty_modifier);
+                        Global.game_map.class_ally_lighting[class_id] = new Light_Data(new Color(r, g, b, a), penalty_modifier);
                     }
                     else
-                        Global.game_map.class_ally_lighting[id] = new Light_Data(new Color(r, g, b, a), 1.0d);
+                        Global.game_map.class_ally_lighting[class_id] = new Light_Data(new Color(r, g, b, a), 1.0d);
                     break;
                 #endregion
                 case "Set Ambient Lighting":
