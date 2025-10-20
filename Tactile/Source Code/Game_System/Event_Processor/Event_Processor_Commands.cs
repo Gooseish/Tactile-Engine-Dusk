@@ -2841,6 +2841,96 @@ namespace Tactile
                     #region Turnwheel Charges; set number of charges for turnwheel
                     // Value[1] = number of charges
                     Global.turnwheel.charges = process_number(command.Value[1]);
+					break;
+				#endregion
+                case "Set Ally Lighting":
+                    #region Set Ally Lighting; Set color and brightness of allies for the ray march lighting system
+                    // Value[1] = r
+                    // Value[2] = g
+                    // Value[3] = b
+                    // Value[4] = a
+                    // Value[5] = penalty modifier
+                    byte r = (byte)process_number(command.Value[1]);
+                    byte g = (byte)process_number(command.Value[2]);
+                    byte b = (byte)process_number(command.Value[3]);
+                    byte a = (byte)process_number(command.Value[4]);
+                    
+
+                    if (command.Value.Length > 5)
+                    {
+                        double penalty_modifier = (double)process_number(command.Value[5])/100d;
+                        //Global.game_map.class_ally_lighting[id] = new Light_Data(new Color(r, g, b, a), 0.5f);
+                        Global.game_map.ally_lighting = new Light_Data(new Color(r, g, b, a), penalty_modifier);
+                    }
+                    else
+                        Global.game_map.ally_lighting = new Light_Data(new Color(r, g, b, a), 1.0d);
+                    break;
+                #endregion
+                case "Set Class Lighting":
+                    #region Set Class Lighting; Set color and brightness of specific ally classes for the ray march lighting system
+                    // Value[1] = r
+                    // Value[2] = g
+                    // Value[3] = b
+                    // Value[4] = a
+                    // Value[5] = Class ID
+                    // Value[6] = penalty modifier
+                    r = (byte)process_number(command.Value[1]);
+                    g = (byte)process_number(command.Value[2]);
+                    b = (byte)process_number(command.Value[3]);
+                    a = (byte)process_number(command.Value[4]);
+                    int id = (int)process_number(command.Value[5]);
+
+
+                    if (command.Value.Length > 6)
+                    {
+                        double penalty_modifier = (double)process_number(command.Value[6])/100d;
+                        Global.game_map.class_ally_lighting[id] = new Light_Data(new Color(r, g, b, a), penalty_modifier);
+                    }
+                    else
+                        Global.game_map.class_ally_lighting[id] = new Light_Data(new Color(r, g, b, a), 1.0d);
+                    break;
+                #endregion
+                case "Set Ambient Lighting":
+                    #region Set Ambient Lighting
+                    // Value[1] = r
+                    // Value[2] = g
+                    // Value[3] = b
+                    // Value[4] = a
+                    r = (byte)process_number(command.Value[1]);
+                    g = (byte)process_number(command.Value[2]);
+                    b = (byte)process_number(command.Value[3]);
+                    a = (byte)process_number(command.Value[4]);
+                    Global.game_map.ambient_lighting = new Color(r, g, b, a);
+                    Global.game_map.lightmap_needs_redrawing = true;
+                    break;
+                #endregion
+                case "Add Static Light Source":
+                    #region Add Static Light Source
+                    // Value[1] = x
+                    // Value[2] = y
+                    // Value[3] = r
+                    // Value[4] = g
+                    // Value[5] = b
+                    // Value[6] = a
+                    Vector2 loc = new Vector2(process_number(command.Value[1]), process_number(command.Value[2]));
+                    r = (byte)process_number(command.Value[3]);
+                    g = (byte)process_number(command.Value[4]);
+                    b = (byte)process_number(command.Value[5]);
+                    a = (byte)process_number(command.Value[6]);
+                    Global.game_map.static_light_sources[loc] = new Light_Source(new Light_Data(new Color(r, g, b, a), 1.0d), loc, Light_Source_Type.Static);
+                    break;
+                #endregion
+                case "Remove Static Light Source":
+                    #region Remove Static Light Source
+                    // Value[1] = x
+                    // Value[2] = y
+                    loc = new Vector2(process_number(command.Value[1]), process_number(command.Value[2]));
+                    Global.game_map.static_light_sources.Remove(loc);
+                    break;
+                #endregion
+                case "Use Lightmap FoW":
+                    #region Use Lightmap FoW
+                    Global.game_map.fow_uses_lightmap = process_bool(command.Value[1]);
                     break;
                 #endregion
 #if DEBUG

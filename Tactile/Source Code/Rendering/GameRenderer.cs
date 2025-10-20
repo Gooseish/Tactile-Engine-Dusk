@@ -68,9 +68,15 @@ namespace Tactile.Rendering
         {
             Fullscreen = fullscreen;
             graphics = new GraphicsDeviceManager(game);
+            graphics.DeviceReset += on_device_reset;
             SetInitialResolution();
 
             camera = new Camera(WindowWidth, WindowHeight, Vector2.Zero);
+        }
+
+        private void on_device_reset(object sender, EventArgs e)
+        {
+
         }
 
         private void SetInitialResolution()

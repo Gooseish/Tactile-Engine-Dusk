@@ -17,6 +17,7 @@ using TactileVector2Extension;
 using TactileDictionaryExtension;
 using TactileListExtension;
 using TactileVersionExtension;
+using TactileColorExtension;
 
 namespace Tactile
 {
@@ -56,6 +57,7 @@ namespace Tactile
         private int[,] Unit_Locations = new int[,] { };
         internal bool UnitsHidden { get; private set; }
         private bool Fow;
+        private bool FoW_Uses_Lightmap;
         private int Vision_Range;
         private Tone Fow_Color = new Tone(40, 40, 40, 72);
         private bool Fow_Updated = false;
@@ -72,9 +74,17 @@ namespace Tactile
         private HashSet<Vector2> Seized_Points = new HashSet<Vector2>();
         private List<Tuple<Rectangle, string>> Area_Background = new List<Tuple<Rectangle, string>>();
         private int Grid_Opacity = 32;
-        private List<Vector2>[] Light_Sources = new List<Vector2>[0];
+        private List<Vector2>[] Light_Sources_Oldcode = new List<Vector2>[0];
+        private List<Light_Source> Light_Sources = new List<Light_Source> { };
+        private Dictionary<Vector2, Light_Source> Static_Light_Sources = new Dictionary<Vector2, Light_Source> { };
+        public bool lightmap_needs_redrawing = true;
+        private byte[,] Lighting_Cost_Map;
         private int Min_Alpha = 0;
         private int Ally_Alpha;
+        private Light_Data Ally_Lighting = new Light_Data();
+        private Dictionary<int, Light_Data> Class_Ally_Lighting = new Dictionary<int, Light_Data> { };
+        private Color Ambient_Lighting = Color.White;
+        private Color[] FoW_Lightmap_Data;
         private Dictionary<int, List<Rectangle>>[] Team_Defend_Areas;
         private Dictionary<int, Vector2> Unit_Seek_Locs;
         private Dictionary<int, Dictionary<int, Vector2>> Team_Seek_Locs;
@@ -152,7 +162,7 @@ namespace Tactile
             Seized_Points.write(writer);
             Area_Background.write(writer);
             writer.Write(Grid_Opacity);
-            Light_Sources.write(writer);
+            Light_Sources_Oldcode.write(writer);
             writer.Write(Min_Alpha);
             writer.Write(Ally_Alpha);
             Team_Defend_Areas.write(writer);
@@ -164,6 +174,15 @@ namespace Tactile
             writer.Write(Last_Added_Unit_Id);
 
             move_range_write(writer);
+
+            Light_Sources.write(writer);
+            Static_Light_Sources.write(writer);
+            Lighting_Cost_Map.write(writer);
+            Ally_Lighting.write(writer);
+            Class_Ally_Lighting.write(writer);
+            Ambient_Lighting.write(writer);
+            writer.Write(FoW_Uses_Lightmap);
+            
         }
 
         public void read(BinaryReader reader)
@@ -297,7 +316,7 @@ namespace Tactile
             Seized_Points.read(reader);
             Area_Background.read(reader);
             Grid_Opacity = reader.ReadInt32();
-            Light_Sources = Light_Sources.read(reader);
+            Light_Sources_Oldcode = Light_Sources_Oldcode.read(reader);
             refresh_alpha();
             Min_Alpha = reader.ReadInt32();
             Ally_Alpha = reader.ReadInt32();
@@ -316,6 +335,14 @@ namespace Tactile
             Last_Added_Unit_Id = reader.ReadInt32();
 
             move_range_read(reader);
+
+            Light_Sources.read(reader);
+            Static_Light_Sources.read(reader);
+            Lighting_Cost_Map.read(reader);
+            Ally_Lighting.read(reader);
+            Class_Ally_Lighting.read(reader);
+            Ambient_Lighting.read(reader);
+            FoW_Uses_Lightmap = reader.ReadBoolean();
         }
 
         public void load_suspend()
@@ -660,6 +687,12 @@ namespace Tactile
             }
         }
 
+        public bool fow_uses_lightmap
+        {
+            get { return FoW_Uses_Lightmap; }
+            set { FoW_Uses_Lightmap = value; }
+        }
+
         public int vision_range
         {
             get { return Vision_Range; }
@@ -718,6 +751,25 @@ namespace Tactile
             }
         }
 
+        public Light_Data ally_lighting
+        {
+            get { return Ally_Lighting; }
+            set { Ally_Lighting = value; }
+        }
+        public Dictionary<int, Light_Data> class_ally_lighting
+        {
+            get { return Class_Ally_Lighting; }
+        }
+        public Color ambient_lighting
+        {
+            get { return Ambient_Lighting; }
+            set { Ambient_Lighting = value; }
+        }
+        public Dictionary<Vector2, Light_Source> static_light_sources
+        {
+            get { return Static_Light_Sources; }
+        }
+
         internal Dictionary<int, Vector2> unit_seek_locs { get { return Unit_Seek_Locs; } }
         internal Dictionary<int, Dictionary<int, Vector2>> team_seek_locs { get { return Team_Seek_Locs; } }
         internal Dictionary<int, int> unitSeekTargets { get { return UnitSeekTargets; } }
@@ -727,6 +779,11 @@ namespace Tactile
         public bool icons_visible { get { return rescue_anim_timer < Config.RESCUE_VISIBLE_TIME; } }
         public float icon_timer { get { return rescue_anim_timer / (float)Config.RESCUE_TIME ; } }
         public int icon_loops { get { return rescue_anim_loops; } }
+
+        public List<Light_Source> light_sources
+        {
+            get { return Light_Sources; }
+        }
         #endregion
 
         public Game_Map()
@@ -914,9 +971,9 @@ namespace Tactile
             Window_Minimap.clear();
             UnitsHidden = false;
 
-            Light_Sources = new List<Vector2>[Constants.Map.ALPHA_MAX];
-            for(int i = 0; i < Light_Sources.Length; i++)
-                Light_Sources[i] = new List<Vector2>();
+            Light_Sources_Oldcode = new List<Vector2>[Constants.Map.ALPHA_MAX];
+            for(int i = 0; i < Light_Sources_Oldcode.Length; i++)
+                Light_Sources_Oldcode[i] = new List<Vector2>();
             Min_Alpha = 255;
             Ally_Alpha = -1;
             refresh_alpha();
@@ -1248,6 +1305,7 @@ namespace Tactile
         }
         public void refresh_alpha(int time)
         {
+			refresh_lighting();
             set_map_alpha();
             if (get_scene_map() != null)
                 get_scene_map().set_map_alpha_texture(Tile_Alpha, time);
@@ -1264,12 +1322,12 @@ namespace Tactile
                 return;
             }
             Dictionary<float, List<Vector2>> light_sources = new Dictionary<float, List<Vector2>>();
-            List<Vector2>[] sources_with_units = new List<Vector2>[Light_Sources.Length];
+            List<Vector2>[] sources_with_units = new List<Vector2>[Light_Sources_Oldcode.Length];
 
             for (int i = 0; i < sources_with_units.Length; i++)
             {
                 sources_with_units[i] = new List<Vector2>();
-                sources_with_units[i].AddRange(Light_Sources[i]);
+                sources_with_units[i].AddRange(Light_Sources_Oldcode[i]);
             }
             if (Ally_Alpha >= 0)
                 for (int y = 0; y < this.height; y++)
@@ -1336,22 +1394,23 @@ namespace Tactile
         protected int alpha_cost(Vector2 loc)
         {
             int cost = Global.data_terrains[Global.data_tilesets[Map_Data.GetTileset()].Terrain_Tags[
-                Map_Data.GetValue((int)loc.X, (int)loc.Y)]].Move_Costs[Global.game_state.weather][0];
+                Map_Data.GetValue((int)loc.X, (int)loc.Y)]].alpha_cost;
             if (cost == -1)
                 return 4;
-            return Math.Min(4, cost);
+            //return Math.Min(7, cost);
+            return cost;
             return 1;
         }
 
         public void add_alpha_source(Vector2 loc, int value)
         {
-            Light_Sources[value].Add(loc);
+            Light_Sources_Oldcode[value].Add(loc);
         }
 
         public void clear_alpha()
         {
-            for (int i = 0; i < Light_Sources.Length; i++)
-                Light_Sources[i].Clear();
+            for (int i = 0; i < Light_Sources_Oldcode.Length; i++)
+                Light_Sources_Oldcode[i].Clear();
         }
 
         public Color get_unit_tint(Vector2 loc)
@@ -1375,7 +1434,120 @@ namespace Tactile
             return new Color(alpha, alpha, alpha, 255);
         }
         #endregion
+        #region Lighting
 
+        public void refresh_lighting()
+        {
+            List<Vector2> changed_tiles = set_cost_map();
+            update_light_sources(changed_tiles);
+        }
+        public void update_light_sources(List<Vector2> changed_tiles)
+        {
+            List<Light_Source> result = new List<Light_Source> { };
+
+            // Get all light sources on the board
+            List<Light_Source> light_source_check = new List<Light_Source> { };
+            if (Global.game_map.ally_lighting.color != Color.Transparent)
+            {
+                for (int y = 0; y < this.height; y++)
+                    for (int x = 0; x < this.width; x++)
+                        if (get_unit(new Vector2(x, y)) != null) //Multi
+                        {
+                            Game_Unit unit = get_unit(new Vector2(x, y));
+                            if (unit.is_ally)
+                            {
+                                if (class_ally_lighting.ContainsKey(unit.actor.class_id))
+                                    light_source_check.Add(new Light_Source(Global.game_map.class_ally_lighting[unit.actor.class_id], new Vector2(x, y), Light_Source_Type.Unit));
+                                else
+                                    light_source_check.Add(new Light_Source(Global.game_map.ally_lighting, new Vector2(x, y), Light_Source_Type.Unit));
+                            }
+                                
+                        }    
+                            
+            }
+            light_source_check.AddRange(Static_Light_Sources.Values);
+
+            // Check which light sources have been added or removed
+            foreach (Light_Source old_light_source in Light_Sources)
+            {
+                int n = 0;
+                foreach (Light_Source new_light_source in light_source_check)
+                {
+                    if (old_light_source.is_equivalent(new_light_source))
+                    {
+                        result.Add(old_light_source);   // Keep old light sources that are still in use
+                        break;
+                    }
+                    n++;
+                }
+                if (n != light_source_check.Count()) // True only if the light source was confirmed to be unchanged
+                    light_source_check.RemoveAt(n);
+                else
+                    lightmap_needs_redrawing = true;
+            }
+
+            // Recalculate ray march for any light source near a changed tile
+            foreach (Light_Source light_source in result)
+            {
+                light_source.set_max_distance();
+                foreach(Vector2 changed_tile_loc in changed_tiles)
+                {
+                    if (Vector2.Distance(light_source.loc, changed_tile_loc) < light_source.max_distance)
+                    {
+                        light_source.calculate_lightmap(Lighting_Cost_Map);
+                        break;
+                    }
+                }
+            }
+
+            // Calculate ray march for new light sources
+            foreach (Light_Source light_source in light_source_check)
+            {
+                light_source.calculate_lightmap(Lighting_Cost_Map);
+                result.Add(light_source);
+                lightmap_needs_redrawing = true;
+            }
+
+            Light_Sources = result;
+        }
+        public List<Vector2> set_cost_map()
+        {
+            byte[,] new_cost_map = new byte[this.width * Constants.Map.ALPHA_GRANULARITY, this.height * Constants.Map.ALPHA_GRANULARITY];
+
+            if (Lighting_Cost_Map == null || Lighting_Cost_Map.GetLength(0) != new_cost_map.GetLength(0) || Lighting_Cost_Map.GetLength(1) != new_cost_map.GetLength(1))
+                Lighting_Cost_Map = new byte[this.width * Constants.Map.ALPHA_GRANULARITY, this.height * Constants.Map.ALPHA_GRANULARITY];
+
+            
+
+            List<Vector2> changed_tiles = new List<Vector2> { };
+            
+            
+            for (int x = 0; x < new_cost_map.GetLength(0); x += Constants.Map.ALPHA_GRANULARITY)
+                for (int y = 0; y < new_cost_map.GetLength(1); y += Constants.Map.ALPHA_GRANULARITY)
+                {
+                    // Each tile on the map corresponds to an N by N grid of pixels in the cost map, where N is the alpha granularity
+
+                    // Check the tile's brightness cost
+                    byte new_alpha_cost = (byte)(alpha_cost(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY) * Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST);
+
+                    // Fill in the N by N grid
+                    for (int n = 0; n < Constants.Map.ALPHA_GRANULARITY; n++)
+                        for (int m = 0; m < Constants.Map.ALPHA_GRANULARITY; m++)
+                            new_cost_map[x + n, y + m] = new_alpha_cost;
+
+                    // Check if the cost has changed so we can recalculate the raymarch of nearby light sources
+                    if (new_cost_map[x, y] != Lighting_Cost_Map[x, y])
+                    {
+                        changed_tiles.Add(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY);
+                    }
+                }
+            
+            Lighting_Cost_Map = new_cost_map;
+
+            return changed_tiles;
+        }
+
+        #endregion
         public int width
         {
             get
@@ -1946,35 +2118,71 @@ namespace Tactile
                 // Calculate the sight ranges by team groups
                 for (int i = 0; i < Constants.Team.TEAM_GROUPS.Length; i++)
                 {
+                    HashSet<Vector2> visibility;
                     int[] group = Constants.Team.TEAM_GROUPS[i];
-                    List<int> team = new List<int>();
-                    foreach (int team_id in group)
-                        team.AddRange(Teams[team_id]);
-                    // Remove units that are rescued
-                    int j = 0;
-                    while (j < team.Count)
+                    if (FoW_Uses_Lightmap)
                     {
-                        if (this.units[team[j]].is_rescued)
-                            team.RemoveAt(j);
-                        else
-                            j++;
+                        visibility = fow_sight_area_from_lightmap();
                     }
-                    // Calculate visible area
-                    List<Fow_View_Object> viewers = new List<Fow_View_Object>();
-                    for (j = 0; j < team.Count; j++)
+                    else
                     {
-                        Game_Unit unit = this.units[team[j]];
-                        viewers.Add(new Fow_View_Object(unit));
+                        List<int> team = new List<int>();
+                        foreach (int team_id in group)
+                            team.AddRange(Teams[team_id]);
+                        // Remove units that are rescued
+                        int j = 0;
+                        while (j < team.Count)
+                        {
+                            if (this.units[team[j]].is_rescued)
+                                team.RemoveAt(j);
+                            else
+                                j++;
+                        }
+                        // Calculate visible area
+                        List<Fow_View_Object> viewers = new List<Fow_View_Object>();
+                        for (j = 0; j < team.Count; j++)
+                        {
+                            Game_Unit unit = this.units[team[j]];
+                            viewers.Add(new Fow_View_Object(unit));
+                        }
+
+                        viewers.AddRange(Torch_Staves);
+                        viewers.AddRange(VisionPoints);
+
+
+                        visibility = Pathfind.fow_sight_area(viewers);
                     }
-
-                    viewers.AddRange(Torch_Staves);
-                    viewers.AddRange(VisionPoints);
-
-                    HashSet<Vector2> visibility = Pathfind.fow_sight_area(viewers);
+                    
                     foreach (int team_id in group)
                         Fow_Visibility[team_id] = visibility;
                 }
             }
+        }
+
+        protected HashSet<Vector2> fow_sight_area_from_lightmap()
+        {
+            HashSet<Vector2> result = new HashSet<Vector2>{ };
+
+            for (int x = 0; x < this.width*Constants.Map.ALPHA_GRANULARITY; x += Constants.Map.ALPHA_GRANULARITY)
+                for (int y = 0; y < this.height * Constants.Map.ALPHA_GRANULARITY; y += Constants.Map.ALPHA_GRANULARITY)
+                {
+                    byte[] alpha_values = new byte[Constants.Map.ALPHA_GRANULARITY * Constants.Map.ALPHA_GRANULARITY];
+                    int i = 0;
+                    for (int m = 0; m < Constants.Map.ALPHA_GRANULARITY; m++)
+                        for (int n = 0; n < Constants.Map.ALPHA_GRANULARITY; n++)
+                        {
+                            int lightmap_data_index = (x + m) + (y + n) * this.width * Constants.Map.ALPHA_GRANULARITY;
+                            alpha_values[i] = FoW_Lightmap_Data[lightmap_data_index].A;
+                            i++;
+                        }
+                    if (alpha_values.Max() > 10)
+                        result.Add(new Vector2(x, y)/Constants.Map.ALPHA_GRANULARITY);
+                }
+            return result;
+        }
+        public void set_FoW_lightmap(Color[] value)
+        {
+            FoW_Lightmap_Data = value;
         }
 
         protected bool test_unit_move_range_update(Game_Unit unit)

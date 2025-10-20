@@ -75,9 +75,16 @@ namespace Tactile
         protected static Texture2D Current_Map_Alpha, Map_Alpha_Target, Map_Alpha_Source;
         protected Color[] Map_Alpha_Data;
         protected int Map_Alpha_Timer, Map_Alpha_Duration;
+        protected int Lighting_Transition_Timer;
+        protected int Lighting_Transition_Duration = 50;
+        protected float Lighting_Transition_Factor;
         protected int Suspend_Fade_Timer = 0;
 
         protected int TILE_SIZE { get { return Constants.Map.TILE_SIZE; } }
+
+        protected Texture2D Target_Lightmap;
+        protected Texture2D Old_Lightmap;
+        protected Texture2D Current_Lightmap;
 
         #region Accessors
         public bool map_transition { get { return Map_Transition; } }
@@ -85,6 +92,20 @@ namespace Tactile
         public bool map_transition_running { get { return Black_Screen_Time > 0 || (!Map_Transition && Transition_Timer > 0); } }
         public Character_Sprite player_sprite { get { return Player_Sprite; } }
         public bool suppress_cursor;
+
+        private int current_render_index = 0;
+        private void next_render_target()
+        {
+                current_render_index = 1 - current_render_index;
+        }
+        private int current_render_target
+        {
+            get { return current_render_index; }
+        }
+        private int last_render_target
+        {
+            get { return 1-current_render_index; }
+        }
         #endregion
 
         public Scene_Map()
@@ -176,6 +197,8 @@ namespace Tactile
             // Cache textures that will be used by the map, but not immediately
             Battle_Transition = new Battle_Transition_Effect(Global.Content.Load<Texture2D>(@"Graphics/Pictures/Turn_Change"));
             create_info_windows();
+
+            Global.game_map.lightmap_needs_redrawing = true;
         }
 
         protected override void clear_graphic_objects()
@@ -360,6 +383,14 @@ namespace Tactile
             }
         }
 
+        protected void update_lighting()
+        {
+            if (Lighting_Transition_Timer > 0)
+            {
+                Lighting_Transition_Timer--;
+                Lighting_Transition_Factor = (float)(Lighting_Transition_Timer) / (float)(Lighting_Transition_Duration);
+            }
+        }
         protected void update_map_alpha()
         {
             if (Map_Alpha_Duration != 0)
@@ -1053,6 +1084,7 @@ namespace Tactile
                     Map_Popup = null;
             }
             update_map_alpha();
+            update_lighting();
         }
 
         public void set_status_heal(Game_Unit unit)
@@ -1268,14 +1300,28 @@ namespace Tactile
 
         protected virtual void draw_scene(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets)
         {
+            RenderTarget2D cumulative_render_target = render_targets[0];
+            RenderTarget2D[] volatile_render_targets = new RenderTarget2D[2] { render_targets[1], render_targets[2] };
+        
+
             camera.pos = Vector2.Zero;
             camera.offset = Vector2.Zero;
             camera.zoom = Vector2.One;
             camera.angle = 0f;
 
+            device.SamplerStates[3] = SamplerState.PointClamp; // This prevents crashes after resuming a minimized session... for some godforsaken reason
+
+            if (Global.game_map.lightmap_needs_redrawing)
+                draw_lightmap(sprite_batch, device);
+
+            if (Lighting_Transition_Timer > 0)
+                transition_lightmap(sprite_batch, device);
+            else
+                Current_Lightmap = Target_Lightmap;
+
             #region Map and Idle Units
             // Base map
-            draw_map(sprite_batch, device, render_targets);
+            draw_map(sprite_batch, device, cumulative_render_target, volatile_render_targets);
 
             // Move ranges
             draw_ranges(sprite_batch);
@@ -1284,7 +1330,7 @@ namespace Tactile
             var roof_tiles = @Tilemap.roof_tiles;
             if (roof_tiles.Count > 0)
             {
-                draw_units(sprite_batch, device, render_targets, true, roof_tiles);
+                draw_units(sprite_batch, device, cumulative_render_target, volatile_render_targets, true, roof_tiles);
                 // Copies the map with units on it to render_targets[2]
                 device.SetRenderTarget(render_targets[2]);
                 device.Clear(Color.Transparent);
@@ -1293,7 +1339,7 @@ namespace Tactile
                 sprite_batch.End();
 
                 // Draws the roof tiles to render_targets[0]
-                draw_map(sprite_batch, device, render_targets, roof: true);
+                draw_map(sprite_batch, device, cumulative_render_target, volatile_render_targets, roof: true);
 
                 // Copies the roof tiles to render_targets[2] on top of the current map, then moves it all back to render_targets[0]
                 //device.SetRenderTarget(render_targets[2]);
@@ -1318,19 +1364,20 @@ namespace Tactile
             DrawTileOutlines(sprite_batch, device, render_targets);
 
             // Idle units (that aren't under a roof)
-            draw_units(sprite_batch, device, render_targets, false, roof_tiles);
-
+            draw_units(sprite_batch, device, cumulative_render_target, volatile_render_targets, false, roof_tiles);
             #endregion
 
             draw_arrow(sprite_batch);
 
             #region Active Units
             // Draw active units on render target 1, then copy them with tone on render target 0
-            device.SetRenderTarget(render_targets[1]);
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
             device.Clear(Color.Transparent);
             draw_active_units(sprite_batch);
             // Unit tone
-            device.SetRenderTarget(render_targets[0]);
+            next_render_target();
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
+            device.Clear(Color.Transparent);
             Effect map_shader = Global.effect_shader();
             if (map_shader != null)
             {
@@ -1338,7 +1385,17 @@ namespace Tactile
                 map_shader.Parameters["tone"].SetValue(Global.game_state.screen_tone.to_vector_4(Config.UNIT_TONE_PERCENT));
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[1], Vector2.Zero, Color.White);
+            sprite_batch.Draw(volatile_render_targets[last_render_target], Vector2.Zero, Color.White);
+            sprite_batch.End();
+            // Map Lighting
+            device.SetRenderTarget(cumulative_render_target);
+            if (map_shader != null)
+            {
+                map_shader.CurrentTechnique = map_shader.Techniques["Map_Lighting"];
+                map_shader.Parameters["LightmapTexture"].SetValue(Current_Lightmap);
+            }
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
+            sprite_batch.Draw(volatile_render_targets[current_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
 
             // Status animations and icons
@@ -1651,18 +1708,20 @@ namespace Tactile
         /// Draws the map onto render_targets[0].
         /// </summary>
         /// <param name="sprite_batch">The active SpriteBatch</param>
-        /// <param name="device">The game's GraphicsDevuce object</param>
+        /// <param name="device">The game's GraphicsDevice object</param>
         /// <param name="render_targets">A of render targets to draw on</param>
         /// <param name="roof">If true, draws map tiles that are fading out and are "above" units under them; otherwise draws the base map.</param>
-        protected void draw_map(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets, bool roof = false)
+        protected void draw_map(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D cumulative_render_target, RenderTarget2D[] volatile_render_targets, bool roof = false)
         {
+            current_render_index = 1;
             // Draw fog tiles to render target 1
-            device.SetRenderTarget(render_targets[1]);
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
             device.Clear(Color.Transparent);
             draw_raw_map(sprite_batch, false, fog: true, roof: roof);
 
             // Copy fog tiles with the fog effect to render target 0
-            device.SetRenderTarget(render_targets[0]);
+            next_render_target();
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
             device.Clear(Color.Transparent);
 
             Color fog_color;
@@ -1671,14 +1730,15 @@ namespace Tactile
 
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[1], Vector2.Zero, fog_color);
+            sprite_batch.Draw(volatile_render_targets[last_render_target], Vector2.Zero, fog_color);
             sprite_batch.End();
 
             // Draw regular tiles on top of fog tiles
             draw_raw_map(sprite_batch, false, fog: false, roof: roof);
 
             // Draw map to render target 1 with map alpha effects applied
-            device.SetRenderTarget(render_targets[1]);
+            next_render_target();
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
             device.Clear(Color.Transparent);
 
             Effect alpha_shader = Global.effect_shader();
@@ -1696,11 +1756,13 @@ namespace Tactile
 #endif
                 }
             }
+            alpha_shader.Parameters["LightmapTexture"].SetValue(Current_Lightmap);
             // Darken screen for spells if needed
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, alpha_shader);
-            sprite_batch.Draw(render_targets[0], Vector2.Zero,
+            sprite_batch.Draw(volatile_render_targets[last_render_target], Vector2.Zero,
                 new Color(Map_Spell_Darken, Map_Spell_Darken, Map_Spell_Darken, 255));
+
             sprite_batch.End();
 #if __ANDROID__
             // There has to be a way to do this for both
@@ -1711,7 +1773,7 @@ namespace Tactile
 #endif
 
             // Draw map to render target 0 with map tone applied
-            device.SetRenderTarget(render_targets[0]);
+            device.SetRenderTarget(cumulative_render_target);
             device.Clear(roof ? Color.Transparent : Color.Black);
             if (Global.game_map.width <= 0)
                 return;
@@ -1724,7 +1786,7 @@ namespace Tactile
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[1], Vector2.Zero, Color.White);
+            sprite_batch.Draw(volatile_render_targets[current_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
         }
 
@@ -1765,6 +1827,119 @@ namespace Tactile
             sprite_batch.End();
         }
         #endregion
+
+        protected void draw_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
+        {
+            if (Target_Lightmap != null)
+            {
+                Old_Lightmap = (Global.Content as ContentManagers.ThreadSafeContentManager).texture_from_size(Target_Lightmap.Width, Target_Lightmap.Height);
+                Color[] Old_Lightmap_Data = new Color[Target_Lightmap.Width * Target_Lightmap.Height];
+                Target_Lightmap.GetData<Color>(Old_Lightmap_Data);
+                Old_Lightmap.SetData<Color>(Old_Lightmap_Data);
+                Lighting_Transition_Timer = Lighting_Transition_Duration;
+            }
+                
+
+            if (Global.game_map.width == 0)
+                return;
+
+            // Add contributions from each light source
+            current_render_index = 0;
+            RenderTarget2D[] lightmap = new RenderTarget2D[2];
+
+            for (int n = 0; n < 2; n++)
+                lightmap[n] = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY,
+                    false,
+                    SurfaceFormat.Color,
+                    DepthFormat.Depth24,
+                    0,
+                    RenderTargetUsage.PreserveContents);
+
+            device.SetRenderTarget(lightmap[current_render_target]);
+            device.Clear(Color.Transparent);
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp, null, null);
+            foreach (Light_Source light_source in Global.game_map.light_sources)
+            {
+                sprite_batch.Draw(light_source.lightmap_contribution, Vector2.Zero, Color.White);
+            }
+            sprite_batch.End();
+
+            // Apply blur effect
+            Effect effect_shader = Global.effect_shader();
+            effect_shader.CurrentTechnique = effect_shader.Techniques["Blur"];
+
+            next_render_target();
+            device.SetRenderTarget(lightmap[current_render_target]);
+            device.Clear(Color.Transparent);
+
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, effect_shader);
+            sprite_batch.Draw(lightmap[last_render_target], Vector2.Zero, Color.White);
+            sprite_batch.End();
+
+            // Add ambient lighting
+            effect_shader.Parameters["Ambient_Color"].SetValue(Global.game_map.ambient_lighting.ToVector4());
+            effect_shader.CurrentTechnique = effect_shader.Techniques["Ambient_Blend"];
+
+            next_render_target();
+            device.SetRenderTarget(lightmap[current_render_target]);
+            device.Clear(Color.Transparent);
+
+            Color[] FoW_Lightmap_Data = new Color[lightmap[current_render_target].Width * lightmap[current_render_target].Height];
+            lightmap[last_render_target].GetData(FoW_Lightmap_Data);
+            Global.game_map.set_FoW_lightmap(FoW_Lightmap_Data);
+
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, effect_shader);
+            sprite_batch.Draw(lightmap[last_render_target], Vector2.Zero, Color.White);
+            sprite_batch.End();
+
+            // Finish Process
+            device.SetRenderTarget(null);
+
+            Target_Lightmap = (Global.Content as ContentManagers.ThreadSafeContentManager).texture_from_size(lightmap[current_render_target].Width, lightmap[current_render_target].Height);
+            Color[] Target_Lightmap_Data = new Color[Target_Lightmap.Width * Target_Lightmap.Height];
+            lightmap[current_render_target].GetData<Color>(Target_Lightmap_Data);
+            Target_Lightmap.SetData<Color>(Target_Lightmap_Data);
+
+
+            lightmap[last_render_target].Dispose();
+            lightmap[current_render_target].Dispose();
+            Global.game_map.lightmap_needs_redrawing = false;
+
+            if (Global.game_map.fow_uses_lightmap)
+                Global.game_map.refresh_move_ranges();
+        }
+
+        protected void transition_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
+        {
+            current_render_index = 0;
+
+            if (Global.game_map.width == 0)
+                return;
+
+            RenderTarget2D lightmap = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
+
+            Effect lightmap_shader = Global.effect_shader();
+            if (Current_Map_Alpha != null)
+            {
+                sprite_batch.GraphicsDevice.SamplerStates[1] = SamplerState.LinearClamp;
+                if (lightmap_shader != null)
+                {
+                    lightmap_shader.CurrentTechnique = lightmap_shader.Techniques["Transition_Lightmap"];
+                    lightmap_shader.Parameters["LightmapTexture"].SetValue(Target_Lightmap);
+                    lightmap_shader.Parameters["Lightmap_Transition_Factor"].SetValue(Lighting_Transition_Factor);
+                }
+            }
+            device.SetRenderTarget(lightmap);
+            device.Clear(Color.Transparent);
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.PointClamp, null, null, lightmap_shader);
+            sprite_batch.Draw(Old_Lightmap, Vector2.Zero, Color.White);
+            sprite_batch.End();
+
+            device.SetRenderTarget(null);
+
+            Current_Lightmap = lightmap;
+        }
 
         #region Draw Ranges
         protected void draw_ranges(SpriteBatch sprite_batch)
@@ -1919,7 +2094,7 @@ namespace Tactile
         /// <param name="sprite_batch">The active SpriteBatch</param>
         /// <param name="device">The game's GraphicsDevuce object</param>
         /// <param name="render_targets">A of render targets to draw on</param>
-        protected virtual void draw_units(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D[] render_targets,
+        protected virtual void draw_units(SpriteBatch sprite_batch, GraphicsDevice device, RenderTarget2D cumulative_render_target, RenderTarget2D[] volatile_render_targets,
             bool roof, HashSet<Vector2> roof_tiles)
         {
             // Units hidden
@@ -1927,12 +2102,14 @@ namespace Tactile
                 return;
 
             // Draw units on render target 1, then copy them with tone on render target 0
-            device.SetRenderTarget(render_targets[1]);
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
             device.Clear(Color.Transparent);
             draw_units(sprite_batch, roof: roof, roof_tiles: roof_tiles);
 
             // Unit tone
-            device.SetRenderTarget(render_targets[0]);
+            next_render_target();
+            device.SetRenderTarget(volatile_render_targets[current_render_target]);
+            device.Clear(Color.Transparent);
             Effect map_shader = Global.effect_shader();
             if (map_shader != null)
             {
@@ -1940,7 +2117,18 @@ namespace Tactile
                 map_shader.Parameters["tone"].SetValue(Global.game_state.screen_tone.to_vector_4(Config.UNIT_TONE_PERCENT));
             }
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
-            sprite_batch.Draw(render_targets[1], Vector2.Zero, Color.White);
+            sprite_batch.Draw(volatile_render_targets[last_render_target], Vector2.Zero, Color.White);
+            sprite_batch.End();
+
+            // Map Lighting
+            device.SetRenderTarget(cumulative_render_target);
+            if (map_shader != null)
+            {
+                map_shader.CurrentTechnique = map_shader.Techniques["Map_Lighting"];
+                map_shader.Parameters["LightmapTexture"].SetValue(Current_Lightmap);
+            }
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, map_shader);
+            sprite_batch.Draw(volatile_render_targets[current_render_target], Vector2.Zero, Color.White);
             sprite_batch.End();
         }
 

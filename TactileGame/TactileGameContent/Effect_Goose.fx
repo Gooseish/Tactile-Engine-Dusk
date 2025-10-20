@@ -20,6 +20,17 @@ uniform float2 map_size;
 uniform float2 game_size;
 
 float timer;
+Texture2D LightmapTexture;
+float4 Ambient_Color;
+float Lightmap_Transition_Factor;
+
+sampler2D LightmapTextureSampler = sampler_state
+{
+	Texture = <LightmapTexture>;
+	Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = Clamp;
+    AddressV = Clamp;
+};
 
 //--------------------------------------------------------------------------------
 // Vertex Shader
@@ -255,10 +266,8 @@ technique Normal
 float4 map_lighting(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
 {
 	float4 Color = tex2D(TextureSampler, uv);
-	Color *= tex2D(Map_Alpha, (uv * game_size + alpha_offset) / (16 * map_size));
+	Color.rgb *= tex2D(LightmapTextureSampler, (uv * game_size + alpha_offset) / (16 * map_size)).rgb;
 	return Color * color;
-	
-	
 }
 
 technique Map_Lighting
@@ -267,6 +276,62 @@ technique Map_Lighting
 	{
 		VertexShader = compile vs_2_0 original_vs();
 		PixelShader = compile ps_2_0 map_lighting();
+	}
+}
+
+float4 ambient_blend(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
+{
+	float4 Color = tex2D(TextureSampler, uv);
+	Color.rgb /= Color.a; //un-premultiply
+	Color = lerp(Ambient_Color, Color, Color.a);
+	return Color;
+}
+
+technique Ambient_Blend
+{
+	pass Pass1
+	{
+		PixelShader = compile ps_2_0 ambient_blend();
+	}
+}
+
+float4 transition_lightmap(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
+{
+	float4 Color = tex2D(TextureSampler, uv);
+	Color = lerp(tex2D(LightmapTextureSampler, uv), Color, Lightmap_Transition_Factor);
+	return Color;
+}
+
+technique Transition_Lightmap
+{
+	pass Pass1
+	{
+		PixelShader = compile ps_2_0 transition_lightmap();
+	}
+}
+
+float4 blur(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
+{
+	float4 Color = 0.2*tex2D(TextureSampler, uv);
+	float unblurred_a = Color.a;
+	uv.x += 0.5/map_size.x;
+	Color += 0.2*tex2D(TextureSampler, uv);
+	uv.x -= 1/map_size.x;
+	Color += 0.2*tex2D(TextureSampler, uv);
+	uv.x += 0.5/map_size.x;
+	uv.y += 0.5/map_size.y;
+	Color += 0.2*tex2D(TextureSampler, uv);
+	uv.y -= 1/map_size.y;
+	Color += 0.2*tex2D(TextureSampler, uv);
+	
+	return Color;
+}
+
+technique Blur
+{
+	pass Pass1
+	{
+		PixelShader = compile ps_2_0 blur();
 	}
 }
 
@@ -614,7 +679,6 @@ technique Coverage_Shader
 		PixelShader = compile ps_2_0 coverage_shader();
 	}
 }
-
 
 //-----------------------------------------------------------------------------
 // Ripple

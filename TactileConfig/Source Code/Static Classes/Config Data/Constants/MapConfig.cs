@@ -17,6 +17,10 @@ namespace Tactile.Constants
 #endif
         public const int ALPHA_MAX = 12 * ALPHA_GRANULARITY;
 
+        public static int SUBPIXEL_GRANULARITY = 8/ALPHA_GRANULARITY;
+        public static int BASE_PIXEL_BRIGHTNESS_COST = 50/ALPHA_GRANULARITY;
+        public static int BASE_SUBPIXEL_BRIGHTNESS_COST = BASE_PIXEL_BRIGHTNESS_COST / SUBPIXEL_GRANULARITY;
+
         public const bool FOW_TERRAIN_DATA = false; // Is terrain info data visible when moving the cursor on fog tiles, generally turn off only if doing Thracia fog
 
         public const int AI_WAIT_TIME = 20;

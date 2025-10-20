@@ -118,6 +118,7 @@
     <Compile Include="Source Code\Game_State\Components\Game_Swap_State.cs" />
     <Compile Include="Source Code\Game_State\Components\Game_Teleport_State.cs" />
     <Compile Include="Source Code\Game_State\Components\Game_Transform_State.cs" />
+    <Compile Include="Source Code\Game_Map\Light_Source.cs" />
     <Compile Include="Source Code\Menus\Map\ConfirmationPromptMenu.cs" />
     <Compile Include="Source Code\Menus\Map\DialoguePromptMenu.cs" />
     <Compile Include="Source Code\Menus\Map\Unit\Skill\SummonMenu.cs" />
