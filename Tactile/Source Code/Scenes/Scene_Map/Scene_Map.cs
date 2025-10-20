@@ -1833,7 +1833,10 @@ namespace Tactile
         protected void transition_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
         {
             current_render_index = 0;
-            
+
+            if (Global.game_map.width == 0)
+                return;
+
             RenderTarget2D lightmap = new RenderTarget2D(device, Global.game_map.width * Constants.Map.ALPHA_GRANULARITY, Global.game_map.height * Constants.Map.ALPHA_GRANULARITY);
 
             Effect lightmap_shader = Global.effect_shader();
