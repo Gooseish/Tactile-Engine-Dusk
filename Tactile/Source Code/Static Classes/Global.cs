@@ -785,6 +785,7 @@ namespace Tactile
             Global.reset_game_state();
             var old_map = Global.game_map;
             Global.game_map = new Game_Map();
+            Global.turnwheel = new Turnwheel();
             Global.player = new Player();
 
             // Trying to start this after everything else, instead of in the middle
@@ -854,6 +855,7 @@ namespace Tactile
             Global.reset_game_state();
             var old_map = Global.game_map;
             Global.game_map = new Game_Map();
+            Global.turnwheel = new Turnwheel();
             Global.player = new Player();
 
             // Trying to start this after everything else, instead of in the middle
