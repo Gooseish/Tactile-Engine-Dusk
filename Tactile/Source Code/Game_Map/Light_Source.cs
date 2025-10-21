@@ -74,7 +74,7 @@ namespace Tactile
         public void read(BinaryReader reader)
         {
             Color.read(reader);
-            Loc.read(reader);
+            Loc = Loc.read(reader);
             Type = (Light_Source_Type)reader.ReadInt32();
             Penalty_Modifier = reader.ReadDouble();
 

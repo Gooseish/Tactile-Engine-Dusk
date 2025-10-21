@@ -163,6 +163,15 @@ namespace Tactile
             Area_Background.write(writer);
             writer.Write(Grid_Opacity);
             Light_Sources_Oldcode.write(writer);
+
+            Light_Sources.write(writer);
+            Static_Light_Sources.write(writer);
+            Lighting_Cost_Map.write(writer);
+            Ally_Lighting.write(writer);
+            Class_Ally_Lighting.write(writer);
+            Ambient_Lighting.write(writer);
+            writer.Write(FoW_Uses_Lightmap);
+
             writer.Write(Min_Alpha);
             writer.Write(Ally_Alpha);
             Team_Defend_Areas.write(writer);
@@ -173,16 +182,7 @@ namespace Tactile
 
             writer.Write(Last_Added_Unit_Id);
 
-            move_range_write(writer);
-
-            Light_Sources.write(writer);
-            Static_Light_Sources.write(writer);
-            Lighting_Cost_Map.write(writer);
-            Ally_Lighting.write(writer);
-            Class_Ally_Lighting.write(writer);
-            Ambient_Lighting.write(writer);
-            writer.Write(FoW_Uses_Lightmap);
-            
+            move_range_write(writer);            
         }
 
         public void read(BinaryReader reader)
@@ -317,6 +317,15 @@ namespace Tactile
             Area_Background.read(reader);
             Grid_Opacity = reader.ReadInt32();
             Light_Sources_Oldcode = Light_Sources_Oldcode.read(reader);
+
+            Light_Sources.read(reader);
+            Static_Light_Sources.read(reader);
+            Lighting_Cost_Map.read(reader);
+            Ally_Lighting.read(reader);
+            Class_Ally_Lighting.read(reader);
+            Ambient_Lighting.read(reader);
+            FoW_Uses_Lightmap = reader.ReadBoolean();
+
             refresh_alpha();
             Min_Alpha = reader.ReadInt32();
             Ally_Alpha = reader.ReadInt32();
@@ -335,14 +344,6 @@ namespace Tactile
             Last_Added_Unit_Id = reader.ReadInt32();
 
             move_range_read(reader);
-
-            Light_Sources.read(reader);
-            Static_Light_Sources.read(reader);
-            Lighting_Cost_Map.read(reader);
-            Ally_Lighting.read(reader);
-            Class_Ally_Lighting.read(reader);
-            Ambient_Lighting.read(reader);
-            FoW_Uses_Lightmap = reader.ReadBoolean();
         }
 
         public void load_suspend()
