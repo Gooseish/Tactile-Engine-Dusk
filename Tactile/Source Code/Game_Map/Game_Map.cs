@@ -2157,7 +2157,7 @@ namespace Tactile
                                 alpha_values[i] = FoW_Lightmap_Data[lightmap_data_index].A;
                                 i++;
                             }
-                        if (alpha_values.Max() > 10)
+                        if (alpha_values.Max() > Constants.Map.FOW_MINIMUM_BRIGHTNESS)
                             result.Add(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY);
                     }
             }
