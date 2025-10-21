@@ -2143,21 +2143,24 @@ namespace Tactile
         {
             HashSet<Vector2> result = new HashSet<Vector2>{ };
 
-            for (int x = 0; x < this.width*Constants.Map.ALPHA_GRANULARITY; x += Constants.Map.ALPHA_GRANULARITY)
-                for (int y = 0; y < this.height * Constants.Map.ALPHA_GRANULARITY; y += Constants.Map.ALPHA_GRANULARITY)
-                {
-                    byte[] alpha_values = new byte[Constants.Map.ALPHA_GRANULARITY * Constants.Map.ALPHA_GRANULARITY];
-                    int i = 0;
-                    for (int m = 0; m < Constants.Map.ALPHA_GRANULARITY; m++)
-                        for (int n = 0; n < Constants.Map.ALPHA_GRANULARITY; n++)
-                        {
-                            int lightmap_data_index = (x + m) + (y + n) * this.width * Constants.Map.ALPHA_GRANULARITY;
-                            alpha_values[i] = FoW_Lightmap_Data[lightmap_data_index].A;
-                            i++;
-                        }
-                    if (alpha_values.Max() > 10)
-                        result.Add(new Vector2(x, y)/Constants.Map.ALPHA_GRANULARITY);
-                }
+            if (FoW_Lightmap_Data != null)
+            {
+                for (int x = 0; x < this.width * Constants.Map.ALPHA_GRANULARITY; x += Constants.Map.ALPHA_GRANULARITY)
+                    for (int y = 0; y < this.height * Constants.Map.ALPHA_GRANULARITY; y += Constants.Map.ALPHA_GRANULARITY)
+                    {
+                        byte[] alpha_values = new byte[Constants.Map.ALPHA_GRANULARITY * Constants.Map.ALPHA_GRANULARITY];
+                        int i = 0;
+                        for (int m = 0; m < Constants.Map.ALPHA_GRANULARITY; m++)
+                            for (int n = 0; n < Constants.Map.ALPHA_GRANULARITY; n++)
+                            {
+                                int lightmap_data_index = (x + m) + (y + n) * this.width * Constants.Map.ALPHA_GRANULARITY;
+                                alpha_values[i] = FoW_Lightmap_Data[lightmap_data_index].A;
+                                i++;
+                            }
+                        if (alpha_values.Max() > 10)
+                            result.Add(new Vector2(x, y) / Constants.Map.ALPHA_GRANULARITY);
+                    }
+            }
             return result;
         }
         public void set_FoW_lightmap(Color[] value)
