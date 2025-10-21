@@ -77,7 +77,7 @@ namespace Tactile
         private List<Vector2>[] Light_Sources_Oldcode = new List<Vector2>[0];
         private List<Light_Source> Light_Sources = new List<Light_Source> { };
         private Dictionary<Vector2, Light_Source> Static_Light_Sources = new Dictionary<Vector2, Light_Source> { };
-        public bool lightmap_needs_redrawing = true;
+        public bool lightmap_needs_redrawing;
         private byte[,] Lighting_Cost_Map;
         private int Min_Alpha = 0;
         private int Ally_Alpha;
@@ -2025,7 +2025,7 @@ namespace Tactile
         {
             while (true)
             {
-                if (Refresh_Move_Ranges && Run_Move_Update)
+                if (Refresh_Move_Ranges && Run_Move_Update && !lightmap_needs_redrawing)
                 {
                     update_move_ranges();
                 }
