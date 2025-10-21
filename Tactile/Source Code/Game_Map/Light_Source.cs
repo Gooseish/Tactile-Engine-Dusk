@@ -10,6 +10,7 @@ using TactileVector2Extension;
 using TactileDictionaryExtension;
 using TactileListExtension;
 using TactileColorExtension;
+using System;
 
 namespace Tactile
 {
@@ -50,12 +51,14 @@ namespace Tactile
     {
         private Color @Color;
         private Vector2 Loc;
-        private int Max_Steps;
-        private int Max_Distance;
         private Texture2D Lightmap_Contribution;
         private byte[,] Brightness_Map;
         private Light_Source_Type Type;
         private double Penalty_Modifier;
+
+        private Vector2 Centered_Loc;
+        private int Max_Distance;
+        private int Max_Steps;
 
         public Texture2D lightmap_contribution { get { return Lightmap_Contribution; } }
 
@@ -87,15 +90,9 @@ namespace Tactile
             }
         }
         public Vector2 loc { get { return Loc; } }
-        public Vector2 centered_loc { get { return (Loc + new Vector2(0.5f, 0.5f))*Constants.Map.ALPHA_GRANULARITY; } }
         public Light_Source_Type type { get { return Type; } }
 
         public int max_distance { get { return Max_Distance; } }
-
-        public void set_max_distance()
-        {
-            Max_Distance = Color.A / Constants.Map.BASE_PIXEL_BRIGHTNESS_COST / Constants.Map.ALPHA_GRANULARITY;
-        }
 
         public Light_Source(Light_Data light_data, Vector2 loc, Light_Source_Type type)
         {
@@ -114,8 +111,15 @@ namespace Tactile
         {
             set_max_steps();
             Brightness_Map = new byte[cost_map.GetLength(0), cost_map.GetLength(1)];
-            for (int x = 0; x < cost_map.GetLength(0); x++)
-                for (int y = 0; y < cost_map.GetLength(1); y++)
+
+            int max_pixel_distance = Color.A / Constants.Map.BASE_PIXEL_BRIGHTNESS_COST + 1;
+            int x_min = Math.Max(0, (int)Centered_Loc.X - max_pixel_distance);
+            int x_max = Math.Min(cost_map.GetLength(0), (int)Centered_Loc.X + max_pixel_distance);
+            int y_min = Math.Max(0, (int)Centered_Loc.Y - max_pixel_distance);
+            int y_max = Math.Min(cost_map.GetLength(1), (int)Centered_Loc.Y + max_pixel_distance);
+
+            for (int x = x_min; x < x_max; x++)
+                for (int y = y_min; y < y_max; y++)
                 {
                     Brightness_Map[x, y] = raymarch_brightness(x, y, cost_map);
                 }
@@ -127,7 +131,7 @@ namespace Tactile
         {
             byte brightness = Color.A;
             Vector2 pixel_location = new Vector2(x, y) + new Vector2(0.5f, 0.5f);
-            Vector2 difference_vector = pixel_location - centered_loc;
+            Vector2 difference_vector = pixel_location - Centered_Loc;
             Vector2 step_vector = Vector2.Normalize(difference_vector) / Constants.Map.SUBPIXEL_GRANULARITY;
 
             int number_of_steps = (int)(difference_vector.Length() / step_vector.Length());
@@ -136,7 +140,7 @@ namespace Tactile
                 return 0;
             }
 
-            Vector2 temp_vector = centered_loc;
+            Vector2 temp_vector = Centered_Loc;
             for (int n = 0; n < number_of_steps; n++)
             {
                 byte brightness_cost = cost_map[(int)(temp_vector.X + step_vector.X), (int)(temp_vector.Y + step_vector.Y)];
@@ -174,7 +178,12 @@ namespace Tactile
 
         public void set_max_steps()
         {
-            Max_Steps = Color.A / Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST;
+            Max_Steps = (int)(Color.A / Constants.Map.BASE_SUBPIXEL_BRIGHTNESS_COST / Penalty_Modifier);
+            Centered_Loc = (Loc + new Vector2(0.5f, 0.5f)) * Constants.Map.ALPHA_GRANULARITY;
+        }
+        public void set_max_distance()
+        {
+            Max_Distance = Color.A / Constants.Map.BASE_PIXEL_BRIGHTNESS_COST / Constants.Map.ALPHA_GRANULARITY;
         }
 
         public bool is_equivalent(Light_Source compared_light_source)
