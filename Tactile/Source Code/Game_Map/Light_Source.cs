@@ -109,17 +109,15 @@ namespace Tactile
 
         public void calculate_lightmap(byte[,] cost_map)
         {
-            
-
             set_max_steps();
             Brightness_Map = new byte[cost_map.GetLength(0), cost_map.GetLength(1)];
-            
+			
             int max_pixel_distance = Color.A / Constants.Map.BASE_PIXEL_BRIGHTNESS_COST + 1;
             int x_min = Math.Max(0, (int)Centered_Loc.X - max_pixel_distance);
             int x_max = Math.Min(cost_map.GetLength(0), (int)Centered_Loc.X + max_pixel_distance);
             int y_min = Math.Max(0, (int)Centered_Loc.Y - max_pixel_distance);
             int y_max = Math.Min(cost_map.GetLength(1), (int)Centered_Loc.Y + max_pixel_distance);
-            
+			
             for (int x = x_min; x < x_max; x++)
                 for (int y = y_min; y < y_max; y++)
                 {
@@ -127,8 +125,6 @@ namespace Tactile
                 }
 
             refresh_light_texture();
-
-            
         }
 
         byte raymarch_brightness(int x, int y, byte[,] cost_map)

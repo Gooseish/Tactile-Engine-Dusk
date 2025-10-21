@@ -1841,7 +1841,10 @@ namespace Tactile
                 
 
             if (Global.game_map.width == 0)
+            {
+                Global.game_map.lightmap_needs_redrawing = false;
                 return;
+            }
 
             // Add contributions from each light source
             current_render_index = 0;
@@ -1904,9 +1907,6 @@ namespace Tactile
             lightmap[last_render_target].Dispose();
             lightmap[current_render_target].Dispose();
             Global.game_map.lightmap_needs_redrawing = false;
-
-            if (Global.game_map.fow_uses_lightmap)
-                Global.game_map.refresh_move_ranges();
         }
 
         protected void transition_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
