@@ -320,7 +320,7 @@ namespace Tactile
 
             Light_Sources.read(reader);
             Static_Light_Sources.read(reader);
-            Lighting_Cost_Map.read(reader);
+            Lighting_Cost_Map = Lighting_Cost_Map.read(reader);
             Ally_Lighting.read(reader);
             Class_Ally_Lighting.read(reader);
             Ambient_Lighting.read(reader);
