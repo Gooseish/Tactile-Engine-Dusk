@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using TactileListExtension;
+using System.Threading;
 
 namespace Tactile
 {
@@ -14,6 +15,10 @@ namespace Tactile
         public Turnwheel_Snapshot current_snapshot { get { return Snapshots.Last(); } }
         private bool Active;
         private int Charges;
+
+        private Thread SnapshotThread;
+        public bool snapshot_in_progress { get { return SnapshotThread != null && SnapshotThread.IsAlive; } }
+
         public bool active { get { return Active; } set { Active = value; } }
         public int charges { get { return Charges; } set { Charges = value; } }
         public bool can_rewind { get { return charges > 0 && active; } }
@@ -39,6 +44,12 @@ namespace Tactile
         }
         public void Take_Snapshot(string snapshot_name)
         {
+            SnapshotThread = new Thread(new ParameterizedThreadStart(Take_Snapshot_Worker));
+            SnapshotThread.Start(snapshot_name);
+        }
+        public void Take_Snapshot_Worker(Object data)
+        {
+            string snapshot_name = (string)data;
             string temp_filename = System.IO.Path.GetTempFileName();
             Create_Snapshot(temp_filename, snapshot_name);
             Save_Snapshot(temp_filename);
