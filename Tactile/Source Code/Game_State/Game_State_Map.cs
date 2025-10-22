@@ -461,10 +461,13 @@ namespace Tactile
             // Select button
             if (Global.Input.triggered(Inputs.Select))
             {
-                if(Global.turnwheel.active)
-                    Global.game_map.open_turnwheel_menu();
-                else
-                    Global.game_system.play_se(System_Sounds.Buzzer);
+                if (!Global.turnwheel.snapshot_in_progress && Global.game_system.Selected_Unit_Id == -1)
+                {
+                    if (Global.turnwheel.active)
+                        Global.game_map.open_turnwheel_menu();
+                    else
+                        Global.game_system.play_se(System_Sounds.Buzzer);
+                }
             }
             // Start button
             if (Global.Input.triggered(Inputs.Start))
