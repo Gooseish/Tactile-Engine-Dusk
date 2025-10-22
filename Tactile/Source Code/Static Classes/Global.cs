@@ -722,7 +722,7 @@ namespace Tactile
             ((Scene_Action)Scene).reset_map();
             ((Scene_Action)Scene).set_map_texture();
             ((Scene_Action)Scene).re_add_map_sprites();
-            ((Scene_Action)Scene).set_map_alpha_texture(Game_Map.Tile_Alpha);
+            ((Scene_Action)Scene).set_map_alpha_texture();
         }
         public static void update_scene(Microsoft.Xna.Framework.Input.KeyboardState key_state)
         {
@@ -893,7 +893,7 @@ namespace Tactile
             ((Scene_Map)Scene).reset_map();
             ((Scene_Map)Scene).set_map_texture();
             ((Scene_Map)Scene).re_add_map_sprites();
-            ((Scene_Map)Scene).set_map_alpha_texture(Global.game_map.Tile_Alpha);
+            ((Scene_Map)Scene).set_map_alpha_texture();
         }
 
         public static void suspend_fade_in()

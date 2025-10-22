@@ -288,12 +288,13 @@ namespace Tactile
         }
 
         #region Map Alpha
-        public void set_map_alpha_texture(float[,] alpha_data)
+        public void set_map_alpha_texture()
         {
-            set_map_alpha_texture(alpha_data, 0);
+            set_map_alpha_texture(0);
         }
-        public void set_map_alpha_texture(float[,] alpha_data, int time)
+        public void set_map_alpha_texture(int time)
         {
+            float[,] alpha_data = Global.game_map.Tile_Alpha;
             // If no data to set, dispose and return
             if (alpha_data.GetLength(0) == 0)
             {
@@ -393,6 +394,8 @@ namespace Tactile
         }
         protected void update_map_alpha()
         {
+            if (Global.game_map.map_alpha_updated.Key)
+                set_map_alpha_texture(Global.game_map.map_alpha_updated.Value);
             if (Map_Alpha_Duration != 0)
             {
                 Map_Alpha_Timer++;

@@ -1309,8 +1309,9 @@ namespace Tactile
 			refresh_lighting();
             set_map_alpha();
             if (get_scene_map() != null)
-                get_scene_map().set_map_alpha_texture(Tile_Alpha, time);
+                map_alpha_updated = new KeyValuePair<bool, int>(true, time);
         }
+        public KeyValuePair<bool, int> map_alpha_updated = new KeyValuePair<bool, int>(false, 0);
 
         void set_map_alpha()
         {
