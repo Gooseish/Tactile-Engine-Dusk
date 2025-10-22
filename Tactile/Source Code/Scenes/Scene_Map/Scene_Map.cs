@@ -294,6 +294,7 @@ namespace Tactile
         }
         public void set_map_alpha_texture(int time)
         {
+            Global.game_map.map_alpha_updated = new KeyValuePair<bool, int> (false, 0);
             float[,] alpha_data = Global.game_map.Tile_Alpha;
             // If no data to set, dispose and return
             if (alpha_data.GetLength(0) == 0)
