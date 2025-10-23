@@ -25,9 +25,19 @@ namespace Tactile
         #region: Serialization
         public void write(BinaryWriter writer)
         {
-            Snapshots.write(writer);
+            write_turn_start_snapshots(writer); // Only save turn start snapshots to suspends to save time
             writer.Write(Active);
             writer.Write(Charges);
+        }
+        private void write_turn_start_snapshots(BinaryWriter writer)
+        {
+            List<Turnwheel_Snapshot> turn_start_snapshots = new List<Turnwheel_Snapshot> { };
+            foreach (Turnwheel_Snapshot snapshot in Snapshots)
+            {
+                if (snapshot.name == "Turn Start")
+                    turn_start_snapshots.Add(snapshot);
+            }
+            turn_start_snapshots.write(writer);
         }
         public void read(BinaryReader reader)
         {
