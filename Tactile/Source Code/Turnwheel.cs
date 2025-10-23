@@ -47,6 +47,7 @@ namespace Tactile
             string temp_filename = System.IO.Path.GetTempFileName();
             Create_Snapshot(temp_filename, snapshot_name);
 
+            wait_for_snapshot_thread();
             SnapshotThread = new Thread(new ParameterizedThreadStart(Take_Snapshot_Worker));
             SnapshotThread.Start(temp_filename);
         }
@@ -56,6 +57,11 @@ namespace Tactile
             
             Save_Snapshot(temp_filename);
             Delete_Temp_File(temp_filename);
+        }
+        public void wait_for_snapshot_thread()
+        {
+            while (snapshot_in_progress)
+                System.Threading.Thread.Sleep(2);
         }
         private void Create_Snapshot(string temp_filename, string snapshot_name)
         {
