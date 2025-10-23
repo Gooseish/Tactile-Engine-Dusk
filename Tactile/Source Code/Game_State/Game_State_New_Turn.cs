@@ -84,6 +84,8 @@ namespace Tactile
             {
                 In_New_Turn = true;
                 New_Turn_Calling = false;
+                if (is_player_turn)
+                    Global.turnwheel.Take_Snapshot("Turn Start");
             }
             if (In_New_Turn)
             {
