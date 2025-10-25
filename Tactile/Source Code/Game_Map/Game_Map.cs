@@ -1306,7 +1306,6 @@ namespace Tactile
         }
         public void refresh_alpha(int time)
         {
-			refresh_lighting();
             set_map_alpha();
             if (get_scene_map() != null)
                 map_alpha_updated = new KeyValuePair<bool, int>(true, time);
@@ -2024,6 +2023,7 @@ namespace Tactile
         public void refresh_move_ranges(bool update_all)
         {
             Refresh_Move_Ranges = true;
+            refresh_lighting();
             if (update_all)
             {
                 Refresh_All_Ranges = true;
