@@ -1280,7 +1280,6 @@ namespace Tactile
         }
         public void refresh_alpha(int time)
         {
-            refresh_lighting();
             // If alpha is irrelevant
             if (time == 0 && Min_Alpha == 255)
             {
@@ -2003,6 +2002,7 @@ namespace Tactile
         public void refresh_move_ranges(bool update_all)
         {
             Refresh_Move_Ranges = true;
+            refresh_lighting();
             if (update_all)
             {
                 Refresh_All_Ranges = true;
