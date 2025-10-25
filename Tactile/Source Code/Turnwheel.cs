@@ -54,6 +54,9 @@ namespace Tactile
         }
         public void Take_Snapshot(string snapshot_name)
         {
+            if (Global.scene.scene_type == "Scene_Map_Unit_Editor") // Prevents unit editor from crashing
+                return;
+
             string temp_filename = System.IO.Path.GetTempFileName();
             Create_Snapshot(temp_filename, snapshot_name);
 
