@@ -2963,6 +2963,10 @@ namespace Tactile
                     // Value[2] = new value
                     SWITCHES[id] = process_bool(command.Value[2]);
                     break;
+                case "flip":
+                case "Flip":
+                    SWITCHES[id] = !SWITCHES[id];
+                    break;
 #if DEBUG
                 default:
                     throw event_case_missing_exception(command.Value[1], command.Key);
