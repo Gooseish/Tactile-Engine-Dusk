@@ -1999,10 +1999,11 @@ namespace Tactile
         {
             refresh_move_ranges(false);
         }
-        public void refresh_move_ranges(bool update_all)
+        public void refresh_move_ranges(bool update_all, bool update_lightmap = true)
         {
             Refresh_Move_Ranges = true;
-            refresh_lighting();
+            if(update_lightmap)
+                refresh_lighting();
             if (update_all)
             {
                 Refresh_All_Ranges = true;
