@@ -2917,7 +2917,13 @@ namespace Tactile
                     g = (byte)process_number(command.Value[4]);
                     b = (byte)process_number(command.Value[5]);
                     a = (byte)process_number(command.Value[6]);
-                    Global.game_map.static_light_sources[loc] = new Light_Source(new Light_Data(new Color(r, g, b, a), 1.0d), loc, Light_Source_Type.Static);
+                    if (command.Value.Length > 7)
+                    {
+                        double penalty_modifier = (double)process_number(command.Value[7]) / 100d;
+                        Global.game_map.static_light_sources[loc] = new Light_Source(new Light_Data(new Color(r, g, b, a), penalty_modifier), loc, Light_Source_Type.Static);
+                    }
+                    else
+                        Global.game_map.static_light_sources[loc] = new Light_Source(new Light_Data(new Color(r, g, b, a), 1.0d), loc, Light_Source_Type.Static);
                     break;
                 #endregion
                 case "Remove Static Light Source":
