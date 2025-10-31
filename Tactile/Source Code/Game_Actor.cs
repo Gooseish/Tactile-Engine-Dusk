@@ -1273,6 +1273,33 @@ namespace Tactile
                     return Global.data_classes[generic_base_class_id];
             }
         }
+        public Data_Class actor_base_class
+        {
+            get
+            {
+                return Global.data_classes[Data.ClassId];
+            }
+        }
+        public Data_Class base_class
+        {
+            get
+            {
+                if (is_generic_actor)
+                    return generic_base_class;
+                else
+                    return actor_base_class;
+            }
+        }
+        public int base_class_id
+        {
+            get
+            {
+                if (base_class != null)
+                    return base_class.Id;
+                else
+                    return -1;
+            }
+        }
 
         public string class_name { get { return actor_class.name; } }
         public string class_name_full { get { return actor_class.Name; } }
@@ -1915,7 +1942,7 @@ namespace Tactile
             else
             {
                 if (Promotion_Choices.Count > 0)
-                    result.AddRange(Global.data_classes[Data.ClassId].Skills.Select(x => x.SkillId));
+                    result.AddRange(actor_base_class.Skills.Select(x => x.SkillId));
             }
 
             // Current Class Skills

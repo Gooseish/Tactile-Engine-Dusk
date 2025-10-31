@@ -1457,8 +1457,14 @@ namespace Tactile
                             Game_Unit unit = get_unit(new Vector2(x, y));
                             if (unit.is_ally)
                             {
-                                if (class_ally_lighting.ContainsKey(unit.actor.class_id))
-                                    light_source_check.Add(new Light_Source(Global.game_map.class_ally_lighting[unit.actor.class_id], new Vector2(x, y), Light_Source_Type.Unit));
+                                int class_lighting_id = -1;
+                                if (class_ally_lighting.ContainsKey(unit.actor.class_id)) // Class ID takes priority over base class ID
+                                    class_lighting_id = unit.actor.class_id;
+                                else if (class_ally_lighting.ContainsKey(unit.actor.base_class_id))
+                                    class_lighting_id = unit.actor.base_class_id;
+
+                                if (class_lighting_id != -1)
+                                    light_source_check.Add(new Light_Source(Global.game_map.class_ally_lighting[class_lighting_id], new Vector2(x, y), Light_Source_Type.Unit));
                                 else
                                     light_source_check.Add(new Light_Source(Global.game_map.ally_lighting, new Vector2(x, y), Light_Source_Type.Unit));
                             }
