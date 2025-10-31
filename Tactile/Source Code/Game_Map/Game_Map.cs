@@ -1502,6 +1502,7 @@ namespace Tactile
                     if (Vector2.Distance(light_source.loc, changed_tile_loc) < light_source.max_distance)
                     {
                         light_source.calculate_lightmap(Lighting_Cost_Map);
+                        lightmap_needs_redrawing = true;
                         break;
                     }
                 }
