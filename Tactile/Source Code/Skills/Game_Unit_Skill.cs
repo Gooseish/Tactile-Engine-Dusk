@@ -2306,6 +2306,9 @@ namespace Tactile
             HashSet<Vector2> result = new HashSet<Vector2> { };
             foreach(Vector2 tile in candidate_tiles)
             {
+                if (Global.game_map.fow)
+                    if (!Global.game_map.fow_visibility[team].Contains(tile))
+                        continue;
                 if (Pathfind.passable(this, tile) && !Global.game_map.is_off_map(tile) && !Global.game_map.is_blocked(tile, id))
                     result.Add(tile);
             }
