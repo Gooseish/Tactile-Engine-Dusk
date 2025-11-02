@@ -52,6 +52,7 @@ namespace Tactile
         private bool Instant_Level = false;
         private HashSet<string> Skills = new HashSet<string>();
         private bool Skills_Need_Updated = false;
+        private int Pre_Levels = 0;
 
         #region Serialization
         public void write(BinaryWriter writer)
@@ -63,6 +64,7 @@ namespace Tactile
                 writer.Write(class_id);
             Promotion_Choices.write(writer);
             writer.Write(Level);
+            writer.Write(Pre_Levels);
             writer.Write(Exp);
             if (is_generic_actor)
             {
@@ -148,6 +150,7 @@ namespace Tactile
                 }
             }
             Level = reader.ReadInt32();
+            Pre_Levels = reader.ReadInt32();
             Exp = reader.ReadInt32();
             if (!Global.LOADED_VERSION.older_than(0, 4, 3, 1))
             {
@@ -484,7 +487,7 @@ namespace Tactile
         {
             get
             {
-                return Global.ActorConfig.ActualLevel(this.tier, Level);
+                return Global.ActorConfig.ActualLevel(this.tier, Level, Pre_Levels +  Constants.Actor.prepomote_levels(id));
             }
         }
 
@@ -832,6 +835,7 @@ namespace Tactile
             }
             Instant_Level = false;
             this.level = level;
+            Pre_Levels = prepromote_levels;
             // Reset HP
             Hp = maxhp;
 
@@ -1458,6 +1462,7 @@ namespace Tactile
 
         public void promotion_reset_level()
         {
+            Pre_Levels += this.level + 2;
             int level = this.level;
             level_down();
 

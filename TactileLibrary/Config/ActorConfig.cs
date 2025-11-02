@@ -398,10 +398,10 @@ namespace TactileLibrary.Config
                 return LvlCap;
         }
 
-        public int ActualLevel(int tier, int level)
+        public int ActualLevel(int tier, int level, int pre_levels)
         {
             if (ResetLevelOnPromotion)
-                return level + LevelsBeforeTier(tier);
+                return level + pre_levels;
             else
                 return level;
         }
