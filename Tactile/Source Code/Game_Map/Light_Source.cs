@@ -69,7 +69,9 @@ namespace Tactile
             writer.Write((int)Type);
             writer.Write(Penalty_Modifier);
 
-            Brightness_Map.write(writer);
+            writer.Write(Brightness_Map != null);
+            if (Brightness_Map != null)
+                Brightness_Map.write(writer);
         }
         public void read(BinaryReader reader)
         {
@@ -78,8 +80,11 @@ namespace Tactile
             Type = (Light_Source_Type)reader.ReadInt32();
             Penalty_Modifier = reader.ReadDouble();
 
-            Brightness_Map = Brightness_Map.read(reader);
-            refresh_light_texture();
+            if (reader.ReadBoolean())
+            {
+                Brightness_Map = Brightness_Map.read(reader);
+                refresh_light_texture();
+            }
         }
 
         public Color color { 
