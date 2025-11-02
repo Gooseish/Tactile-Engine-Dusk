@@ -4186,6 +4186,19 @@ namespace Tactile
                     result = Battler_1_check || Battler_2_check;
                     
                     break;
+                case "Group Defeated":
+                    // Value[1] = group id
+                    result = true;
+                    group = process_number(command.Value[1]);
+                    foreach (KeyValuePair<int, Game_Unit> _unit in Global.game_map.units)
+                    {
+                        if (_unit.Value.group == group)
+                        {
+                            result = false;
+                            break;
+                        }
+                    }
+                    break;
                 case "Unit at Loc":
                     // Value[1] = x
                     // Value[2] = y
