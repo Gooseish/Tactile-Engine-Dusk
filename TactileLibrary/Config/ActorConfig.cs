@@ -410,7 +410,8 @@ namespace TactileLibrary.Config
         {
             int level = 0;
             for (int currentTier = LowestTier; currentTier < tier; currentTier++)
-                level += RawLevelCap(currentTier);
+                level += 2;
+                //level += RawLevelCap(currentTier);
 
             return level;
         }
