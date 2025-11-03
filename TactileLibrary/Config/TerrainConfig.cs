@@ -11,7 +11,7 @@ namespace TactileLibrary.Config
         {
             { 10, 2 }, // Fort
             { 12, 2 }, // Forest
-            { 13, 4 }, // Thicket
+            { 13, 3 }, // Thicket
             { 18, 2 }, // Peak
             { 29, 2 }, // Pillar
         };
