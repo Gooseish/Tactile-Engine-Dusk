@@ -1462,7 +1462,7 @@ namespace Tactile
 
         public void promotion_reset_level()
         {
-            Pre_Levels += this.level;
+            Pre_Levels += this.level + 2;
             int level = this.level;
             level_down();
 
