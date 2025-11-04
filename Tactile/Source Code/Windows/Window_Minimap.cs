@@ -391,7 +391,7 @@ namespace Tactile
                 // Map
                 int width = Minimap_Texture.Width / MINIMAP_TILE_SIZE;
                 // Fow tiles
-                Color fog_color = Color.White;
+                Color fog_color = Color.Black;
 
                 Effect unit_shader = Global.effect_shader();
                 if (unit_shader != null)
