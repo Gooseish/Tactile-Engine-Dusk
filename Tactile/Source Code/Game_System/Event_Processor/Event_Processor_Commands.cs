@@ -2943,11 +2943,33 @@ namespace Tactile
                     Global.game_map.refresh_lighting();
                     break;
                 case "Import Units":
-                    #region import units
+                    #region Import Units
                     // Value[1] = filename
                     Global.game_map.import_units(command.Value[1]);
                     break;
                 #endregion
+                case "Clear Area":
+                    #region Clear Area; Remove all units in an area
+                    // Value[1] = x1
+                    // Value[2] = y1
+                    // Value[3] = x2
+                    // Value[4] = y2
+                    int x1 = process_number(command.Value[1]);
+                    int y1 = process_number(command.Value[2]);
+                    int x2 = process_number(command.Value[3]);
+                    int y2 = process_number(command.Value[4]);
+                    List<int> units_to_remove = new List<int> { };
+                    foreach (KeyValuePair<int, Game_Unit> unit in Global.game_map.units)
+                    {
+                        loc = unit.Value.loc;
+                        if (loc.X >= x1 && loc.X <= x2)
+                            if (loc.Y >= y1 && loc.Y <= y2)
+                                units_to_remove.Add(unit.Key);
+                    }
+                    foreach (int id in units_to_remove)
+                        Global.game_map.remove_unit(id);
+                    #endregion
+                    break;
 #if DEBUG
                 default:
                     throw event_case_missing_exception(command.Value[0], command.Key);
