@@ -1416,10 +1416,12 @@ namespace Tactile
         #endregion
         #region Lighting
 
-        public void refresh_lighting()
+        public void refresh_lighting(int duration = 50)
         {
             List<Vector2> changed_tiles = set_cost_map();
             update_light_sources(changed_tiles);
+            lightmap_needs_redrawing = true;
+            get_scene_map().set_lighting_transition_timer(duration);
         }
         public void update_light_sources(List<Vector2> changed_tiles)
         {
@@ -1486,7 +1488,6 @@ namespace Tactile
             }
 
             Light_Sources = result;
-            lightmap_needs_redrawing = true;
         }
         public List<Vector2> set_cost_map()
         {
