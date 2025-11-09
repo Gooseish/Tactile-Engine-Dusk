@@ -79,7 +79,7 @@ namespace Tactile
                 }
                 if (unit_true_killed)
                 {
-                    refresh_move_ranges(true, false);
+                    refresh_move_ranges();
                     Global.game_map.wait_for_move_update();
                     Global.game_state.any_trigger_events();
                 }
