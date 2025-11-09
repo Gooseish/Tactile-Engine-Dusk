@@ -465,7 +465,12 @@ namespace Tactile.Rendering
             while (true)
             {
                 if (Global.game_map != null && Global.game_map.lightmap_needs_redrawing)
-                    Global.game_map.get_scene_map().draw_lightmap(spriteBatch, GraphicsDevice);
+                {
+                    if (Global.game_map.get_scene_map() != null)
+                        Global.game_map.get_scene_map().draw_lightmap(spriteBatch, GraphicsDevice);
+                    else
+                        Global.game_map.lightmap_needs_redrawing = false;
+                }
                 else
                     System.Threading.Thread.Sleep(
                         TimeSpan.FromTicks((int)(TimeSpan.TicksPerSecond * (1.0f / ((float)Config.FRAME_RATE * 10)))));
