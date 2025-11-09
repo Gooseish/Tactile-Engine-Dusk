@@ -2940,7 +2940,11 @@ namespace Tactile
                     break;
                 #endregion
                 case "Refresh Lighting":
-                    Global.game_map.refresh_lighting();
+                    // Value[1] = duration (optional)
+                    if (command.Value.Length > 1)
+                        Global.game_map.refresh_lighting(process_number(command.Value[1]));
+                    else
+                        Global.game_map.refresh_lighting();
                     break;
                 case "Import Units":
                     #region Import Units
