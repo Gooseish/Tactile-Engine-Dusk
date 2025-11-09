@@ -1005,6 +1005,7 @@ namespace Tactile
                 MoveRangeUpdateThread.Abort();
                 MoveRangeUpdateThread.Join();
             }
+            Renderer.end_lightmap_thread();
         }
 
         private void EndThreads()
@@ -1045,6 +1046,7 @@ namespace Tactile
             MoveRangeUpdateThread = new Thread(new ThreadStart(Global.map_update_move_range_loop));
             MoveRangeUpdateThread.Name = "Move range update";
             MoveRangeUpdateThread.Start();
+            Renderer.start_lightmap_thread();
         }
         public void CloseMoveRangeThread()
         {
