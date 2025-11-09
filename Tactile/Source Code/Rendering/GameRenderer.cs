@@ -49,7 +49,8 @@ namespace Tactile.Rendering
         private Vector2 TouchCursorLoc;
         private Texture2D MouseCursorTexture;
 
-        private Thread LightmapThread; 
+        private Thread LightmapThread;
+        private bool Drawing;
 
         public static int zoom
         {
@@ -399,6 +400,8 @@ namespace Tactile.Rendering
         #region Draw
         public void Draw()
         {
+            wait_for_lightmap();
+            Drawing = true;
             // Reset data
             Global.palette_pool.update();
             if (ShaderRenderTargets[0] == null)
@@ -409,8 +412,6 @@ namespace Tactile.Rendering
             camera.offset = new Vector2(ShaderRenderTargets[0].Width / 2, ShaderRenderTargets[0].Height / 2);
             Vector2 ratio = new Vector2(ScreenSizeRatio);
             camera.zoom = ratio;
-
-            wait_for_lightmap();
 
             // Always draw the screen normally to FinalRender, for screenshotting/suspend images
             DrawScene(spriteBatch, Stereoscopic_Mode.Center);
@@ -458,10 +459,14 @@ namespace Tactile.Rendering
             }
 
             GraphicsDevice.SetRenderTarget(null);
+            Drawing = false;
         }
 
         private void draw_lightmap()
         {
+            while (Drawing)
+                System.Threading.Thread.Sleep(
+                        TimeSpan.FromTicks((int)(TimeSpan.TicksPerSecond * (1.0f / ((float)Config.FRAME_RATE * 10)))));
             while (true)
             {
                 if (Global.game_map != null && Global.game_map.lightmap_needs_redrawing)
