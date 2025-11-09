@@ -2939,6 +2939,9 @@ namespace Tactile
                     Global.game_map.fow_uses_lightmap = process_bool(command.Value[1]);
                     break;
                 #endregion
+                case "Refresh Lighting":
+                    Global.game_map.refresh_lighting();
+                    break;
 #if DEBUG
                 default:
                     throw event_case_missing_exception(command.Value[0], command.Key);
