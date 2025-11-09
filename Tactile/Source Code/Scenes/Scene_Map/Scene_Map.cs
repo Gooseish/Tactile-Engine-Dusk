@@ -389,6 +389,15 @@ namespace Tactile
             }
         }
 
+        public void set_lighting_transition_timer(int duration)
+        {
+            Lighting_Transition_Duration = duration;
+        }
+        protected void start_lighting_transition_timer()
+        {
+            Lighting_Transition_Timer = Lighting_Transition_Duration;
+        }
+
         protected void update_lighting()
         {
             if (Lighting_Transition_Timer > 0)
@@ -1841,7 +1850,7 @@ namespace Tactile
                 Color[] Old_Lightmap_Data = new Color[Target_Lightmap.Width * Target_Lightmap.Height];
                 Target_Lightmap.GetData<Color>(Old_Lightmap_Data);
                 Old_Lightmap.SetData<Color>(Old_Lightmap_Data);
-                Lighting_Transition_Timer = Lighting_Transition_Duration;
+                start_lighting_transition_timer();
             }
                 
 
