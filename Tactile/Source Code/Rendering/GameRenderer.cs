@@ -75,9 +75,6 @@ namespace Tactile.Rendering
             SetInitialResolution();
 
             camera = new Camera(WindowWidth, WindowHeight, Vector2.Zero);
-
-            LightmapThread = new Thread(new ThreadStart(draw_lightmap));
-            LightmapThread.Start();
         }
 
         private void on_device_reset(object sender, EventArgs e)
@@ -467,17 +464,38 @@ namespace Tactile.Rendering
         {
             while (true)
             {
-                if (Global.game_map != null && Global.game_map.lightmap_needs_redrawing)
+                if (Global.game_map.lightmap_needs_redrawing)
                     Global.game_map.get_scene_map().draw_lightmap(spriteBatch, GraphicsDevice);
                 else
-                    System.Threading.Thread.Sleep(1);
+                    System.Threading.Thread.Sleep(
+                        TimeSpan.FromTicks((int)(TimeSpan.TicksPerSecond * (1.0f / ((float)Config.FRAME_RATE * 10)))));
             }
         }
         private void wait_for_lightmap()
         {
             while (Global.game_map != null && Global.game_map.lightmap_needs_redrawing)
-                System.Threading.Thread.Sleep(1);
+                System.Threading.Thread.Sleep(
+                        TimeSpan.FromTicks((int)(TimeSpan.TicksPerSecond * (1.0f / ((float)Config.FRAME_RATE * 10)))));
         }
+        public void start_lightmap_thread()
+        {
+            if (LightmapThread != null)
+            {
+                end_lightmap_thread();
+            }
+            LightmapThread = new Thread(new ThreadStart(draw_lightmap));
+            LightmapThread.Name = "Draw Lightmap";
+            LightmapThread.Start();
+        }
+        public void end_lightmap_thread()
+        {
+            if (LightmapThread != null)
+            {
+                LightmapThread.Abort();
+                LightmapThread.Join();
+            }
+        }
+
         public void RedrawPreviousFrame()
         {
             DrawToScreen(spriteBatch, !Global.gameSettings.Graphics.Stereoscopic ?
