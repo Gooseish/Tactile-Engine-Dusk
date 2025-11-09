@@ -260,6 +260,10 @@ namespace Tactile
             return new Data_Map(Map_Content[0].Load<Data_Map>(@"Data/Map Data/Maps/" + map_name));
         }
 
+        public Map_Unit_Data get_unit_data(string unit_data_name)
+        {
+            return new Map_Unit_Data(Map_Content[0].Load<Map_Unit_Data>(@"Data/Map Data/Unit Data/" + unit_data_name));
+        }
         public void set_map_texture()
         {
             Turn_Skip_Text = new TextSprite();
