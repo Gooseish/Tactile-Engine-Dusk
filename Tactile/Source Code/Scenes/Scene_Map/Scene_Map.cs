@@ -1269,9 +1269,6 @@ namespace Tactile
 
             device.SamplerStates[3] = SamplerState.PointClamp; // This prevents crashes after resuming a minimized session... for some godforsaken reason
 
-            if (Global.game_map.lightmap_needs_redrawing)
-                draw_lightmap(sprite_batch, device);
-
             if (Lighting_Transition_Timer > 0)
                 transition_lightmap(sprite_batch, device);
             else
@@ -1749,7 +1746,7 @@ namespace Tactile
         }
         #endregion
 
-        protected void draw_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
+        public void draw_lightmap(SpriteBatch sprite_batch, GraphicsDevice device)
         {
             if (Target_Lightmap != null)
             {

@@ -1462,8 +1462,6 @@ namespace Tactile
                 }
                 if (n != light_source_check.Count()) // True only if the light source was confirmed to be unchanged
                     light_source_check.RemoveAt(n);
-                else
-                    lightmap_needs_redrawing = true;
             }
 
             // Recalculate ray march for any light source near a changed tile
@@ -1475,7 +1473,6 @@ namespace Tactile
                     if (Vector2.Distance(light_source.loc, changed_tile_loc) < light_source.max_distance)
                     {
                         light_source.calculate_lightmap(Lighting_Cost_Map);
-                        lightmap_needs_redrawing = true;
                         break;
                     }
                 }
@@ -1486,10 +1483,10 @@ namespace Tactile
             {
                 light_source.calculate_lightmap(Lighting_Cost_Map);
                 result.Add(light_source);
-                lightmap_needs_redrawing = true;
             }
 
             Light_Sources = result;
+            lightmap_needs_redrawing = true;
         }
         public List<Vector2> set_cost_map()
         {

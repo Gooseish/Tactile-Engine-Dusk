@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using System.Threading;
 
 namespace Tactile.Rendering
 {
@@ -48,6 +49,8 @@ namespace Tactile.Rendering
         private Vector2 TouchCursorLoc;
         private Texture2D MouseCursorTexture;
 
+        private Thread LightmapThread; 
+
         public static int zoom
         {
             get { return GameRenderer.IsFullscreen ? 2 : ZOOM; }
@@ -72,6 +75,9 @@ namespace Tactile.Rendering
             SetInitialResolution();
 
             camera = new Camera(WindowWidth, WindowHeight, Vector2.Zero);
+
+            LightmapThread = new Thread(new ThreadStart(draw_lightmap));
+            LightmapThread.Start();
         }
 
         private void on_device_reset(object sender, EventArgs e)
@@ -407,6 +413,8 @@ namespace Tactile.Rendering
             Vector2 ratio = new Vector2(ScreenSizeRatio);
             camera.zoom = ratio;
 
+            wait_for_lightmap();
+
             // Always draw the screen normally to FinalRender, for screenshotting/suspend images
             DrawScene(spriteBatch, Stereoscopic_Mode.Center);
             // Copy render to final render
@@ -453,6 +461,22 @@ namespace Tactile.Rendering
             }
 
             GraphicsDevice.SetRenderTarget(null);
+        }
+
+        private void draw_lightmap()
+        {
+            while (true)
+            {
+                if (Global.game_map != null && Global.game_map.lightmap_needs_redrawing)
+                    Global.game_map.get_scene_map().draw_lightmap(spriteBatch, GraphicsDevice);
+                else
+                    System.Threading.Thread.Sleep(1);
+            }
+        }
+        private void wait_for_lightmap()
+        {
+            while (Global.game_map != null && Global.game_map.lightmap_needs_redrawing)
+                System.Threading.Thread.Sleep(1);
         }
         public void RedrawPreviousFrame()
         {
