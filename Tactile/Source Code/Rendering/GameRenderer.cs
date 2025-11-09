@@ -464,7 +464,7 @@ namespace Tactile.Rendering
         {
             while (true)
             {
-                if (Global.game_map.lightmap_needs_redrawing)
+                if (Global.game_map != null && Global.game_map.lightmap_needs_redrawing)
                     Global.game_map.get_scene_map().draw_lightmap(spriteBatch, GraphicsDevice);
                 else
                     System.Threading.Thread.Sleep(
