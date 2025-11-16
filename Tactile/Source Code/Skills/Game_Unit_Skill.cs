@@ -3568,10 +3568,10 @@ namespace Tactile
                     { 12, new Tuple<bool, int>(false, -1) } // Forest
                 }},
                 { "NMDMV", new Dictionary<int, Tuple<bool, int>> {
-                    { 12, new Tuple<bool, int>(false, -1) }, // Forest
+                    { 12, new Tuple<bool, int>(false, -2) }, // Forest
                     { 15, new Tuple<bool, int>(false, -1) }, // Desert
                     { 16, new Tuple<bool, int>(true, 5) }, // River
-                    { 17, new Tuple<bool, int>(false, -1) } // Hill
+                    { 17, new Tuple<bool, int>(false, -3) } // Hill
                 }},
                 { "TRAVERSAL", new Dictionary<int, Tuple<bool, int>> {
                     { 16, new Tuple<bool, int>(true, 2) }, // River
