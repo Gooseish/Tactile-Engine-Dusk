@@ -601,8 +601,7 @@ namespace Tactile
                 // Skills: Gravity
                 if (is_grounded)
                 {
-                    List<ClassTypes> result = actor_class.Class_Types;
-                    result.Remove(ClassTypes.Flier);
+                    List<ClassTypes> result = actor_class.Class_Types.Where(item => item != ClassTypes.Flier).ToList();
                     return result;
                 }
                 else
@@ -616,12 +615,22 @@ namespace Tactile
 
         public int mov_plus { get { return Stats[(int)Stat_Labels.Mov]; } }
 
-        public int class_move_type { get { return (int)actor_class.Movement_Type; } }
+        public int class_move_type { get {return (int)actor_class.Movement_Type; } }
         public int move_type { get 
             {
                 // Skills: Gravity
                 if (is_grounded)
+                {
+                    if (class_id == 109)
+                        return (int)MovementTypes.Light; // Manakete
+                    if (class_id == 212 || class_id == 213)
+                        return (int)MovementTypes.Light; // Mogall
+                    if (class_id == 208 || class_id == 209) // Gargoyle
+                        return (int)MovementTypes.Heavy;
                     return (int)MovementTypes.Mounted;
+                }
+                if (this.class_types.Contains(ClassTypes.Cavalry))
+                    return ((int)MovementTypes.Mounted); // Mounted overrides all others (necessary for great knights not to have the armored movement type)
                 else
                     return class_move_type; 
             } 
