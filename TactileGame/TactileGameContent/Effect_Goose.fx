@@ -281,8 +281,7 @@ technique Map_Lighting
 float4 ambient_blend(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
 {
 	float4 Color = tex2D(TextureSampler, uv);
-	Color.rgb /= Color.a; //un-premultiply
-	Color = lerp(Ambient_Color, Color, Color.a);
+	Color += lerp(Ambient_Color, float4(0, 0, 0, 0), Color.a);
 	return Color;
 }
 
