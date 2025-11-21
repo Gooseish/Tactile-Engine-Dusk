@@ -1872,17 +1872,34 @@ namespace Tactile
                     0,
                     RenderTargetUsage.PreserveContents);
 
+            Effect effect_shader = Global.effect_shader();
+            effect_shader.CurrentTechnique = effect_shader.Techniques["Add_Light_Sources"];
+
             device.SetRenderTarget(lightmap[current_render_target]);
             device.Clear(Color.Transparent);
-            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp, null, null);
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp, null, null, effect_shader);
             foreach (Light_Source light_source in Global.game_map.light_sources)
             {
                 sprite_batch.Draw(light_source.lightmap_contribution, Vector2.Zero, Color.White);
             }
             sprite_batch.End();
 
+
+            // Finish light source addition
+            
+            effect_shader.CurrentTechnique = effect_shader.Techniques["Finish_Light_Sources"];
+
+            next_render_target();
+            device.SetRenderTarget(lightmap[current_render_target]);
+            device.Clear(Color.Transparent);
+
+            sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, effect_shader);
+            sprite_batch.Draw(lightmap[last_render_target], Vector2.Zero, Color.White);
+            sprite_batch.End();
+            
+
             // Apply blur effect
-            Effect effect_shader = Global.effect_shader();
+
             effect_shader.CurrentTechnique = effect_shader.Techniques["Blur"];
 
             next_render_target();

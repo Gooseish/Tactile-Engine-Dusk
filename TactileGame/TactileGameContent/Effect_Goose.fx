@@ -282,8 +282,7 @@ technique Map_Lighting
 float4 ambient_blend(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
 {
 	float4 Color = tex2D(TextureSampler, uv);
-	Color.rgb /= Color.a; //un-premultiply
-	Color = lerp(Ambient_Color, Color, Color.a);
+	Color += lerp(Ambient_Color, float4(0, 0, 0, 0), Color.a);
 	return Color;
 }
 
@@ -332,6 +331,41 @@ technique Blur
 	pass Pass1
 	{
 		PixelShader = compile ps_2_0 blur();
+	}
+}
+
+float4 add_light_sources(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
+{
+	float4 Color = tex2D(TextureSampler, uv)/3;///number_of_light_sources;
+	
+	return Color;
+}
+
+technique Add_Light_Sources
+{
+	pass Pass1
+	{
+		PixelShader = compile ps_2_0 add_light_sources();
+	}
+}
+
+float4 finish_light_sources(float4 color : COLOR0, float2 uv : TEXCOORD0) : COLOR
+{
+	float4 Color = tex2D(TextureSampler, uv)*9;
+	
+	float divisor = max(Color.r, Color.g);
+	divisor = max(divisor, Color.b);
+	divisor = max(divisor, 1);
+	Color /= divisor;
+	
+	return Color;
+}
+
+technique Finish_Light_Sources
+{
+	pass Pass1
+	{
+		PixelShader = compile ps_2_0 finish_light_sources();
 	}
 }
 
