@@ -3639,22 +3639,24 @@ namespace Tactile
             // This might actually be pretty slow //gooseish
             // Skills: Clear the Way
             if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
-                foreach (Game_Unit unit in Global.game_map.units_in_range_of_location(target_loc, 1))
+                if (cost > 0)
                 {
-                    if (unit.actor.has_skill("CLEAR_THE_WAY") && !is_attackable_team(unit) && (this != unit))
+                    foreach (Game_Unit unit in Global.game_map.units_in_range_of_location(target_loc, 1))
                     {
-                        // Get the plains cost of this tile in this weather
-                        int plains_cost = Global.game_map.terrain_cost(this, 1);
-                        // Return whichever is lower
-                        if (plains_cost > 0)
-                            return Math.Min(plains_cost, cost);
+                        if (unit.actor.has_skill("CLEAR_THE_WAY") && !is_attackable_team(unit) && (this != unit))
+                        {
+                            // Get the plains cost of this tile in this weather
+                            int plains_cost = Global.game_map.terrain_cost(this, 1);
+                            // Return whichever is lower
+                            if (plains_cost > 0)
+                                return Math.Min(plains_cost, cost);
+                        }
+                        // Skills: Ground Control
+                        if (unit.actor.has_skill("GROUND_CONTROL") && is_attackable_team(unit))
+                        {
+                            return cost + 1;
+                        }
                     }
-                    // Skills: Ground Control
-                    if (unit.actor.has_skill("GROUND_CONTROL") && is_attackable_team(unit))
-                    {
-                        return cost + 1;
-                    }
-
                 }
             return cost;
         }
