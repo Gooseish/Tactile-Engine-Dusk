@@ -93,6 +93,8 @@ namespace Tactile
             Support_Progress.write(writer);
             Supports.write(writer);
             writer.Write(Bond);
+
+            skills_write(writer);
         }
 
         public void read(BinaryReader reader) // Make this static, maybe? //Yeti
@@ -226,6 +228,8 @@ namespace Tactile
                     Support_Progress[pair.Key] = pair.Value;
             Supports.read(reader);
             Bond = reader.ReadInt32();
+
+            skills_read(reader);
 
             skill_list_update();
         }

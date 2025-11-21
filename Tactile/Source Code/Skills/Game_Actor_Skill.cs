@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using TactileLibrary;
 using TactileStringExtension;
 
@@ -47,7 +48,17 @@ namespace Tactile
         {
             Added_Attacks.Clear();
         }
+        #region Serialization
+        public void skills_write(BinaryWriter writer)
+        {
+            writer.Write(DTransformActive);
+        }
 
+        public void skills_read(BinaryReader reader)
+        {
+            DTransformActive = reader.ReadBoolean();
+        }
+        #endregion
         #region Skill Setup
         public void reset_skills()
         {
