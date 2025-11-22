@@ -20,6 +20,7 @@ namespace TactileLibrary
         public Item_Data_Type Type;
         public int Id;
         public int Uses;
+        public bool Drops;
 
         #region Accessors
         public Data_Equipment to_equipment
@@ -70,23 +71,24 @@ namespace TactileLibrary
         {
             int count = reader.ReadInt32();
             Item_Data result;
-            if (count == 3)
-                result = new Item_Data(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
-            else //Debug
-                result = new Item_Data(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
+
+            int type = reader.ReadInt32();
+            int id = reader.ReadInt32();
+            int uses = reader.ReadInt32();
+            bool drops = reader.ReadBoolean();
+
+
+            result = new Item_Data((Item_Data_Type) type, id, uses, drops);
 
             return result;
         }
 
         public void write(BinaryWriter writer)
         {
-            if (true) //Debug
-            {
-                writer.Write(3);
-                writer.Write((int)Type);
-                writer.Write(Id);
-                writer.Write(Uses);
-            }
+            writer.Write((int)Type);
+            writer.Write(Id);
+            writer.Write(Uses);
+            writer.Write(Drops);
         }
         #endregion
 
@@ -108,11 +110,12 @@ namespace TactileLibrary
                 Uses = this.max_uses;
         }
         public Item_Data(int type, int id) : this((Item_Data_Type)type, id) { }
-        public Item_Data(Item_Data_Type type, int id, int uses)
+        public Item_Data(Item_Data_Type type, int id, int uses, bool drops = false)
         {
             Type = type;
             Id = id;
             Uses = uses;
+            Drops = drops;
         }
         public Item_Data(int type, int id, int uses) : this((Item_Data_Type)type, id, uses) { }
         public Item_Data(Item_Data data) : this(data.Type, data.Id, data.Uses) { }

@@ -383,7 +383,16 @@ namespace Tactile
             get { return Drops_Item && actor.has_items; }
             set { Drops_Item = value; }
         }
-
+        private Item_Data dropped_item
+        {
+            get
+            {
+                foreach (Item_Data item in actor.items)
+                    if (item.Drops)
+                        return item;
+                return actor.items[actor.num_items - 1];
+            }
+        }
         public int priority
         {
             get { return Priority; }
