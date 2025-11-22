@@ -2358,7 +2358,7 @@ namespace Tactile
                 discard_item(0);
         }
 
-        private int dropped_item
+        public int dropped_item
         {
             get
             {
