@@ -245,7 +245,7 @@ namespace Tactile
                             Battler_1_Id : Battler_2_Ids[i]];
                         Game_Unit winning_unit = Global.game_map.units[Kills[i] == 1 ?
                             Battler_2_Ids[i] : Battler_1_Id];
-                        if (killed_unit.drops_item && killed_unit.actor.has_items &&
+                        if (killed_unit.drops_item.Key && killed_unit.actor.has_items &&
                                 winning_unit.can_acquire_drops)
                             return true;
                     }

@@ -378,10 +378,20 @@ namespace Tactile
             set { Boss = value; }
         }
 
-        public bool drops_item
+        public KeyValuePair<bool, Item_Data> drops_item
         {
-            get { return Drops_Item && actor.has_items; }
-            set { Drops_Item = value; }
+            get { return new KeyValuePair<bool, Item_Data> (Drops_Item && actor.has_items, dropped_item); }
+            set { Drops_Item = value.Key; }
+        }
+        private Item_Data dropped_item
+        {
+            get
+            {
+                foreach (Item_Data item in actor.items)
+                    if (item.Drops)
+                        return item;
+                return actor.items[actor.num_items - 1];
+            }
         }
 
         public int priority
