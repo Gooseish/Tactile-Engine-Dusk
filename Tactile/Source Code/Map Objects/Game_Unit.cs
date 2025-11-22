@@ -383,16 +383,6 @@ namespace Tactile
             get { return Drops_Item && actor.has_items; }
             set { Drops_Item = value; }
         }
-        public Item_Data dropped_item
-        {
-            get
-            {
-                foreach (Item_Data item in actor.items)
-                    if (item.Drops)
-                        return item;
-                return actor.items[actor.num_items - 1];
-            }
-        }
         public void set_dropped_item(Item_Data_Type type, int id)
         {
             foreach (Item_Data item in actor.items)
@@ -400,7 +390,9 @@ namespace Tactile
                 {
                     item.Drops = true;
                     break;
-                }   
+                }
+            // What should happen if no appropriate item is found?
+            // Perhaps change drops_item back to false?
         }
         public void clear_dropped_item()
         {
