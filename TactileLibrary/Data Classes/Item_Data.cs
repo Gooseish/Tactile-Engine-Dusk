@@ -20,7 +20,6 @@ namespace TactileLibrary
         public Item_Data_Type Type;
         public int Id;
         public int Uses;
-        public bool Drops;
 
         #region Accessors
         public Data_Equipment to_equipment

@@ -345,7 +345,7 @@ namespace Tactile.State
                                                 for (int i = 0; i < Aoe_Targets.Count; i++)
                                                 {
                                                     Battler_2 = Units[Aoe_Targets[i]];
-                                                    if (!Battler_2.is_dead && Battler_1.drops_item.Key)
+                                                    if (!Battler_2.is_dead && Battler_1.drops_item)
                                                     {
                                                         Cleanup_Action.Add(new List<int> { (int)Cleanup_Actions.Item_Gain, 2, -i });
                                                         break;
@@ -355,7 +355,7 @@ namespace Tactile.State
                                                 for (int i = 0; i < Aoe_Targets.Count; i++)
                                                 {
                                                     Battler_2 = Units[Aoe_Targets[i]];
-                                                    if (Battler_2.is_dead && Battler_2.drops_item.Key)
+                                                    if (Battler_2.is_dead && Battler_2.drops_item)
                                                         Cleanup_Action.Add(new List<int> { (int)Cleanup_Actions.Item_Gain, 1, i });
                                                 }
                                         }
