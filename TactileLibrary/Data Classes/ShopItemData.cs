@@ -6,12 +6,10 @@ namespace TactileLibrary
     {
         public static ShopItemData read(BinaryReader reader)
         {
-            int count = reader.ReadInt32();
             ShopItemData result;
-            if (count == 3)
-                result = new ShopItemData(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
-            else //Debug
-                result = new ShopItemData(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
+            
+            result = new ShopItemData(reader.ReadInt32(), reader.ReadInt32(), reader.ReadInt32());
+            reader.ReadBoolean(); // Needed for Drops flag
 
             return result;
         }
