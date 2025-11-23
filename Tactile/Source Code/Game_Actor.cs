@@ -2550,12 +2550,26 @@ namespace Tactile
                 discard_item(0);
         }
 
+        public int dropped_item
+        {
+            get
+            {
+                int n = 0;
+                foreach (Item_Data item in Items)
+                {
+                    if (item.Drops)
+                        return n;
+                    n++;
+                }
+                return n - 1;
+            }
+        }
         /// <summary>
         /// Removes the last item from the inventory, and then returns the data of that item
         /// </summary>
         public Item_Data drop_item()
         {
-            return drop_item(num_items - 1);
+            return drop_item(dropped_item);
         }
         /// <summary>
         /// Removes an item from the inventory, and then returns the data of that item

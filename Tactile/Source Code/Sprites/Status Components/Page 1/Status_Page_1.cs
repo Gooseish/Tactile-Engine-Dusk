@@ -203,7 +203,7 @@ namespace Tactile
                         return new ItemState
                         {
                             Item = unit.actor.items[j],
-                            Drops = unit.drops_item && j == unit.actor.num_items - 1,
+                            Drops = unit.drops_item && j == unit.actor.dropped_item,
                             Equipped = unit.actor.equipped - 1 == j
                         };
                     }));

@@ -1143,6 +1143,16 @@ namespace Tactile
                 else
                     unit.drops_item = process_bool(command.Value[1]);
             }
+
+            // Value [2] (optional) item type
+            // Value [3] (optional) item id
+            if (command.Value.Length > 2)
+            {
+                int item_type = process_number(command.Value[2]);
+                int item_id = process_number(command.Value[3]);
+                unit.set_dropped_item((Item_Data_Type)item_type, item_id);
+            }
+
             Index++;
             return true;
         }
