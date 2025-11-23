@@ -69,7 +69,6 @@ namespace TactileLibrary
         #region Serialization
         public static Item_Data read(BinaryReader reader)
         {
-            int count = reader.ReadInt32();
             Item_Data result;
 
             int type = reader.ReadInt32();
