@@ -3576,8 +3576,8 @@ namespace Tactile
                 { "TRAVERSAL", new Dictionary<int, Tuple<bool, int>> {
                     { 16, new Tuple<bool, int>(true, 2) }, // River
                     { 21, new Tuple<bool, int>(true, 2) }, // Sea
-                    { 22, new Tuple<bool, int>(true, 3) }, // Lake
-                    { 60, new Tuple<bool, int>(true, 3) } // Water
+                    { 22, new Tuple<bool, int>(true, 2) }, // Lake
+                    { 60, new Tuple<bool, int>(true, 2) } // Water
                 }},
                 { "SEAMV", new Dictionary<int, Tuple<bool, int>> {
                     { 16, new Tuple<bool, int>(true, 2) }, // River
