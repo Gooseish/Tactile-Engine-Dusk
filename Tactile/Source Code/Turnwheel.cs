@@ -37,7 +37,15 @@ namespace Tactile
                 if (snapshot.name == "Turn Start")
                     turn_start_snapshots.Add(snapshot);
             }
-            turn_start_snapshots.write(writer);
+            if (turn_start_snapshots.Count() > 9)
+            {
+                List<Turnwheel_Snapshot> filtered_turn_start_snapshots = new List<Turnwheel_Snapshot> { };
+                filtered_turn_start_snapshots.Add(turn_start_snapshots[0]);
+                filtered_turn_start_snapshots.AddRange(turn_start_snapshots.Skip(Math.Max(0, turn_start_snapshots.Count() - 9)));
+                filtered_turn_start_snapshots.write(writer);
+            }
+            else
+                turn_start_snapshots.write(writer);
         }
         public void read(BinaryReader reader)
         {
