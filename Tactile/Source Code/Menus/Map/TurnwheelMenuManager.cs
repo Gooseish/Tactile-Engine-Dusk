@@ -39,7 +39,7 @@ namespace Tactile.Menus.Map.Turnwheel
             int index = turnwheelMenu.Index;
 
             Turnwheel_Snapshot snapshot = TurnwheelMenu.snapshots[index];
-            if (!Global.turnwheel.can_rewind)
+            if (!Global.turnwheel.can_rewind(snapshot.index))
             {
                 Global.game_system.play_se(System_Sounds.Buzzer);
             }

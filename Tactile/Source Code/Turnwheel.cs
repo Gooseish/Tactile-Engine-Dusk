@@ -15,20 +15,31 @@ namespace Tactile
         public Turnwheel_Snapshot current_snapshot { get { return Snapshots.Last(); } }
         private bool Active;
         private int Charges;
+        private int Max_Charges;
 
         private Thread SnapshotThread;
         public bool snapshot_in_progress { get { return SnapshotThread != null && SnapshotThread.IsAlive; } }
-
         public bool active { get { return Active; } set { Active = value; } }
-        public int charges { get { return Charges; } set { Charges = value; } }
-        public bool can_rewind { get { return charges > 0 && active; } }
+        public int charges { get { return Charges; } set { Charges = value; Max_Charges = value; } }
+        public bool can_rewind(int index)
+        {
+            if (!active)
+                return false;
+            if (index == 0) // Always okay to return to the start
+                return true;
+            if (charges > 0)
+                return true;
+            return false;
+        }
+        
         #region: Serialization
         public void write(BinaryWriter writer)
         {
             write_turn_start_snapshots(writer); // Only save turn start snapshots to suspends to save time
             writer.Write(Active);
             writer.Write(Charges);
-        }
+            writer.Write(Max_Charges);
+    }
         private void write_turn_start_snapshots(BinaryWriter writer)
         {
             List<Turnwheel_Snapshot> turn_start_snapshots = new List<Turnwheel_Snapshot> { };
@@ -52,6 +63,7 @@ namespace Tactile
             Snapshots.read(reader);
             Active = reader.ReadBoolean();
             Charges = reader.ReadInt32();
+            Max_Charges = reader.ReadInt32();
         }
         #endregion
 
@@ -116,7 +128,11 @@ namespace Tactile
         }
         public Turnwheel_Snapshot rewind(int index)
         {
-            Charges -= 1;
+            if (index == 0)
+                Charges = Max_Charges; // Reset charge count if rewinding to the start of the map
+            else
+                Charges -= 1;
+
             Turnwheel_Snapshot rewound_snapshot = Snapshots[index];
             int number_of_snapshots_to_remove = Snapshots.Count - (index + 1);
             Snapshots.RemoveRange(index + 1, number_of_snapshots_to_remove); // Discard snapshots that take place after the point we're rewinding to
