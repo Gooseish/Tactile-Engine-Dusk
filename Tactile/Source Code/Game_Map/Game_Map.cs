@@ -2741,11 +2741,12 @@ namespace Tactile
                 Global.game_temp.menu_call = true;
             }
         }
-        internal void open_turnwheel_menu()
+        internal void open_turnwheel_menu(bool gameover_on_exit = false)
         {
             if (!Scrolling)
             {
                 Global.game_temp.turnwheel_menu_call = true;
+                Global.game_temp.turnwheel_gameover_on_exit = gameover_on_exit;
                 Global.game_temp.menu_call = true;
             }
         }

@@ -30,6 +30,9 @@ namespace Tactile.Menus.Map.Turnwheel
             Global.game_temp.menuing = false;
             Global.game_map.highlight_test();
             Global.game_temp.clear_turnwheel_preview();
+
+            if (Global.game_temp.turnwheel_gameover_on_exit)
+                ((Scene_Map)Global.scene).gameover();
         }
 
         // Selected an item in the turnwheel menu
@@ -39,7 +42,7 @@ namespace Tactile.Menus.Map.Turnwheel
             int index = turnwheelMenu.Index;
 
             Turnwheel_Snapshot snapshot = TurnwheelMenu.snapshots[index];
-            if (!Global.turnwheel.can_rewind)
+            if (!Global.turnwheel.can_rewind(snapshot.index))
             {
                 Global.game_system.play_se(System_Sounds.Buzzer);
             }
