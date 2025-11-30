@@ -3080,7 +3080,10 @@ namespace Tactile
         // 122: Game Over
         private bool command_gameover()
         {
-            ((Scene_Map)Global.scene).gameover();
+            if (Global.turnwheel.can_rewind(1))
+                Global.game_map.open_turnwheel_menu(true);
+            else
+                ((Scene_Map)Global.scene).gameover();
             Index++;
             return false;
         }
